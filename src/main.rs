@@ -37,10 +37,10 @@ fn print_usage() {
 Commands:
     help    # Print this message.
     init    # Register current directory.
-    start   # Start \"{}\"
-    end     # End \"{}\"
     set     # Set parameters.
     sweep   # Sweep files in current directory.
+    start   # Start \"{}\"
+    end     # End \"{}\"
     destroy # Destroy \"{}\"",
         bin_name,
         bin_name,
