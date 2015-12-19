@@ -1,5 +1,9 @@
 use std::env;
 
+mod command;
+
+use command::*;
+
 fn main() {
     let args = env::args().skip(1).collect::<Vec<String>>();
 
@@ -43,28 +47,4 @@ Commands:
         bin_name,
         bin_name,
     );
-}
-
-fn initialize() {
-    println!("initialize");
-}
-
-fn set_params() {
-    println!("set parameters");
-}
-
-fn clean() {
-    println!("clean");
-}
-
-fn register_with_cron() {
-    println!("register");
-}
-
-fn unregister_cron() {
-    println!("unregister");
-}
-
-fn destroy() {
-    println!("destroy");
 }
