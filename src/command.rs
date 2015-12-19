@@ -31,8 +31,8 @@ pub fn set_params() {
     println!("set parameters");
 }
 
-pub fn clean() {
-    println!("clean");
+pub fn sweep() {
+    println!("sweep");
 }
 
 pub fn register_with_cron() {

@@ -16,7 +16,7 @@ fn main() {
         "help"    => print_usage(),
         "init"    => initialize(),
         "set"     => set_params(),
-        "clean"   => clean(),
+        "sweep"   => sweep(),
         "start"   => register_with_cron(),
         "end"     => unregister_cron(),
         "destroy" => destroy(),
@@ -40,7 +40,7 @@ Commands:
     start   # Start \"{}\"
     end     # End \"{}\"
     set     # Set parameters.
-    clean   # Clean current directory.
+    sweep   # Sweep files in current directory.
     destroy # Destroy \"{}\"",
         bin_name,
         bin_name,
