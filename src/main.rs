@@ -11,10 +11,10 @@ fn main() {
     match args[0].as_ref() {
         "help"    => print_usage(),
         "init"    => initialize(),
-        "start"   => register_with_cron(),
-        "end"     => unregister_cron(),
         "set"     => set_params(),
         "clean"   => clean(),
+        "start"   => register_with_cron(),
+        "end"     => unregister_cron(),
         "destroy" => destroy(),
         _         => print_usage(),
     }
@@ -49,20 +49,20 @@ fn initialize() {
     println!("initialize");
 }
 
-fn register_with_cron() {
-    println!("register");
-}
-
-fn unregister_cron() {
-    println!("unregister");
-}
-
 fn set_params() {
     println!("set parameters");
 }
 
 fn clean() {
     println!("clean");
+}
+
+fn register_with_cron() {
+    println!("register");
+}
+
+fn unregister_cron() {
+    println!("unregister");
 }
 
 fn destroy() {
