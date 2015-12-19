@@ -1,10 +1,21 @@
 use std::env;
 
+mod constants;
 mod command;
 
+use constants::*;
 use command::*;
 
 fn main() {
+    let current_dir = env::current_dir().unwrap();
+    match BANNED_DIRS.iter().find(|d| current_dir.ends_with(d)) {
+        Some(dir) => {
+            println!("Cannot run in \"{}\"", dir);
+            return
+        }
+        None => {},
+    }
+
     let args = env::args().skip(1).collect::<Vec<String>>();
 
     if args.is_empty() {
