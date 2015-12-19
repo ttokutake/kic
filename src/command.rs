@@ -5,13 +5,13 @@ pub fn initialize() {
     println!("Initialize ...");
 
     let dir_name = ".keepha";
-    if !dir_exists(dir_name) {
+    if dir_exists(dir_name) {
+        println!("  OK: \"{}\" directory has already exist.", dir_name);
+    } else {
         match fs::create_dir(dir_name) {
             Ok(_)    => println!("  OK: Created \"{}\" directory.", dir_name),
             Err(why) => panic!("{:?}", why),
         }
-    } else {
-        println!("  OK: \"{}\" directory has already exist.", dir_name);
     }
 }
 
