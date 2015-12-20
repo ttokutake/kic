@@ -25,13 +25,30 @@ pub fn initialize() {
         match File::create(path_to_config) {
             Ok(mut fp) => {
                 println!("  OK: Created \"{}\" file.", config_file);
-                match fp.write(b"Hello, world!!\n") {
-                    Ok(_)    => {},
-                    Err(why) => panic!("{:?}", why),
-                }
+                write_default_config(&mut fp);
             },
             Err(why) => panic!("{:?}", why),
         }
+    }
+}
+
+fn write_default_config(fp: &mut File) {
+    let contents =
+"[period]
+  class = daily
+  time  = 00:00
+[hidden]
+  delete = false
+[ignore]
+  Cargo.lock
+  Cargo.toml
+  README.md
+  src/
+  target/
+";
+    match fp.write(contents.as_bytes()) {
+        Ok(_)    => {},
+        Err(why) => panic!("{:?}", why),
     }
 }
 
