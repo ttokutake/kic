@@ -4,7 +4,7 @@ use std::path::Path;
 pub fn initialize() {
     println!("Initialize ...");
 
-    let dir_name = ".keepha";
+    let dir_name = ".kic";
     if dir_exists(dir_name) {
         println!("  OK: \"{}\" directory has already exist.", dir_name);
     } else {
