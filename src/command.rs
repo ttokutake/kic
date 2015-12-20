@@ -1,3 +1,4 @@
+use constants::*;
 use std::fs;
 use std::fs::File;
 use std::io::Write;
@@ -33,18 +34,8 @@ pub fn initialize() {
 }
 
 fn write_default_config(fp: &mut File) {
-    let contents =
-"sweep:
-  period: daily
-  time  : 00:00
-
-burn:
-  after: 2 weeks
-
-hidden-file:
-  delete: no
-
-ignore:
+    let contents = DEFAULT_CONFIG.to_string() +
+"ignore:
   - Cargo.lock
   - Cargo.toml
   - README.md
