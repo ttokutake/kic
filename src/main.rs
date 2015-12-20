@@ -28,6 +28,7 @@ fn main() {
         "init"    => initialize(),
         "set"     => set_params(),
         "sweep"   => sweep(),
+        "burn"    => burn(),
         "start"   => register_with_cron(),
         "end"     => unregister_cron(),
         "destroy" => destroy(),
@@ -50,9 +51,10 @@ Commands:
     init    # Register current directory.
     set     # Set parameters.
     sweep   # Sweep files in current directory.
-    start   # Start \"{}\"
-    end     # End \"{}\"
-    destroy # Destroy \"{}\"",
+    burn    # Burn sweeped files.
+    start   # Start \"{}\".
+    end     # End \"{}\".
+    destroy # Destroy \"{}\".",
         bin_name,
         bin_name,
         bin_name,

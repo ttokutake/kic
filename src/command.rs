@@ -17,7 +17,7 @@ pub fn initialize() {
         }
     }
 
-    let config_file    = "config";
+    let config_file    = "config.yml";
     let path_to_config = path_to_dir.clone().join(config_file);
     if path_to_config.exists() && path_to_config.is_file() {
         println!("  OK: \"{}\" file has already exist.", config_file);
@@ -34,17 +34,22 @@ pub fn initialize() {
 
 fn write_default_config(fp: &mut File) {
     let contents =
-"[period]
-  class = daily
-  time  = 00:00
-[hidden]
-  delete = false
-[ignore]
-  Cargo.lock
-  Cargo.toml
-  README.md
-  src/
-  target/
+"sweep:
+  period: daily
+  time  : 00:00
+
+burn:
+  after: 2 weeks
+
+hidden-file:
+  delete: no
+
+ignore:
+  - Cargo.lock
+  - Cargo.toml
+  - README.md
+  - src/
+  - target/
 ";
     match fp.write(contents.as_bytes()) {
         Ok(_)    => {},
@@ -58,6 +63,10 @@ pub fn set_params() {
 
 pub fn sweep() {
     println!("sweep");
+}
+
+pub fn burn() {
+    println!("burn");
 }
 
 pub fn register_with_cron() {
