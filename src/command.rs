@@ -8,7 +8,7 @@ pub fn initialize() {
 
     let dir_name    = ".kic";
     let path_to_dir = Path::new(dir_name);
-    if dir_exists(path_to_dir) {
+    if path_to_dir.exists() && path_to_dir.is_dir() {
         println!("  OK: \"{}\" directory has already exist.", dir_name);
     } else {
         match fs::create_dir(path_to_dir) {
@@ -19,7 +19,7 @@ pub fn initialize() {
 
     let config_file    = "config";
     let path_to_config = Path::new(dir_name).join(config_file);
-    if file_exists(path_to_config.as_path()) {
+    if path_to_config.exists() && path_to_config.is_file() {
         println!("  OK: \"{}\" file has already exist.", config_file);
     } else {
         match File::create(path_to_config) {
@@ -33,14 +33,6 @@ pub fn initialize() {
             Err(why) => panic!("{:?}", why),
         }
     }
-}
-
-fn dir_exists(p: &Path) -> bool {
-    p.exists() && p.is_dir()
-}
-
-fn file_exists(p: &Path) -> bool {
-    p.exists() && p.is_file()
 }
 
 pub fn set_params() {
