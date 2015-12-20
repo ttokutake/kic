@@ -1,4 +1,5 @@
 use constants::*;
+use std::ffi::OsString;
 use std::fs;
 use std::fs::File;
 use std::io::Write;
@@ -34,18 +35,39 @@ pub fn initialize() {
 }
 
 fn write_default_config(fp: &mut File) {
-    let contents = DEFAULT_CONFIG.to_string() +
-"ignore:
-  - Cargo.lock
-  - Cargo.toml
-  - README.md
-  - src/
-  - target/
-";
+    let mut files = walk_dir(".").iter()
+        .map(|f| f.clone().into_string())
+        .filter(|f| f.is_ok())
+        .map(|f| f.unwrap())
+        .collect::<Vec<String>>();
+    files.sort();
+    let ignore_config = files.iter()
+        .map(|f| "  - ".to_string() + f + "\n")
+        .fold("ignore:\n".to_string(), |config, elem| config + &elem);
+    let contents = DEFAULT_CONFIG.to_string() + &ignore_config;
     match fp.write(contents.as_bytes()) {
         Ok(_)    => {},
         Err(why) => panic!("{:?}", why),
     }
+}
+
+// You will be enable to use std::fs::walk_dir instead of this function in rust 1.6.0 or later
+fn walk_dir<P: AsRef<Path>>(p: P) -> Vec<OsString> {
+    let dirs = match fs::read_dir(p) {
+        Ok(ds)   => ds,
+        Err(why) => panic!("{:?}", why),
+    };
+    let dirs = dirs.filter(|d| d.is_ok())
+        .flat_map(|d| {
+            let p = d.unwrap().path();
+            if p.is_file() {
+                vec![p.into_os_string()]
+            } else {
+                walk_dir(&p)
+            }
+        })
+        .collect::<Vec<OsString>>();
+    dirs
 }
 
 pub fn set_params() {
