@@ -6,11 +6,12 @@ use std::path::Path;
 pub fn initialize() {
     println!("Initialize ...");
 
-    let dir_name = ".kic";
-    if dir_exists(&dir_name) {
+    let dir_name    = ".kic";
+    let path_to_dir = Path::new(dir_name);
+    if dir_exists(path_to_dir) {
         println!("  OK: \"{}\" directory has already exist.", dir_name);
     } else {
-        match fs::create_dir(dir_name) {
+        match fs::create_dir(path_to_dir) {
             Ok(_)    => println!("  OK: Created \"{}\" directory.", dir_name),
             Err(why) => panic!("{:?}", why),
         }
@@ -18,7 +19,7 @@ pub fn initialize() {
 
     let config_file    = "config";
     let path_to_config = Path::new(dir_name).join(config_file);
-    if file_exists(&path_to_config) {
+    if file_exists(path_to_config.as_path()) {
         println!("  OK: \"{}\" file has already exist.", config_file);
     } else {
         match File::create(path_to_config) {
@@ -34,28 +35,12 @@ pub fn initialize() {
     }
 }
 
-fn dir_exists<P: AsRef<Path>>(path: P) -> bool {
-    match fs::metadata(path) {
-        Ok(m)    => m.is_dir(),
-        Err(why) => {
-            match why.raw_os_error() {
-                Some(2) => false,
-                _       => panic!("{:?}", why),
-            }
-        }
-    }
+fn dir_exists(p: &Path) -> bool {
+    p.exists() && p.is_dir()
 }
 
-fn file_exists<P: AsRef<Path>>(path: P) -> bool {
-    match fs::metadata(path) {
-        Ok(m) => m.is_file(),
-        Err(why) => {
-            match why.raw_os_error() {
-                Some(2) => false,
-                _       => panic!("{:?}", why),
-            }
-        }
-    }
+fn file_exists(p: &Path) -> bool {
+    p.exists() && p.is_file()
 }
 
 pub fn set_params() {
