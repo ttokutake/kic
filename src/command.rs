@@ -18,7 +18,7 @@ pub fn initialize() {
     }
 
     let config_file    = "config";
-    let path_to_config = Path::new(dir_name).join(config_file);
+    let path_to_config = path_to_dir.clone().join(config_file);
     if path_to_config.exists() && path_to_config.is_file() {
         println!("  OK: \"{}\" file has already exist.", config_file);
     } else {
