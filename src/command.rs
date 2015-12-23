@@ -19,7 +19,7 @@ pub fn initialize() {
         }
     }
 
-    let config_file    = "config";
+    let config_file    = "config.toml";
     let path_to_config = path_to_dir.clone().join(config_file);
     create_setting_file(path_to_config, DEFAULT_CONFIG);
 
