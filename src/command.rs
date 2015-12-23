@@ -21,17 +21,25 @@ pub fn initialize() {
 
     let config_file    = "config";
     let path_to_config = path_to_dir.clone().join(config_file);
-    create_setting_file(&path_to_config, DEFAULT_CONFIG);
+    create_setting_file(path_to_config, DEFAULT_CONFIG);
+
+    let ignore_file    = "ignore";
+    let path_to_ignore = path_to_dir.clone().join(ignore_file);
+    let ignore_contents = walk_dir(".").iter()
+        .map(|f| f.clone().into_string())
+        .filter(|f| f.is_ok())
+        .fold("".to_string(), |c, f| c + &(f.unwrap()) + "\n");
+    create_setting_file(path_to_ignore, ignore_contents);
 }
 
-fn create_setting_file(path_to_file: &PathBuf, contents: &'static str) {
+fn create_setting_file<S: AsRef<str>>(path_to_file: PathBuf, contents: S) {
     if path_to_file.exists() && path_to_file.is_file() {
         println!("  OK: \"{:?}\" file has already exist.", path_to_file);
     } else {
-        match File::create(path_to_file) {
+        match File::create(&path_to_file) {
             Ok(mut fp) => {
                 println!("  OK: Created {:?} file.", path_to_file);
-                match fp.write(contents.as_bytes()) {
+                match fp.write(contents.as_ref().as_bytes()) {
                     Ok(_)    => {},
                     Err(why) => panic!("{:?}", why),
                 }
