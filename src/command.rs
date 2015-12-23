@@ -2,6 +2,7 @@ extern crate toml;
 
 use constants::*;
 use self::toml::Table;
+use std::collections::BTreeSet;
 use std::ffi::OsString;
 use std::fs;
 use std::fs::File;
@@ -87,8 +88,11 @@ pub fn set_params() {
 }
 
 pub fn sweep() {
-    let table = read_config_file();
-    println!("{:?}", table);
+    let config = read_config_file();
+    let ignore = read_ignore_file();
+
+    println!("{:?}", config);
+    println!("{:?}", ignore);
 }
 
 fn read_config_file() -> Table {
@@ -99,14 +103,31 @@ fn read_config_file() -> Table {
     };
     let mut config = String::new();
     match fp.read_to_string(&mut config) {
-        Ok(contents) => contents,
-        Err(why)     => panic!("{:?}", why),
+        Ok(_)    => {},
+        Err(why) => panic!("{:?}", why),
     };
 
     match toml::Parser::new(&config).parse() {
         Some(toml) => toml,
         None       => panic!("Error occurs on parsing \"{}\".", CONFIG_FILE_NAME),
     }
+}
+
+fn read_ignore_file() -> BTreeSet<String> {
+    let ignore_file = Path::new(WORKING_DIR_NAME).join(IGNORE_FILE_NAME);
+    let mut fp      = match File::open(ignore_file) {
+        Ok(fp)   => fp,
+        Err(why) => panic!("{:?}", why),
+    };
+    let mut contents = String::new();
+    match fp.read_to_string(&mut contents) {
+        Ok(_)    => {},
+        Err(why) => panic!("{:?}", why),
+    }
+    contents
+        .lines()
+        .map(|l| l.trim().to_string())
+        .collect::<BTreeSet<String>>()
 }
 
 pub fn burn() {
