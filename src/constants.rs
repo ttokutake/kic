@@ -27,13 +27,13 @@ pub const IGNORED_NAMES: [&'static str; 2] = [
 ];
 
 pub const DEFAULT_CONFIG: &'static str =
-"sweep:
-  period: daily
-  time  : 00:00
+"[sweep]
+  period = daily
+  time   = 00:00
 
-burn:
-  after: 2 weeks
+[burn]
+  after = 2 weeks
 
-hidden-file:
-  delete: no
+[hidden-file]
+  delete = no
 ";

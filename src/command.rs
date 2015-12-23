@@ -19,7 +19,7 @@ pub fn initialize() {
         }
     }
 
-    let config_file    = "config.yml";
+    let config_file    = "config";
     let path_to_config = path_to_dir.clone().join(config_file);
     if path_to_config.exists() && path_to_config.is_file() {
         println!("  OK: \"{}\" file has already exist.", config_file);
@@ -35,17 +35,7 @@ pub fn initialize() {
 }
 
 fn write_default_config(fp: &mut File) {
-    let mut files = walk_dir(".").iter()
-        .map(|f| f.clone().into_string())
-        .filter(|f| f.is_ok())
-        .map(|f| f.unwrap())
-        .collect::<Vec<String>>();
-    files.sort();
-    let ignore_config = files.iter()
-        .map(|f| "  - ".to_string() + f + "\n")
-        .fold("\nignore:\n".to_string(), |config, elem| config + &elem);
-    let contents = DEFAULT_CONFIG.to_string() + &ignore_config;
-    match fp.write(contents.as_bytes()) {
+    match fp.write(DEFAULT_CONFIG.as_bytes()) {
         Ok(_)    => {},
         Err(why) => panic!("{:?}", why),
     }
