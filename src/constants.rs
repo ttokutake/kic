@@ -26,13 +26,13 @@ pub const CONFIG_FILE_NAME: &'static str = "config.toml";
 pub const IGNORE_FILE_NAME: &'static str = "ignore";
 
 pub const DEFAULT_CONFIG: &'static str =
-"[sweep]
-  period = daily
-  time   = 00:00
+r#"[sweep]
+  period = "daily"
+  time   = "00:00"
 
 [burn]
-  after = 2 weeks
+  after = "2 weeks"
 
 [hidden-file]
-  delete = no
-";
+  delete = false
+"#;

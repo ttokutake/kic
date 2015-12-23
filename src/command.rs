@@ -1,8 +1,11 @@
+extern crate toml;
+
 use constants::*;
+use self::toml::Table;
 use std::ffi::OsString;
 use std::fs;
 use std::fs::File;
-use std::io::Write;
+use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
 
 pub fn initialize() {
@@ -84,7 +87,26 @@ pub fn set_params() {
 }
 
 pub fn sweep() {
-    println!("sweep");
+    let table = read_config_file();
+    println!("{:?}", table);
+}
+
+fn read_config_file() -> Table {
+    let config_file = Path::new(WORKING_DIR_NAME).join(CONFIG_FILE_NAME);
+    let mut fp      = match File::open(config_file) {
+        Ok(fp)   => fp,
+        Err(why) => panic!("{:?}", why),
+    };
+    let mut config = String::new();
+    match fp.read_to_string(&mut config) {
+        Ok(contents) => contents,
+        Err(why)     => panic!("{:?}", why),
+    };
+
+    match toml::Parser::new(&config).parse() {
+        Some(toml) => toml,
+        None       => panic!("Error occurs on parsing \"{}\".", CONFIG_FILE_NAME),
+    }
 }
 
 pub fn burn() {
