@@ -21,6 +21,11 @@ pub const BANNED_DIRS: [&'static str; 20] = [
     "/var",
 ];
 
+pub const IGNORED_NAMES: [&'static str; 2] = [
+    ".kic",
+    ".git",
+];
+
 pub const DEFAULT_CONFIG: &'static str =
 "sweep:
   period: daily

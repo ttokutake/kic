@@ -43,7 +43,7 @@ fn write_default_config(fp: &mut File) {
     files.sort();
     let ignore_config = files.iter()
         .map(|f| "  - ".to_string() + f + "\n")
-        .fold("ignore:\n".to_string(), |config, elem| config + &elem);
+        .fold("\nignore:\n".to_string(), |config, elem| config + &elem);
     let contents = DEFAULT_CONFIG.to_string() + &ignore_config;
     match fp.write(contents.as_bytes()) {
         Ok(_)    => {},
@@ -60,7 +60,9 @@ fn walk_dir<P: AsRef<Path>>(p: P) -> Vec<OsString> {
     let dirs = dirs.filter(|d| d.is_ok())
         .flat_map(|d| {
             let p = d.unwrap().path();
-            if p.is_file() {
+            if IGNORED_NAMES.iter().any(|name| p.ends_with(name)) {
+                Vec::new()
+            } else if p.is_file() {
                 vec![p.into_os_string()]
             } else {
                 walk_dir(&p)
