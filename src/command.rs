@@ -25,7 +25,7 @@ pub fn initialize() {
 
     let ignore_file    = "ignore";
     let path_to_ignore = path_to_dir.clone().join(ignore_file);
-    let ignore_contents = walk_dir(".", &IGNORED_NAMES).iter()
+    let ignore_contents = walk_dir(".").iter()
         .fold(String::new(), |c, f| c + &f + "\n");
     create_setting_file(path_to_ignore, ignore_contents);
 }
@@ -48,32 +48,37 @@ fn create_setting_file<S: AsRef<str>>(path_to_file: PathBuf, contents: S) {
     }
 }
 
-fn walk_dir<P: AsRef<Path>>(path: P, ignored_names: &[&'static str]) -> Vec<String> {
-    fn walk_dir<P: AsRef<Path>>(path: P, ignored_names: &[&'static str]) -> Vec<OsString> {
+fn walk_dir<P: AsRef<Path>>(path: P) -> Vec<String> {
+    fn walk_dir<P: AsRef<Path>>(path: P) -> Vec<OsString> {
         let dirs = match fs::read_dir(path) {
             Ok(ds)   => ds,
             Err(why) => panic!("{:?}", why),
         };
         let dirs = dirs.filter(|d| d.is_ok())
             .flat_map(|d| {
-                let p = d.unwrap().path();
-                if ignored_names.iter().any(|name| p.ends_with(name)) {
+                let path = d.unwrap().path();
+                if is_hidden(&path) {
                     Vec::new()
-                } else if p.is_file() {
-                    vec![p.into_os_string()]
+                } else if path.is_file() {
+                    vec![path.into_os_string()]
                 } else {
-                    walk_dir(&p, ignored_names)
+                    walk_dir(&path)
                 }
             })
             .collect::<Vec<OsString>>();
         dirs
     }
 
-    walk_dir(path, ignored_names).iter()
+    walk_dir(path).iter()
         .map(|f| f.clone().into_string())
         .filter(|f| f.is_ok())
         .map(|f| f.unwrap())
         .collect::<Vec<String>>()
+}
+
+fn is_hidden(path: &PathBuf) -> bool {
+    let file_name = path.file_name().and_then(|f| f.to_str());
+    file_name.map_or(false, |f| f.starts_with("."))
 }
 
 pub fn set_params() {
