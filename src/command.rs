@@ -50,7 +50,7 @@ fn create_setting_file<S: AsRef<str>>(path_to_file: PathBuf, contents: S) {
     }
 }
 
-fn walk_dir<P: AsRef<Path>>(path: P) -> Vec<String> {
+fn walk_dir<P: AsRef<Path>>(path: P) -> BTreeSet<String> {
     fn walk_dir(path: PathBuf) -> Vec<OsString> {
         let paths = match fs::read_dir(path) {
             Ok(rd)   => rd,
@@ -75,7 +75,7 @@ fn walk_dir<P: AsRef<Path>>(path: P) -> Vec<String> {
         .map(|f| f.clone().into_string())
         .filter(|f| f.is_ok())
         .map(|f| f.unwrap())
-        .collect::<Vec<String>>()
+        .collect::<BTreeSet<String>>()
 }
 
 fn is_hidden(path: &PathBuf) -> bool {
@@ -88,11 +88,18 @@ pub fn set_params() {
 }
 
 pub fn sweep() {
+    println!("Sweep ...");
+
     let config = read_config_file();
     let ignore = read_ignore_file();
 
+    let target_files = walk_dir(".")
+        .difference(&ignore)
+        .cloned()
+        .collect::<Vec<String>>();
+
     println!("{:?}", config);
-    println!("{:?}", ignore);
+    println!("{:?}", target_files);
 }
 
 fn read_config_file() -> Table {
