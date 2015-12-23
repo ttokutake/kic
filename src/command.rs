@@ -102,5 +102,11 @@ pub fn unregister_cron() {
 }
 
 pub fn destroy() {
-    println!("destroy");
+    println!("Destroy ...");
+
+    let dir_name = ".kic";
+    match fs::remove_dir_all(dir_name) {
+        Ok(_)    => println!("  OK: Removed \"{}\" directory.", dir_name),
+        Err(why) => panic!("{:?}", why),
+    }
 }
