@@ -49,27 +49,27 @@ fn create_setting_file<S: AsRef<str>>(path_to_file: PathBuf, contents: S) {
 }
 
 fn walk_dir<P: AsRef<Path>>(path: P) -> Vec<String> {
-    fn walk_dir<P: AsRef<Path>>(path: P) -> Vec<OsString> {
-        let dirs = match fs::read_dir(path) {
-            Ok(ds)   => ds,
+    fn walk_dir(path: PathBuf) -> Vec<OsString> {
+        let paths = match fs::read_dir(path) {
+            Ok(rd)   => rd,
             Err(why) => panic!("{:?}", why),
         };
-        let dirs = dirs.filter(|d| d.is_ok())
-            .flat_map(|d| {
-                let path = d.unwrap().path();
+        paths
+            .filter(|de| de.is_ok())
+            .flat_map(|de| {
+                let path = de.unwrap().path();
                 if is_hidden(&path) {
                     Vec::new()
                 } else if path.is_file() {
                     vec![path.into_os_string()]
                 } else {
-                    walk_dir(&path)
+                    walk_dir(path)
                 }
             })
-            .collect::<Vec<OsString>>();
-        dirs
+            .collect::<Vec<OsString>>()
     }
 
-    walk_dir(path).iter()
+    walk_dir(path.as_ref().to_path_buf()).iter()
         .map(|f| f.clone().into_string())
         .filter(|f| f.is_ok())
         .map(|f| f.unwrap())
