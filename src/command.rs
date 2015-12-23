@@ -25,10 +25,8 @@ pub fn initialize() {
 
     let ignore_file    = "ignore";
     let path_to_ignore = path_to_dir.clone().join(ignore_file);
-    let ignore_contents = walk_dir(".").iter()
-        .map(|f| f.clone().into_string())
-        .filter(|f| f.is_ok())
-        .fold("".to_string(), |c, f| c + &(f.unwrap()) + "\n");
+    let ignore_contents = walk_dir(".", &IGNORED_NAMES).iter()
+        .fold(String::new(), |c, f| c + &f + "\n");
     create_setting_file(path_to_ignore, ignore_contents);
 }
 
@@ -50,25 +48,32 @@ fn create_setting_file<S: AsRef<str>>(path_to_file: PathBuf, contents: S) {
     }
 }
 
-// You will be enable to use std::fs::walk_dir instead of this function in rust 1.6.0 or later
-fn walk_dir<P: AsRef<Path>>(p: P) -> Vec<OsString> {
-    let dirs = match fs::read_dir(p) {
-        Ok(ds)   => ds,
-        Err(why) => panic!("{:?}", why),
-    };
-    let dirs = dirs.filter(|d| d.is_ok())
-        .flat_map(|d| {
-            let p = d.unwrap().path();
-            if IGNORED_NAMES.iter().any(|name| p.ends_with(name)) {
-                Vec::new()
-            } else if p.is_file() {
-                vec![p.into_os_string()]
-            } else {
-                walk_dir(&p)
-            }
-        })
-        .collect::<Vec<OsString>>();
-    dirs
+fn walk_dir<P: AsRef<Path>>(path: P, ignored_names: &[&'static str]) -> Vec<String> {
+    fn walk_dir<P: AsRef<Path>>(path: P, ignored_names: &[&'static str]) -> Vec<OsString> {
+        let dirs = match fs::read_dir(path) {
+            Ok(ds)   => ds,
+            Err(why) => panic!("{:?}", why),
+        };
+        let dirs = dirs.filter(|d| d.is_ok())
+            .flat_map(|d| {
+                let p = d.unwrap().path();
+                if ignored_names.iter().any(|name| p.ends_with(name)) {
+                    Vec::new()
+                } else if p.is_file() {
+                    vec![p.into_os_string()]
+                } else {
+                    walk_dir(&p, ignored_names)
+                }
+            })
+            .collect::<Vec<OsString>>();
+        dirs
+    }
+
+    walk_dir(path, ignored_names).iter()
+        .map(|f| f.clone().into_string())
+        .filter(|f| f.is_ok())
+        .map(|f| f.unwrap())
+        .collect::<Vec<String>>()
 }
 
 pub fn set_params() {
