@@ -33,12 +33,13 @@ pub fn initialize() {
 }
 
 fn create_setting_file<S: AsRef<str>>(path_to_file: PathBuf, contents: S) {
+    let file_name = path_to_file.file_name().and_then(|f| f.to_str()).unwrap();
     if path_to_file.exists() && path_to_file.is_file() {
-        println!("  OK: \"{:?}\" file has already exist.", path_to_file);
+        println!("  OK: \"{}\" file has already exist.", file_name);
     } else {
         match File::create(&path_to_file) {
             Ok(mut fp) => {
-                println!("  OK: Created {:?} file.", path_to_file);
+                println!("  OK: Created \"{}\" file.", file_name);
                 match fp.write(contents.as_ref().as_bytes()) {
                     Ok(_)    => {},
                     Err(why) => panic!("{:?}", why),
