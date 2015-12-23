@@ -3,7 +3,7 @@ use std::ffi::OsString;
 use std::fs;
 use std::fs::File;
 use std::io::Write;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 pub fn initialize() {
     println!("Initialize ...");
@@ -21,23 +21,23 @@ pub fn initialize() {
 
     let config_file    = "config";
     let path_to_config = path_to_dir.clone().join(config_file);
-    if path_to_config.exists() && path_to_config.is_file() {
-        println!("  OK: \"{}\" file has already exist.", config_file);
+    create_setting_file(&path_to_config, DEFAULT_CONFIG);
+}
+
+fn create_setting_file(path_to_file: &PathBuf, contents: &'static str) {
+    if path_to_file.exists() && path_to_file.is_file() {
+        println!("  OK: \"{:?}\" file has already exist.", path_to_file);
     } else {
-        match File::create(path_to_config) {
+        match File::create(path_to_file) {
             Ok(mut fp) => {
-                println!("  OK: Created \"{}\" file.", config_file);
-                write_default_config(&mut fp);
+                println!("  OK: Created {:?} file.", path_to_file);
+                match fp.write(contents.as_bytes()) {
+                    Ok(_)    => {},
+                    Err(why) => panic!("{:?}", why),
+                }
             },
             Err(why) => panic!("{:?}", why),
         }
-    }
-}
-
-fn write_default_config(fp: &mut File) {
-    match fp.write(DEFAULT_CONFIG.as_bytes()) {
-        Ok(_)    => {},
-        Err(why) => panic!("{:?}", why),
     }
 }
 
