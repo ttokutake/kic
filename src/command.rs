@@ -8,7 +8,7 @@ use std::path::{Path, PathBuf};
 pub fn initialize() {
     println!("Initialize ...");
 
-    let dir_name    = ".kic";
+    let dir_name    = WORKING_DIR_NAME;
     let path_to_dir = Path::new(dir_name);
     if path_to_dir.exists() && path_to_dir.is_dir() {
         println!("  OK: \"{}\" directory has already exist.", dir_name);
@@ -19,12 +19,10 @@ pub fn initialize() {
         }
     }
 
-    let config_file    = "config.toml";
-    let path_to_config = path_to_dir.clone().join(config_file);
+    let path_to_config = path_to_dir.clone().join(CONFIG_FILE_NAME);
     create_setting_file(path_to_config, DEFAULT_CONFIG);
 
-    let ignore_file    = "ignore";
-    let path_to_ignore = path_to_dir.clone().join(ignore_file);
+    let path_to_ignore = path_to_dir.clone().join(IGNORE_FILE_NAME);
     let ignore_contents = walk_dir(".").iter()
         .fold(String::new(), |c, f| c + &f + "\n");
     create_setting_file(path_to_ignore, ignore_contents);
@@ -104,9 +102,8 @@ pub fn unregister_cron() {
 pub fn destroy() {
     println!("Destroy ...");
 
-    let dir_name = ".kic";
-    match fs::remove_dir_all(dir_name) {
-        Ok(_)    => println!("  OK: Removed \"{}\" directory.", dir_name),
+    match fs::remove_dir_all(WORKING_DIR_NAME) {
+        Ok(_)    => println!("  OK: Removed \"{}\" directory.", WORKING_DIR_NAME),
         Err(why) => panic!("{:?}", why),
     }
 }
