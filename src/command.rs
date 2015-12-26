@@ -38,9 +38,9 @@ fn create_setting_file<S: AsRef<str>>(path_to_file: PathBuf, contents: S) {
         println!("  OK: \"{}\" file has already exist.", file_name);
     } else {
         match File::create(&path_to_file) {
-            Ok(mut fp) => {
+            Ok(mut f) => {
                 println!("  OK: Created \"{}\" file.", file_name);
-                match fp.write(contents.as_ref().as_bytes()) {
+                match f.write(contents.as_ref().as_bytes()) {
                     Ok(_)    => {},
                     Err(why) => panic!("{:?}", why),
                 }
@@ -104,12 +104,12 @@ pub fn sweep() {
 
 fn read_config_file() -> Table {
     let config_file = Path::new(WORKING_DIR_NAME).join(CONFIG_FILE_NAME);
-    let mut fp      = match File::open(config_file) {
-        Ok(fp)   => fp,
+    let mut f       = match File::open(config_file) {
+        Ok(f)    => f,
         Err(why) => panic!("{:?}", why),
     };
     let mut config = String::new();
-    match fp.read_to_string(&mut config) {
+    match f.read_to_string(&mut config) {
         Ok(_)    => {},
         Err(why) => panic!("{:?}", why),
     };
@@ -122,12 +122,12 @@ fn read_config_file() -> Table {
 
 fn read_ignore_file() -> BTreeSet<String> {
     let ignore_file = Path::new(WORKING_DIR_NAME).join(IGNORE_FILE_NAME);
-    let mut fp      = match File::open(ignore_file) {
-        Ok(fp)   => fp,
+    let mut f       = match File::open(ignore_file) {
+        Ok(f)    => f,
         Err(why) => panic!("{:?}", why),
     };
     let mut contents = String::new();
-    match fp.read_to_string(&mut contents) {
+    match f.read_to_string(&mut contents) {
         Ok(_)    => {},
         Err(why) => panic!("{:?}", why),
     }
