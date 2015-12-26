@@ -1,5 +1,7 @@
+extern crate chrono;
 extern crate toml;
 
+use self::chrono::*;
 use constants::*;
 use self::toml::Table;
 use std::collections::BTreeSet;
@@ -88,6 +90,16 @@ pub fn set_params() {
 }
 
 pub fn sweep() {
+    let now           = Local::now();
+    let trash_name    = format!("trash_{}", now.format("%Y-%m-%d"));
+    let path_to_trash = Path::new(WORKING_DIR_NAME).join(trash_name);
+    if !(path_to_trash.exists() && path_to_trash.is_dir()) {
+        match fs::create_dir(path_to_trash) {
+            Ok(_)    => {},
+            Err(why) => panic!("{:?}", why),
+        }
+    }
+
     println!("Sweep ...");
 
     let config = read_config_file();
