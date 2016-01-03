@@ -109,8 +109,14 @@ pub fn unregister_cron() {
 pub fn destroy() {
     println!("Destroy ...");
 
-    match fs::remove_dir_all(WORKING_DIR_NAME) {
-        Ok(_)    => println!("  OK: Removed \"{}\" directory.", WORKING_DIR_NAME),
-        Err(why) => panic!("{:?}", why),
+    let path_to_dir = Path::new(WORKING_DIR_NAME).to_path_buf();
+
+    if path_to_dir.exists() {
+        match fs::remove_dir_all(WORKING_DIR_NAME) {
+            Ok(_)    => println!("  OK: Removed \"{}\" directory.", WORKING_DIR_NAME),
+            Err(why) => panic!("{:?}", why),
+        }
+    } else {
+        println!("  OK: \"{}\" does not exist.", WORKING_DIR_NAME);
     }
 }
