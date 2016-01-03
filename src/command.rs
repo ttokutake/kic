@@ -3,7 +3,6 @@ extern crate toml;
 
 use self::chrono::*;
 use constants::*;
-use self::toml::Table;
 use std::collections::BTreeSet;
 use std::ffi::OsString;
 use std::fs;
@@ -102,7 +101,6 @@ pub fn sweep() {
 
     println!("Sweep ...");
 
-    let config = read_config_file();
     let ignore = read_ignore_file();
 
     let target_files = walk_dir(".")
@@ -110,26 +108,7 @@ pub fn sweep() {
         .cloned()
         .collect::<Vec<String>>();
 
-    println!("{:?}", config);
     println!("{:?}", target_files);
-}
-
-fn read_config_file() -> Table {
-    let config_file = Path::new(WORKING_DIR_NAME).join(CONFIG_FILE_NAME);
-    let mut f       = match File::open(config_file) {
-        Ok(f)    => f,
-        Err(why) => panic!("{:?}", why),
-    };
-    let mut config = String::new();
-    match f.read_to_string(&mut config) {
-        Ok(_)    => {},
-        Err(why) => panic!("{:?}", why),
-    };
-
-    match toml::Parser::new(&config).parse() {
-        Some(toml) => toml,
-        None       => panic!("Error occurs on parsing \"{}\".", CONFIG_FILE_NAME),
-    }
 }
 
 fn read_ignore_file() -> BTreeSet<String> {
