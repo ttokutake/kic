@@ -1,5 +1,4 @@
 extern crate chrono;
-extern crate toml;
 
 use self::chrono::*;
 use constants::*;
