@@ -1,6 +1,7 @@
 use std::env;
 
 mod constants;
+mod lib;
 mod command;
 
 use constants::*;
