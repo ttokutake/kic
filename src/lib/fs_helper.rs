@@ -33,6 +33,5 @@ pub fn walk_dir<P: AsRef<Path>>(path: P) -> BTreeSet<String> {
 
 fn is_hidden(path: &PathBuf) -> bool {
     let file_name = path.file_name().and_then(|f| f.to_str());
-    file_name.map_or(false, |f| f.starts_with("."))
+    file_name.map_or(false, |f| f.starts_with(".") && f.len() > 1 && f != "..")
 }
-
