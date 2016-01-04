@@ -7,6 +7,7 @@ use std::fs;
 use std::fs::File;
 use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
+use lib::cmd_helper::*;
 use lib::fs_helper::*;
 
 pub fn initialize() {
@@ -14,7 +15,7 @@ pub fn initialize() {
 
     let dir_name    = WORKING_DIR_NAME;
     let path_to_dir = Path::new(dir_name);
-    if path_to_dir.exists() && path_to_dir.is_dir() {
+    if working_dir_exists() {
         println!("  OK: \"{}\" directory has already exist.", dir_name);
     } else {
         match fs::create_dir(path_to_dir) {
@@ -55,6 +56,21 @@ pub fn set_params() {
 }
 
 pub fn sweep() {
+    if !working_dir_exists() {
+        print_warning_for_working_dir();
+        return
+    }
+
+    if !config_file_exists() {
+        print_warning_for_config_file();
+        return
+    }
+
+    if !ignore_file_exists() {
+        print_warning_for_ignore_file();
+        return
+    }
+
     let now           = Local::now();
     let trash_name    = format!("trash_{}", now.format("%Y-%m-%d"));
     let path_to_trash = Path::new(WORKING_DIR_NAME).join(trash_name);
@@ -109,14 +125,13 @@ pub fn unregister_cron() {
 pub fn destroy() {
     println!("Destroy ...");
 
-    let path_to_dir = Path::new(WORKING_DIR_NAME).to_path_buf();
+    if !working_dir_exists() {
+        print_warning_for_working_dir();
+        return
+    }
 
-    if path_to_dir.exists() {
-        match fs::remove_dir_all(WORKING_DIR_NAME) {
-            Ok(_)    => println!("  OK: Removed \"{}\" directory.", WORKING_DIR_NAME),
-            Err(why) => panic!("{:?}", why),
-        }
-    } else {
-        println!("  OK: \"{}\" does not exist.", WORKING_DIR_NAME);
+    match fs::remove_dir_all(WORKING_DIR_NAME) {
+        Ok(_)    => println!("  OK: Removed \"{}\" directory.", WORKING_DIR_NAME),
+        Err(why) => panic!("{:?}", why),
     }
 }
