@@ -7,8 +7,8 @@ use std::fs;
 use std::fs::File;
 use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
-use lib::cmd_helper::*;
-use lib::fs_helper::*;
+use super::cmd_helper::*;
+use super::fs_helper::*;
 
 pub fn initialize() {
     println!("Initialize ...");
