@@ -2,10 +2,9 @@ use std::env;
 
 mod constants;
 mod lib;
-mod command;
 
 use constants::*;
-use command::*;
+use lib::command::*;
 
 fn main() {
     let current_dir = env::current_dir().unwrap();
