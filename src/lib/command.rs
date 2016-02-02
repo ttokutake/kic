@@ -1,7 +1,7 @@
 extern crate chrono;
 
 use self::chrono::*;
-use constants::*;
+use constant::*;
 use std::collections::BTreeSet;
 use std::fs;
 use std::fs::File;

@@ -1,4 +1,4 @@
-use constants::*;
+use constant::*;
 use std::fmt::Display;
 use std::path::Path;
 

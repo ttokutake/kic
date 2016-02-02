@@ -1,9 +1,9 @@
 use std::env;
 
-mod constants;
+mod constant;
 mod lib;
 
-use constants::*;
+use constant::*;
 use lib::command::*;
 
 fn main() {
