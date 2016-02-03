@@ -2,6 +2,7 @@ use std::collections::BTreeSet;
 use std::ffi::OsString;
 use std::fs;
 use std::path::{Path, PathBuf};
+use std::result::Result;
 
 pub fn walk_dir<P: AsRef<Path>>(path: P) -> BTreeSet<String> {
     fn walk_dir(path: PathBuf) -> Vec<OsString> {
@@ -10,9 +11,9 @@ pub fn walk_dir<P: AsRef<Path>>(path: P) -> BTreeSet<String> {
             Err(why) => panic!("{:?}", why),
         };
         paths
-            .filter(|de| de.is_ok())
+            .filter_map(Result::ok)
             .flat_map(|de| {
-                let path = de.unwrap().path();
+                let path = de.path();
                 if is_hidden(&path) {
                     Vec::new()
                 } else if path.is_file() {
@@ -26,8 +27,7 @@ pub fn walk_dir<P: AsRef<Path>>(path: P) -> BTreeSet<String> {
 
     walk_dir(path.as_ref().to_path_buf()).iter()
         .map(|f| f.clone().into_string())
-        .filter(|f| f.is_ok())
-        .map(|f| f.unwrap())
+        .filter_map(Result::ok)
         .collect::<BTreeSet<String>>()
 }
 
