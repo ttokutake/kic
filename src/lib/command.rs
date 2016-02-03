@@ -35,7 +35,7 @@ pub fn initialize() {
 
 fn create_setting_file<S: AsRef<str>>(path_to_file: PathBuf, contents: S) {
     let file_name = path_to_file.file_name().and_then(|f| f.to_str()).unwrap();
-    if path_to_file.exists() && path_to_file.is_file() {
+    if path_to_file.is_file() {
         println!("  OK: \"{}\" file has already exist.", file_name);
     } else {
         match File::create(&path_to_file) {
@@ -74,7 +74,7 @@ pub fn sweep() {
     let now           = Local::now();
     let trash_name    = format!("trash_{}", now.format("%Y-%m-%d"));
     let path_to_trash = Path::new(WORKING_DIR_NAME).join(trash_name);
-    if !(path_to_trash.exists() && path_to_trash.is_dir()) {
+    if !path_to_trash.is_dir() {
         match fs::create_dir(path_to_trash) {
             Ok(_)    => {},
             Err(why) => panic!("{:?}", why),
