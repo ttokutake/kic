@@ -25,8 +25,8 @@ pub fn walk_dir<P: AsRef<Path>>(path: P) -> BTreeSet<String> {
             .collect::<Vec<OsString>>()
     }
 
-    walk_dir(path.as_ref().to_path_buf()).iter()
-        .map(|f| f.clone().into_string())
+    walk_dir(path.as_ref().to_path_buf()).into_iter()
+        .map(|f| f.into_string())
         .filter_map(Result::ok)
         .collect::<BTreeSet<String>>()
 }
