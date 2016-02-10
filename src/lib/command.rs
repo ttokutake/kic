@@ -56,21 +56,6 @@ pub fn set_params() {
 }
 
 pub fn sweep() {
-    if !working_dir_exists() {
-        print_warning_for_working_dir();
-        return
-    }
-
-    if !config_file_exists() {
-        print_warning_for_config_file();
-        return
-    }
-
-    if !ignore_file_exists() {
-        print_warning_for_ignore_file();
-        return
-    }
-
     let now           = Local::now();
     let trash_name    = format!("trash_{}", now.format("%Y-%m-%d"));
     let path_to_trash = Path::new(WORKING_DIR_NAME).join(trash_name);
@@ -124,11 +109,6 @@ pub fn unregister_cron() {
 
 pub fn destroy() {
     println!("Destroy ...");
-
-    if !working_dir_exists() {
-        print_warning_for_working_dir();
-        return
-    }
 
     match fs::remove_dir_all(WORKING_DIR_NAME) {
         Ok(_)    => println!("  OK: Removed \"{}\" directory.", WORKING_DIR_NAME),
