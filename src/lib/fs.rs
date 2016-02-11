@@ -4,6 +4,13 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use std::result::Result;
 
+macro_rules! path_buf {
+    ($($x: expr),*) => {
+        PathBuf::new()
+            $(.join($x))*
+    }
+}
+
 pub fn walk_dir<P: AsRef<Path>>(path: P) -> BTreeSet<String> {
     fn walk_dir(path: PathBuf) -> Vec<OsString> {
         let paths = match fs::read_dir(path) {

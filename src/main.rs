@@ -1,6 +1,8 @@
+#[macro_use]
+mod lib;
+
 mod command;
 mod constant;
-mod lib;
 
 use constant::*;
 use std::env;

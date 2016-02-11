@@ -8,7 +8,7 @@ use self::chrono::Local;
 use std::collections::BTreeSet;
 use std::fs::{self, File};
 use std::io::Read;
-use std::path::Path;
+use std::path::PathBuf;
 
 pub struct Sweep;
 
@@ -24,7 +24,7 @@ impl Command for Sweep {
 
         let now           = Local::now();
         let trash_name    = format!("trash_{}", now.format("%Y-%m-%d"));
-        let path_to_trash = Path::new(WORKING_DIR_NAME).join(&trash_name);
+        let path_to_trash = path_buf![WORKING_DIR_NAME, &trash_name];
         if !path_to_trash.is_dir() {
             match fs::create_dir(path_to_trash) {
                 Ok(_)    => println!(r#"  OK: Created "{}" directory."#, trash_name),
@@ -47,7 +47,7 @@ impl Command for Sweep {
 }
 
 fn read_ignore_file() -> BTreeSet<String> {
-    let ignore_file = Path::new(WORKING_DIR_NAME).join(IGNORE_FILE_NAME);
+    let ignore_file = path_buf![WORKING_DIR_NAME, IGNORE_FILE_NAME];
     let mut f       = match File::open(ignore_file) {
         Ok(f)    => f,
         Err(why) => panic!("  ERROR: {}", why),

@@ -5,7 +5,7 @@ use lib::fs::*;
 use lib::setting::*;
 use std::fs::{self, File};
 use std::io::Write;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 pub struct Init;
 
@@ -20,7 +20,7 @@ impl Command for Init {
         println!("Initialize ...");
 
         let dir_name    = WORKING_DIR_NAME;
-        let path_to_dir = Path::new(dir_name);
+        let path_to_dir = path_buf![dir_name];
         if working_dir_exists() {
             println!(r#"  OK: "{}" directory has already exist."#, dir_name);
         } else {
@@ -30,10 +30,10 @@ impl Command for Init {
             }
         }
 
-        let path_to_config = path_to_dir.clone().join(CONFIG_FILE_NAME);
+        let path_to_config = path_buf![dir_name, CONFIG_FILE_NAME];
         create_setting_file(path_to_config, DEFAULT_CONFIG);
 
-        let path_to_ignore = path_to_dir.clone().join(IGNORE_FILE_NAME);
+        let path_to_ignore = path_buf![dir_name, IGNORE_FILE_NAME];
         let ignore_contents = walk_dir(".").iter()
             .fold(String::new(), |c, f| c + &f + "\n");
         create_setting_file(path_to_ignore, ignore_contents);
