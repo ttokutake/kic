@@ -1,5 +1,8 @@
 use super::Command;
 
+use constant::*;
+use std::fs::remove_dir_all;
+
 pub struct Destroy;
 
 impl Command for Destroy {
@@ -10,6 +13,11 @@ impl Command for Destroy {
     }
 
     fn main(&self) {
-        unimplemented!()
+        println!("Destroy ...");
+
+        match remove_dir_all(WORKING_DIR_NAME) {
+            Ok(_)    => println!("  OK: Removed \"{}\" directory.", WORKING_DIR_NAME),
+            Err(why) => panic!("{:?}", why),
+        }
     }
 }
