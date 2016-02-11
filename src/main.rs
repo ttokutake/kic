@@ -14,11 +14,6 @@ fn main() {
 
     let args = env::args().skip(1).collect::<Vec<String>>();
 
-    if args.is_empty() {
-        print_usage();
-        return;
-    }
-
     execute(args);
 }
 

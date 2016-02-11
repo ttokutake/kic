@@ -62,6 +62,11 @@ trait Command {
 }
 
 pub fn execute(args: Vec<String>) {
+    if args.is_empty() {
+        print_usage();
+        return;
+    }
+
     let need_help = args.iter().any(|a| *a == "-h" || *a == "--help");
 
     let command: Box<Command> = match args[0].as_ref() {
