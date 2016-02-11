@@ -15,7 +15,7 @@ use self::end::End;
 use self::destroy::Destroy;
 
 use constant::*;
-use lib::cmd_helper::*;
+use lib::setting::*;
 use std::env;
 
 trait Command {
