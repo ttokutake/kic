@@ -77,7 +77,10 @@ pub fn execute(args: Vec<String>) {
         "start"   => Box::new(Start  ),
         "end"     => Box::new(End    ),
         "destroy" => Box::new(Destroy),
-        _         => { print_usage(); return; },
+        _         => {
+            print_usage();
+            return;
+        },
     };
 
     command.exec(need_help);

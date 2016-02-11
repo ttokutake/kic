@@ -3,7 +3,6 @@ mod constant;
 mod lib;
 
 use constant::*;
-use command::{execute, print_usage};
 use std::env;
 
 fn main() {
@@ -14,7 +13,7 @@ fn main() {
 
     let args = env::args().skip(1).collect::<Vec<String>>();
 
-    execute(args);
+    command::execute(args);
 }
 
 fn validate_at_first() -> Option<String> {

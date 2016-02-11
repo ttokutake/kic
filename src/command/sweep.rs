@@ -4,9 +4,9 @@ extern crate chrono;
 
 use constant::*;
 use lib::fs_helper::*;
-use self::chrono::*;
+use self::chrono::Local;
 use std::collections::BTreeSet;
-use std::fs::{File, create_dir};
+use std::fs::{self, File};
 use std::io::Read;
 use std::path::Path;
 
@@ -24,7 +24,7 @@ impl Command for Sweep {
         let trash_name    = format!("trash_{}", now.format("%Y-%m-%d"));
         let path_to_trash = Path::new(WORKING_DIR_NAME).join(trash_name);
         if !path_to_trash.is_dir() {
-            match create_dir(path_to_trash) {
+            match fs::create_dir(path_to_trash) {
                 Ok(_)    => {},
                 Err(why) => panic!("{:?}", why),
             }

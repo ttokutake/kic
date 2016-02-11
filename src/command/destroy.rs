@@ -1,7 +1,7 @@
 use super::Command;
 
 use constant::*;
-use std::fs::remove_dir_all;
+use std::fs;
 
 pub struct Destroy;
 
@@ -15,7 +15,7 @@ impl Command for Destroy {
     fn main(&self) {
         println!("Destroy ...");
 
-        match remove_dir_all(WORKING_DIR_NAME) {
+        match fs::remove_dir_all(WORKING_DIR_NAME) {
             Ok(_)    => println!("  OK: Removed \"{}\" directory.", WORKING_DIR_NAME),
             Err(why) => panic!("{:?}", why),
         }

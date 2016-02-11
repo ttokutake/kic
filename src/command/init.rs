@@ -3,7 +3,7 @@ use super::Command;
 use constant::*;
 use lib::cmd_helper::*;
 use lib::fs_helper::*;
-use std::fs::{File, create_dir};
+use std::fs::{self, File};
 use std::io::Write;
 use std::path::{Path, PathBuf};
 
@@ -24,7 +24,7 @@ impl Command for Init {
         if working_dir_exists() {
             println!("  OK: \"{}\" directory has already exist.", dir_name);
         } else {
-            match create_dir(path_to_dir) {
+            match fs::create_dir(path_to_dir) {
                 Ok(_)    => println!("  OK: Created \"{}\" directory.", dir_name),
                 Err(why) => panic!("{:?}", why),
             }
