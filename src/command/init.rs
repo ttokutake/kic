@@ -34,8 +34,9 @@ impl Command for Init {
         create_setting_file(path_to_config, DEFAULT_CONFIG);
 
         let path_to_ignore = path_buf![dir_name, IGNORE_FILE_NAME];
-        let ignore_contents = walk_dir(".").iter()
-            .fold(String::new(), |c, f| c + &f + "\n");
+        let ignore_contents = walk_dir(".")
+            .iter()
+            .fold(String::new(), |c, f| c + f + "\n");
         create_setting_file(path_to_ignore, ignore_contents);
     }
 }

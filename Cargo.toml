@@ -6,3 +6,4 @@ authors = ["ttokutake <tadatoshi.tokutake@gmail.com>"]
 [dependencies]
 chrono = "0.2"
 toml = "0.1"
+walkdir = "0.1"
