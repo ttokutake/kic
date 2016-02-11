@@ -1,63 +1,32 @@
-use std::env;
-
+mod command;
 mod constant;
 mod lib;
 
 use constant::*;
-use lib::command::*;
+use command::{execute, print_usage};
+use std::env;
 
 fn main() {
-    let current_dir = env::current_dir().unwrap();
-    match BANNED_DIRS.iter().find(|d| current_dir.ends_with(d)) {
-        Some(dir) => {
-            println!("Cannot run in \"{}\"", dir);
-            return
-        }
-        None => {},
+    if let Some(message) = validate_at_first() {
+        println!("{}", message);
+        return;
     }
 
     let args = env::args().skip(1).collect::<Vec<String>>();
 
     if args.is_empty() {
         print_usage();
-        return
+        return;
     }
 
-    match args[0].as_ref() {
-        "help"    => print_usage(),
-        "init"    => initialize(),
-        "set"     => set_params(),
-        "sweep"   => sweep(),
-        "burn"    => burn(),
-        "start"   => register_with_cron(),
-        "end"     => unregister_cron(),
-        "destroy" => destroy(),
-        _         => print_usage(),
-    }
+    execute(args);
 }
 
-fn print_usage() {
-    let full_path_to_bin = env::current_exe().unwrap();
-    let bin_name         = full_path_to_bin.file_name()
-        .unwrap()
-        .to_str()
-        .unwrap();
-    println!(
-"Usage:
-    {} <command>
+fn validate_at_first() -> Option<String> {
+    let current_dir = env::current_dir().unwrap();
 
-Commands:
-    help    # Print this message.
-    init    # Register current directory.
-    set     # Set parameters.
-    sweep   # Sweep files in current directory.
-    burn    # Burn sweeped files.
-    start   # Start \"{}\".
-    end     # End \"{}\".
-    destroy # Destroy \"{}\".",
-        bin_name,
-        bin_name,
-        bin_name,
-        bin_name,
-    );
+    BANNED_DIRS
+        .iter()
+        .find(|d| current_dir.ends_with(d))
+        .map(|d| format!("Cannot run in \"{}\"", d))
 }
