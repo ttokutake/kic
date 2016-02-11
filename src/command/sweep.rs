@@ -20,17 +20,20 @@ impl Command for Sweep {
     }
 
     fn main(&self) {
+        println!("Sweep ...");
+
         let now           = Local::now();
         let trash_name    = format!("trash_{}", now.format("%Y-%m-%d"));
-        let path_to_trash = Path::new(WORKING_DIR_NAME).join(trash_name);
+        let path_to_trash = Path::new(WORKING_DIR_NAME).join(&trash_name);
         if !path_to_trash.is_dir() {
             match fs::create_dir(path_to_trash) {
-                Ok(_)    => {},
-                Err(why) => panic!("{:?}", why),
+                Ok(_)    => println!(r#"  OK: Created "{}" directory."#, trash_name),
+                Err(why) => {
+                    println!("  ERROR: {}", why);
+                    return;
+                },
             }
         }
-
-        println!("Sweep ...");
 
         let ignore = read_ignore_file();
 
@@ -47,12 +50,12 @@ fn read_ignore_file() -> BTreeSet<String> {
     let ignore_file = Path::new(WORKING_DIR_NAME).join(IGNORE_FILE_NAME);
     let mut f       = match File::open(ignore_file) {
         Ok(f)    => f,
-        Err(why) => panic!("{:?}", why),
+        Err(why) => panic!("  ERROR: {}", why),
     };
     let mut contents = String::new();
     match f.read_to_string(&mut contents) {
         Ok(_)    => {},
-        Err(why) => panic!("{:?}", why),
+        Err(why) => panic!("  ERROR: {}", why),
     }
     contents
         .lines()

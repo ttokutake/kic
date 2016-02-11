@@ -22,7 +22,7 @@ trait Command {
     fn validation(&self) -> bool;
     fn validate(&self) -> Option<String> {
         fn message(subject: String) -> String {
-            format!(r#"  Warning: {} does not exist. Please type "kic init"."#, subject)
+            format!(r#"WARNING: {} does not exist. Please type "kic init"."#, subject)
         }
 
         if !working_dir_exists() {
@@ -95,17 +95,17 @@ pub fn print_usage() {
         .unwrap();
 
     println!(
-"Usage:
-    {} <command>
+r#"Usage:
+    {} <command> [--help|-h]
 
-Commands:
+Command:
     init    # Register current directory.
     set     # Set parameters.
     sweep   # Sweep files in current directory.
     burn    # Burn sweeped files.
-    start   # Start \"{}\".
-    end     # End \"{}\".
-    destroy # Destroy \"{}\".",
+    start   # Start "{}".
+    end     # End "{}".
+    destroy # Destroy "{}"."#,
         bin_name,
         bin_name,
         bin_name,

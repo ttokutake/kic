@@ -17,10 +17,13 @@ fn main() {
 }
 
 fn validate_at_first() -> Option<String> {
-    let current_dir = env::current_dir().unwrap();
+    let current_dir = match env::current_dir() {
+        Ok(dir)  => dir,
+        Err(why) => return Some(format!("ERROR: {}", why)),
+    };
 
     BANNED_DIRS
         .iter()
         .find(|d| current_dir.ends_with(d))
-        .map(|d| format!("Cannot run in \"{}\"", d))
+        .map(|d| format!(r#"ERROR: Cannot run in "{}"."#, d))
 }
