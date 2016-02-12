@@ -3,7 +3,6 @@ use super::Command;
 use constant::*;
 use lib::fs::*;
 use lib::setting::*;
-use std::ffi::OsStr;
 use std::fs::{self, File};
 use std::io::Write;
 use std::path::PathBuf;
@@ -43,10 +42,7 @@ impl Command for Init {
 }
 
 fn create_setting_file<S: AsRef<str>>(path_to_file: PathBuf, contents: S) {
-    let file_name = match path_to_file.file_name().and_then(OsStr::to_str) {
-        Some(f) => f,
-        None    => panic!(r#"  ERROR: Must use "UTF-8" characters as the name of config files."#),
-    };
+    let file_name = extract_file_name(&path_to_file);
 
     if path_to_file.is_file() {
         println!(r#"  OK: "{}" file has already exist."#, file_name);

@@ -15,9 +15,9 @@ use self::end::End;
 use self::destroy::Destroy;
 
 use constant::*;
+use lib::fs::*;
 use lib::setting::*;
 use std::env;
-use std::ffi::OsStr;
 
 trait Command {
     fn validation(&self) -> bool;
@@ -87,10 +87,7 @@ pub fn print_usage() {
         Ok(p)    => p,
         Err(why) => return println!("{}", why),
     };
-    let bin_name = match full_path.file_name().and_then(OsStr::to_str) {
-        Some(b) => b,
-        None    => return println!(r#"Error: Must use "UTF-8" characters as binary name."#),
-    };
+    let bin_name = extract_file_name(&full_path);
 
     println!(
 r#"Usage:
