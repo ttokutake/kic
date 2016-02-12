@@ -17,6 +17,7 @@ use self::destroy::Destroy;
 use constant::*;
 use lib::setting::*;
 use std::env;
+use std::ffi::OsStr;
 
 trait Command {
     fn validation(&self) -> bool;
@@ -48,8 +49,7 @@ trait Command {
     fn exec(&self, need_help: bool) {
         if self.validation() {
             if let Some(message) = self.validate() {
-                println!("{}", message);
-                return;
+                return println!("{}", message);
             }
         }
 
@@ -63,8 +63,7 @@ trait Command {
 
 pub fn execute(args: Vec<String>) {
     if args.is_empty() {
-        print_usage();
-        return;
+        return print_usage();
     }
 
     let need_help = args.iter().any(|a| *a == "-h" || *a == "--help");
@@ -77,22 +76,21 @@ pub fn execute(args: Vec<String>) {
         "start"   => Box::new(Start  ),
         "end"     => Box::new(End    ),
         "destroy" => Box::new(Destroy),
-        _         => {
-            print_usage();
-            return;
-        },
+        _         => return print_usage(),
     };
 
     command.exec(need_help);
 }
 
 pub fn print_usage() {
-    let full_path_to_bin = env::current_exe().unwrap();
-    let bin_name         = full_path_to_bin
-        .file_name()
-        .unwrap()
-        .to_str()
-        .unwrap();
+    let full_path = match env::current_exe() {
+        Ok(p)    => p,
+        Err(why) => return println!("{}", why),
+    };
+    let bin_name = match full_path.file_name().and_then(OsStr::to_str) {
+        Some(b) => b,
+        None    => return println!(r#"Error: Must use "UTF-8" characters as binary name."#),
+    };
 
     println!(
 r#"Usage:

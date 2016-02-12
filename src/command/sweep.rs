@@ -28,10 +28,7 @@ impl Command for Sweep {
         if !path_to_trash.is_dir() {
             match fs::create_dir(path_to_trash) {
                 Ok(_)    => println!(r#"  OK: Created "{}" directory."#, trash_name),
-                Err(why) => {
-                    println!("  ERROR: {}", why);
-                    return;
-                },
+                Err(why) => return println!("  ERROR: {}", why),
             }
         }
 
