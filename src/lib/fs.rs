@@ -10,7 +10,7 @@ macro_rules! path_buf {
     ($($x: expr),*) => {
         PathBuf::new()
             $(.join($x))*
-    }
+    };
 }
 
 pub fn extract_file_name(full_path: &PathBuf) -> &str {
