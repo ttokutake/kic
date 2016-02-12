@@ -4,10 +4,9 @@ extern crate chrono;
 
 use constant::*;
 use lib::fs::*;
+use lib::setting::*;
 use self::chrono::Local;
-use std::collections::BTreeSet;
-use std::fs::{self, File};
-use std::io::Read;
+use std::fs;
 use std::path::PathBuf;
 
 pub struct Sweep;
@@ -41,21 +40,4 @@ impl Command for Sweep {
 
         println!("{:?}", target_files);
     }
-}
-
-fn read_ignore_file() -> BTreeSet<String> {
-    let ignore_file = path_buf![WORKING_DIR_NAME, IGNORE_FILE_NAME];
-    let mut f       = match File::open(ignore_file) {
-        Ok(f)    => f,
-        Err(why) => panic!("  ERROR: {}", why),
-    };
-    let mut contents = String::new();
-    match f.read_to_string(&mut contents) {
-        Ok(_)    => {},
-        Err(why) => panic!("  ERROR: {}", why),
-    }
-    contents
-        .lines()
-        .map(|l| l.trim().to_string())
-        .collect::<BTreeSet<String>>()
 }

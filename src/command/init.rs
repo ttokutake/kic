@@ -3,8 +3,7 @@ use super::Command;
 use constant::*;
 use lib::fs::*;
 use lib::setting::*;
-use std::fs::{self, File};
-use std::io::Write;
+use std::fs;
 use std::path::PathBuf;
 
 pub struct Init;
@@ -38,24 +37,5 @@ impl Command for Init {
             .iter()
             .fold(String::new(), |c, f| c + f + "\n");
         create_setting_file(path_to_ignore, ignore_contents);
-    }
-}
-
-fn create_setting_file<S: AsRef<str>>(path_to_file: PathBuf, contents: S) {
-    let file_name = extract_file_name(&path_to_file);
-
-    if path_to_file.is_file() {
-        println!(r#"  OK: "{}" file has already exist."#, file_name);
-    } else {
-        match File::create(&path_to_file) {
-            Ok(mut f) => {
-                println!(r#"  OK: Created "{}" file."#, file_name);
-                match f.write(contents.as_ref().as_bytes()) {
-                    Ok(_)    => {},
-                    Err(why) => panic!("  ERROR: {}", why),
-                }
-            },
-            Err(why) => panic!("  ERROR: {}", why),
-        }
     }
 }
