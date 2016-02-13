@@ -1,7 +1,6 @@
 use super::Command;
 
-use constant::*;
-use std::fs;
+use lib::setting::*;
 
 pub struct Destroy;
 
@@ -15,9 +14,6 @@ impl Command for Destroy {
     fn main(&self) {
         println!("Destroy ...");
 
-        match fs::remove_dir_all(WORKING_DIR_NAME) {
-            Ok(_)    => println!(r#"  OK: Removed "{}" directory."#, WORKING_DIR_NAME),
-            Err(why) => println!("  ERROR: {}", why),
-        }
+        delete_all_setting_files();
     }
 }

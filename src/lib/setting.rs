@@ -1,7 +1,7 @@
 use constant::*;
 use lib::fs::*;
 use std::collections::BTreeSet;
-use std::fs::File;
+use std::fs::{self, File};
 use std::io::{Read, Write};
 use std::path::PathBuf;
 
@@ -71,4 +71,11 @@ pub fn read_ignore_file() -> BTreeSet<String> {
         .lines()
         .map(|l| l.trim().to_string())
         .collect::<BTreeSet<String>>()
+}
+
+pub fn delete_all_setting_files() {
+    match fs::remove_dir_all(WORKING_DIR_NAME) {
+        Ok(_)    => println!(r#"  OK: Removed "{}" directory."#, WORKING_DIR_NAME),
+        Err(why) => println!("  ERROR: {}", why),
+    }
 }
