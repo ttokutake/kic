@@ -15,8 +15,8 @@ macro_rules! path_buf {
 
 pub fn extract_file_name(full_path: &PathBuf) -> &str {
     match full_path.file_name() {
-        Some(option_f) => {
-            match option_f.to_str() {
+        Some(osstr) => {
+            match osstr.to_str() {
                 Some(file_name) => file_name,
                 None            => panic!("ERROR: Use UTF-8 characters as file name."),
             }
