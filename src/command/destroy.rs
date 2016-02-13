@@ -15,7 +15,13 @@ impl Command for Destroy {
     fn main(&self) {
         println!("Destroy ...");
 
-        echo("Do you want to delete all related files?: ");
-        delete_all_setting_files();
+        echo("Do you want to delete all related files? [yes/no]: ");
+
+        let input = read_line_from_stdin();
+
+        match input.to_lowercase().as_ref() {
+            "y" | "yes" => delete_all_setting_files(),
+            _           => println!("NOTICE: Interrupted by user."),
+        }
     }
 }

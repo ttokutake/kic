@@ -7,3 +7,11 @@ pub fn echo<S: Display>(message: S) {
         panic!("{}", why);
     }
 }
+
+pub fn read_line_from_stdin() -> String {
+    let mut input = String::new();
+    if let Err(why) = io::stdin().read_line(&mut input) {
+        panic!("{}", why);
+    }
+    input.trim().to_string()
+}
