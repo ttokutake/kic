@@ -9,11 +9,12 @@ use std::env;
 
 fn main() {
     if let Some(message) = validate_at_first() {
-        println!("{}", message);
-        return;
+        return println!("{}", message);
     }
 
-    let args = env::args().skip(1).collect::<Vec<String>>();
+    let args = env::args()
+        .skip(1)
+        .collect::<Vec<String>>();
 
     command::execute(args);
 }
