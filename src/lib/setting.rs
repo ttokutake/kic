@@ -18,6 +18,7 @@ pub fn ignore_file() -> PathBuf {
     path_buf![working_dir(), IGNORE_FILE_NAME]
 }
 
+
 pub fn working_dir_exists() -> bool {
     working_dir().is_dir()
 }
@@ -33,11 +34,11 @@ pub fn ignore_file_exists() -> bool {
 
 pub fn create_working_dir() {
     if working_dir_exists() {
-        println!(r#"  NOTICE: "{}" directory has already exist."#, WORKING_DIR_NAME);
+        println!(r#"NOTICE: "{}" directory has already exist."#, WORKING_DIR_NAME);
     } else {
         match fs::create_dir(working_dir()) {
-            Ok(_)    => println!(r#"  OK: Created "{}" directory."#, WORKING_DIR_NAME),
-            Err(why) => panic!("  ERROR: {}", why),
+            Ok(_)    => println!(r#"OK: Created "{}" directory."#, WORKING_DIR_NAME),
+            Err(why) => panic!("ERROR: {}", why),
         }
     }
 }
@@ -54,16 +55,16 @@ fn create_setting_file<S: AsRef<str>>(path_to_file: PathBuf, contents: S) {
     let file_name = extract_file_name(&path_to_file);
 
     if path_to_file.is_file() {
-        println!(r#"  NOTICE: "{}" file has already exist."#, file_name);
+        println!(r#"NOTICE: "{}" file has already exist."#, file_name);
     } else {
         match File::create(&path_to_file) {
             Ok(mut f) => {
-                println!(r#"  OK: Created "{}" file."#, file_name);
+                println!(r#"OK: Created "{}" file."#, file_name);
                 if let Err(why) = f.write(contents.as_ref().as_bytes()) {
-                    panic!("  ERROR: {}", why);
+                    panic!("ERROR: {}", why);
                 }
             },
-            Err(why) => panic!("  ERROR: {}", why),
+            Err(why) => panic!("ERROR: {}", why),
         }
     }
 }
@@ -72,11 +73,11 @@ fn create_setting_file<S: AsRef<str>>(path_to_file: PathBuf, contents: S) {
 pub fn read_ignore_file() -> BTreeSet<String> {
     let mut f       = match File::open(ignore_file()) {
         Ok(f)    => f,
-        Err(why) => panic!("  ERROR: {}", why),
+        Err(why) => panic!("ERROR: {}", why),
     };
     let mut contents = String::new();
     if let Err(why) = f.read_to_string(&mut contents) {
-        panic!("  ERROR: {}", why);
+        panic!("ERROR: {}", why);
     }
     contents
         .lines()
@@ -87,7 +88,7 @@ pub fn read_ignore_file() -> BTreeSet<String> {
 
 pub fn delete_all_setting_files() {
     match fs::remove_dir_all(WORKING_DIR_NAME) {
-        Ok(_)    => println!(r#"  OK: Removed "{}" directory."#, WORKING_DIR_NAME),
-        Err(why) => println!("  ERROR: {}", why),
+        Ok(_)    => println!(r#"OK: Removed "{}" directory."#, WORKING_DIR_NAME),
+        Err(why) => panic!("ERROR: {}", why),
     }
 }
