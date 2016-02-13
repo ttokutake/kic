@@ -4,7 +4,6 @@ use constant::*;
 use lib::fs::*;
 use lib::setting::*;
 use std::fs;
-use std::path::PathBuf;
 
 pub struct Init;
 
@@ -19,7 +18,7 @@ impl Command for Init {
         println!("Initialize ...");
 
         let dir_name    = WORKING_DIR_NAME;
-        let path_to_dir = path_buf![dir_name];
+        let path_to_dir = working_dir();
         if working_dir_exists() {
             println!(r#"  OK: "{}" directory has already exist."#, dir_name);
         } else {

@@ -6,25 +6,37 @@ use std::io::{Read, Write};
 use std::path::PathBuf;
 
 
+pub fn working_dir() -> PathBuf {
+    path_buf![WORKING_DIR_NAME]
+}
+
+pub fn config_file() -> PathBuf {
+    path_buf![working_dir(), CONFIG_FILE_NAME]
+}
+
+pub fn ignore_file() -> PathBuf {
+    path_buf![working_dir(), IGNORE_FILE_NAME]
+}
+
 pub fn working_dir_exists() -> bool {
-    path_buf![WORKING_DIR_NAME].is_dir()
+    working_dir().is_dir()
 }
 
 pub fn config_file_exists() -> bool {
-    path_buf![WORKING_DIR_NAME, CONFIG_FILE_NAME].is_file()
+    config_file().is_file()
 }
 
 pub fn ignore_file_exists() -> bool {
-    path_buf![WORKING_DIR_NAME, IGNORE_FILE_NAME].is_file()
+    ignore_file().is_file()
 }
 
 
 pub fn create_config_file<S: AsRef<str>>(contents: S) {
-    create_setting_file(path_buf![WORKING_DIR_NAME, CONFIG_FILE_NAME], contents);
+    create_setting_file(config_file(), contents);
 }
 
 pub fn create_ignore_file<S: AsRef<str>>(contents: S) {
-    create_setting_file(path_buf![WORKING_DIR_NAME, IGNORE_FILE_NAME], contents);
+    create_setting_file(ignore_file(), contents);
 }
 
 fn create_setting_file<S: AsRef<str>>(path_to_file: PathBuf, contents: S) {
@@ -33,7 +45,7 @@ fn create_setting_file<S: AsRef<str>>(path_to_file: PathBuf, contents: S) {
     if path_to_file.is_file() {
         println!(r#"  OK: "{}" file has already exist."#, file_name);
     } else {
-        match File::create(path_to_file) {
+        match File::create(&path_to_file) {
             Ok(mut f) => {
                 println!(r#"  OK: Created "{}" file."#, file_name);
                 if let Err(why) = f.write(contents.as_ref().as_bytes()) {
@@ -47,8 +59,7 @@ fn create_setting_file<S: AsRef<str>>(path_to_file: PathBuf, contents: S) {
 
 
 pub fn read_ignore_file() -> BTreeSet<String> {
-    let ignore_file = path_buf![WORKING_DIR_NAME, IGNORE_FILE_NAME];
-    let mut f       = match File::open(ignore_file) {
+    let mut f       = match File::open(ignore_file()) {
         Ok(f)    => f,
         Err(why) => panic!("  ERROR: {}", why),
     };
