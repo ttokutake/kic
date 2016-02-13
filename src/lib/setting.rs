@@ -31,6 +31,17 @@ pub fn ignore_file_exists() -> bool {
 }
 
 
+pub fn create_working_dir() {
+    if working_dir_exists() {
+        println!(r#"  NOTICE: "{}" directory has already exist."#, WORKING_DIR_NAME);
+    } else {
+        match fs::create_dir(working_dir()) {
+            Ok(_)    => println!(r#"  OK: Created "{}" directory."#, WORKING_DIR_NAME),
+            Err(why) => panic!("  ERROR: {}", why),
+        }
+    }
+}
+
 pub fn create_config_file<S: AsRef<str>>(contents: S) {
     create_setting_file(config_file(), contents);
 }
@@ -43,7 +54,7 @@ fn create_setting_file<S: AsRef<str>>(path_to_file: PathBuf, contents: S) {
     let file_name = extract_file_name(&path_to_file);
 
     if path_to_file.is_file() {
-        println!(r#"  OK: "{}" file has already exist."#, file_name);
+        println!(r#"  NOTICE: "{}" file has already exist."#, file_name);
     } else {
         match File::create(&path_to_file) {
             Ok(mut f) => {
@@ -72,6 +83,7 @@ pub fn read_ignore_file() -> BTreeSet<String> {
         .map(|l| l.trim().to_string())
         .collect::<BTreeSet<String>>()
 }
+
 
 pub fn delete_all_setting_files() {
     match fs::remove_dir_all(WORKING_DIR_NAME) {
