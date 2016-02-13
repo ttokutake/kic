@@ -2,6 +2,7 @@ use super::Command;
 
 use lib::io::*;
 use lib::setting::*;
+use lib::util::*;
 
 pub struct Destroy;
 
@@ -15,7 +16,8 @@ impl Command for Destroy {
     fn main(&self) {
         println!("Destroy ...");
 
-        echo("Do you want to delete all related files? [yes/no]: ");
+        let bin_name = exe_name();
+        echo(format!(r#"Do you want to clear all files related to "{}"? [yes/no]: "#, bin_name));
 
         let input = read_line_from_stdin();
 

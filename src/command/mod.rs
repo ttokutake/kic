@@ -15,9 +15,8 @@ use self::end::End;
 use self::destroy::Destroy;
 
 use constant::*;
-use lib::fs::*;
 use lib::setting::*;
-use std::env;
+use lib::util::*;
 
 trait Command {
     fn validation(&self) -> bool;
@@ -83,11 +82,7 @@ pub fn execute(args: Vec<String>) {
 }
 
 pub fn print_usage() {
-    let full_path = match env::current_exe() {
-        Ok(p)    => p,
-        Err(why) => return println!("{}", why),
-    };
-    let bin_name = extract_file_name(&full_path);
+    let bin_name = exe_name();
 
     println!(
 r#"Usage:
