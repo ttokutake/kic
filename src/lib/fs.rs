@@ -1,5 +1,6 @@
 extern crate walkdir;
 
+use constant::*;
 use self::walkdir::{DirEntry, WalkDir, WalkDirIterator};
 use std::collections::BTreeSet;
 use std::ffi::{OsStr, OsString};
@@ -39,10 +40,18 @@ fn is_hidden(entry: &DirEntry) -> bool {
         .map_or(false, |s| s.starts_with(".") && s.len() > 1 && s != "..")
 }
 
+fn is_pinned(entry: &DirEntry) -> bool {
+    entry
+        .file_name()
+        .to_str()
+        .map_or(false, |s| s == WORKING_DIR_NAME || s == KEEPED_FILE_NAME)
+}
+
 pub fn walk_dir<P: AsRef<Path>>(root: P) -> BTreeSet<String> {
     let walker = WalkDir::new(root)
         .into_iter()
         .filter_entry(|e| !is_hidden(e))
+        .filter_entry(|e| !is_pinned(e))
         .filter_map(Result::ok)
         .filter(|e| !e.file_type().is_dir())
         .collect::<Vec<DirEntry>>();
