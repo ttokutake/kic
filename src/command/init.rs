@@ -18,6 +18,8 @@ impl Command for Init {
 
         create_working_dir();
 
+        create_storage_dir();
+
         create_config_file(DEFAULT_CONFIG);
 
         let ignore_contents = walk_dir(".")

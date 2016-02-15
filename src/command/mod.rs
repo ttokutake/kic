@@ -28,6 +28,9 @@ trait Command {
         if !working_dir_exists() {
             return Some(message(format!(r#""{}" directory"#, WORKING_DIR_NAME)));
         }
+        if !storage_dir_exists() {
+            return Some(message(format!(r#""{}" directory"#, STORAGE_DIR_NAME)));
+        }
         if !config_file_exists() {
             return Some(message(format!(r#""{}" file"#, CONFIG_FILE_NAME)));
         }

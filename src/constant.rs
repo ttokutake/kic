@@ -22,6 +22,7 @@ pub const BANNED_DIRS: [&'static str; 20] = [
 ];
 
 pub const WORKING_DIR_NAME: &'static str = ".kic";
+pub const STORAGE_DIR_NAME: &'static str = "warehouse";
 pub const CONFIG_FILE_NAME: &'static str = "config.toml";
 pub const IGNORE_FILE_NAME: &'static str = "ignore";
 
