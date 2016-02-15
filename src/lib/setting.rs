@@ -41,14 +41,14 @@ pub fn ignore_file_exists() -> bool {
 
 
 pub fn create_working_dir() {
-    create_setting_dir(working_dir());
+    create_essential_dir(working_dir());
 }
 
 pub fn create_storage_dir() {
-    create_setting_dir(storage_dir());
+    create_essential_dir(storage_dir());
 }
 
-fn create_setting_dir(path_to_dir: PathBuf) {
+pub fn create_essential_dir(path_to_dir: PathBuf) {
     let dir_name = extract_file_name(&path_to_dir);
 
     if path_to_dir.is_dir() {
