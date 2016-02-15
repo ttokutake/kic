@@ -24,7 +24,10 @@ impl Command for Sweep {
         let date = format!("{}", now.format("%Y-%m-%d"));
 
         let path_to_dust_box = path_buf![storage_dir(), date, "dust"];
-        create_essential_dir(&path_to_dust_box);
+        match fs::create_dir_all(&path_to_dust_box) {
+            Ok(_)    => println!("OK: Created {:?} directory.", path_to_dust_box),
+            Err(why) => panic!("ERROR: {}", why),
+        }
 
         let ignore = read_ignore_file();
 
