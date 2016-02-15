@@ -36,7 +36,7 @@ impl Command for Sweep {
         for target in target_files.iter() {
             let target_path = path_buf![&target];
             let target_name = extract_file_name(&target_path);
-            let target_base = target_path.parent().unwrap();
+            let target_base = extract_base(&target_path);
             let to          = path_buf![&path_to_dust_box, target_base];
 
             match fs::create_dir_all(&to) {

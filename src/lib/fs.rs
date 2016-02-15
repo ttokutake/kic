@@ -25,6 +25,13 @@ pub fn extract_file_name(full_path: &PathBuf) -> &str {
     }
 }
 
+pub fn extract_base(full_path: &PathBuf) -> &Path {
+    match full_path.parent() {
+        Some(p) => p,
+        None    => panic!("ERROR: Cannot extract base name."),
+    }
+}
+
 fn is_hidden(entry: &DirEntry) -> bool {
     entry
         .file_name()
