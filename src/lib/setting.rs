@@ -41,20 +41,20 @@ pub fn ignore_file_exists() -> bool {
 
 
 pub fn create_working_dir() {
-    create_essential_dir(working_dir());
+    create_essential_dir(&working_dir());
 }
 
 pub fn create_storage_dir() {
-    create_essential_dir(storage_dir());
+    create_essential_dir(&storage_dir());
 }
 
-pub fn create_essential_dir(path_to_dir: PathBuf) {
-    let dir_name = extract_file_name(&path_to_dir);
+pub fn create_essential_dir(path_to_dir: &PathBuf) {
+    let dir_name = extract_file_name(path_to_dir);
 
     if path_to_dir.is_dir() {
         println!(r#"NOTICE: "{}" directory has already exist."#, dir_name);
     } else {
-        match fs::create_dir(&path_to_dir) {
+        match fs::create_dir(path_to_dir) {
             Ok(_)    => println!(r#"OK: Created "{}" directory."#, dir_name),
             Err(why) => panic!("ERROR: {}", why),
         }
