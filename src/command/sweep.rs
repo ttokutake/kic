@@ -44,10 +44,13 @@ impl Command for Sweep {
                 Err(why) => panic!("ERROR: {}", why),
             }
 
+            // forcedly overwrite if the file exists with same name.
             match fs::rename(target, path_buf![to, target_name]) {
                 Ok(_)    => println!("OK: Moved {:?} to {:?}", target, path_to_dust_box),
                 Err(why) => panic!("ERROR: {}", why),
             }
         }
+
+        // delete all empty directories.
     }
 }
