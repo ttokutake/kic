@@ -61,6 +61,13 @@ fn create_essential_dir(path_to_dir: PathBuf) {
     }
 }
 
+pub fn create_essential_dir_all(path_to_dir: &PathBuf) {
+    match fs::create_dir_all(path_to_dir) {
+        Ok(_)    => println!("OK: Created {:?} directory with its parents.", path_to_dir),
+        Err(why) => panic!("ERROR: {}", why),
+    }
+}
+
 pub fn create_config_file<S: AsRef<str>>(contents: S) {
     create_setting_file(config_file(), contents);
 }
