@@ -53,7 +53,10 @@ impl Command for Sweep {
         for dir in all_dirs.iter().filter(|d| *d != ".") {
             println!("{:?}", dir);
             match fs::remove_dir(dir) {
-                Ok(_)    => println!(r#"OK: Removed "{}" directory."#, dir),
+                Ok(_) => {
+                    println!(r#"OK: Remove "{}" directory."#, dir);
+                    create_essential_dir_all(&path_buf![&path_to_dust_box, dir]);
+                },
                 Err(why) => match why.raw_os_error() {
                     Some(39) => println!(r#"NOTICE: "{}" directory is not empty."#, dir),
                     _        => panic!("ERROR: {:?}", why),
