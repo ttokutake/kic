@@ -18,7 +18,7 @@ impl Command for Sweep {
     }
 
     fn main(&self) {
-        println!("Sweep ...");
+        println!("Sweep ...\n");
 
         let now  = Local::now();
         let date = format!("{}", now.format("%Y-%m-%d"));
@@ -41,25 +41,28 @@ impl Command for Sweep {
 
             create_essential_dir_all(&to);
 
+            println!(r#"EXECUTION: Move "{}" to dust box."#, target_name);
+
             // forcedly overwrite if the file exists with same name.
             match fs::rename(target, path_buf![to, target_name]) {
-                Ok(_)    => println!("OK: Moved {:?} to {:?}", target, path_to_dust_box),
-                Err(why) => panic!("ERROR: {}", why),
+                Ok(_)    => println!("  OK: Moved the file to dust box."),
+                Err(why) => panic!("  ERROR: {}", why),
             }
         }
 
         // delete all empty directories.
         let all_dirs = enumerate_only_dirs_under(".");
         for dir in all_dirs.iter().filter(|d| *d != ".") {
-            println!("{:?}", dir);
+            println!(r#"EXECUTION: Remove "{}" directory."#, dir);
+
             match fs::remove_dir(dir) {
                 Ok(_) => {
-                    println!(r#"OK: Remove "{}" directory."#, dir);
+                    println!("  OK: Removed the directory.");
                     create_essential_dir_all(&path_buf![&path_to_dust_box, dir]);
                 },
                 Err(why) => match why.raw_os_error() {
-                    Some(39) => println!(r#"NOTICE: "{}" directory is not empty."#, dir),
-                    _        => panic!("ERROR: {:?}", why),
+                    Some(39) => println!("  NOTICE: the directory is not empty."),
+                    _        => panic!("  ERROR: {}", why),
                 },
             }
         }

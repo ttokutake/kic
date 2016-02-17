@@ -49,22 +49,24 @@ pub fn create_storage_dir() {
 }
 
 fn create_essential_dir(path_to_dir: PathBuf) {
-    let dir_name = extract_file_name(&path_to_dir);
+    println!(r#"EXECUTION: Create "{}" directory."#, extract_file_name(&path_to_dir));
 
     if path_to_dir.is_dir() {
-        println!(r#"NOTICE: "{}" directory has already exist."#, dir_name);
+        println!("  NOTICE: the directory has already exist.");
     } else {
         match fs::create_dir(&path_to_dir) {
-            Ok(_)    => println!(r#"OK: Created "{}" directory."#, dir_name),
-            Err(why) => panic!("ERROR: {}", why),
+            Ok(_)    => println!("  OK: Created the directory."),
+            Err(why) => panic!("  ERROR: {}", why),
         }
     }
 }
 
 pub fn create_essential_dir_all(path_to_dir: &PathBuf) {
+    println!(r#"EXECUTION: Create "{}" directory with its parents."#, extract_file_name(path_to_dir));
+
     match fs::create_dir_all(path_to_dir) {
-        Ok(_)    => println!("OK: Created {:?} directory with its parents.", path_to_dir),
-        Err(why) => panic!("ERROR: {}", why),
+        Ok(_)    => println!("  OK: Created directories."),
+        Err(why) => panic!("  ERROR: {}", why),
     }
 }
 
@@ -78,33 +80,39 @@ pub fn create_ignore_file<S: AsRef<str>>(contents: S) {
 }
 
 fn create_setting_file<S: AsRef<str>>(path_to_file: PathBuf, contents: S) {
-    let file_name = extract_file_name(&path_to_file);
+    println!(r#"EXECUTION: Create "{}" file."#, extract_file_name(&path_to_file));
 
     if path_to_file.is_file() {
-        println!(r#"NOTICE: "{}" file has already exist."#, file_name);
+        println!("  NOTICE: The file has already exist.");
     } else {
         match File::create(&path_to_file) {
             Ok(mut f) => {
-                println!(r#"OK: Created "{}" file."#, file_name);
+                println!("  OK: Created the file.");
                 if let Err(why) = f.write(contents.as_ref().as_bytes()) {
-                    panic!("ERROR: {}", why);
+                    panic!("  ERROR: {}", why);
                 }
             },
-            Err(why) => panic!("ERROR: {}", why),
+            Err(why) => panic!("  ERROR: {}", why),
         }
     }
 }
 
 
 pub fn read_ignore_file() -> BTreeSet<String> {
-    let mut f = match File::open(ignore_file()) {
+    let path_to_ignore = ignore_file();
+    println!(r#"EXECUTION: Read "{}" file."#, extract_file_name(&path_to_ignore));
+
+    let mut f = match File::open(path_to_ignore) {
         Ok(f)    => f,
-        Err(why) => panic!("ERROR: {}", why),
+        Err(why) => panic!("  ERROR: {}", why),
     };
+
     let mut contents = String::new();
-    if let Err(why) = f.read_to_string(&mut contents) {
-        panic!("ERROR: {}", why);
+    match f.read_to_string(&mut contents) {
+        Ok(_)    => println!("  OK: Read the file."),
+        Err(why) => panic!("  ERROR: {}", why),
     }
+
     contents
         .lines()
         .map(|l| l.trim().to_string())
@@ -113,8 +121,10 @@ pub fn read_ignore_file() -> BTreeSet<String> {
 
 
 pub fn delete_all_setting_files() {
+    println!(r#"EXECUTION: Remove all files and directories under "{}"."#, WORKING_DIR_NAME);
+
     match fs::remove_dir_all(WORKING_DIR_NAME) {
-        Ok(_)    => println!(r#"OK: Removed "{}" directory."#, WORKING_DIR_NAME),
-        Err(why) => panic!("ERROR: {}", why),
+        Ok(_)    => println!("  OK: Removed files and directories."),
+        Err(why) => println!("  ERROR: {}", why),
     }
 }

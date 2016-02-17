@@ -14,7 +14,7 @@ impl Command for Init {
     }
 
     fn main(&self) {
-        println!("Initialize ...");
+        println!("Initialize ...\n");
 
         create_working_dir();
 

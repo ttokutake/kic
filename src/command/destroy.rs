@@ -14,16 +14,16 @@ impl Command for Destroy {
     }
 
     fn main(&self) {
-        println!("Destroy ...");
+        println!("Destroy ...\n");
 
-        let bin_name = exe_name();
-        echo(format!(r#"Do you want to clear all files related to "{}"? [yes/no]: "#, bin_name));
+        let caution = format!(r#"CAUTION: Do you want to clear all files related to "{}"? [yes/no]: "#, exe_name());
+        echo(caution);
 
         let input = read_line_from_stdin();
 
         match input.to_lowercase().as_ref() {
             "y" | "yes" => delete_all_setting_files(),
-            _           => println!("NOTICE: Interrupted by user."),
+            _           => println!("  NOTICE: Interrupted by user."),
         }
     }
 }
