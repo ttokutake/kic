@@ -49,5 +49,16 @@ impl Command for Sweep {
         }
 
         // delete all empty directories.
+        let all_dirs = enumerate_only_dirs_under(".");
+        for dir in all_dirs.iter().filter(|d| *d != ".") {
+            println!("{:?}", dir);
+            match fs::remove_dir(dir) {
+                Ok(_)    => println!(r#"OK: Removed "{}" directory."#, dir),
+                Err(why) => match why.raw_os_error() {
+                    Some(39) => println!(r#"NOTICE: "{}" directory is not empty."#, dir),
+                    _        => panic!("ERROR: {:?}", why),
+                },
+            }
+        }
     }
 }

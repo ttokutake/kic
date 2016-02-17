@@ -68,6 +68,7 @@ pub fn create_essential_dir_all(path_to_dir: &PathBuf) {
     }
 }
 
+
 pub fn create_config_file<S: AsRef<str>>(contents: S) {
     create_setting_file(config_file(), contents);
 }

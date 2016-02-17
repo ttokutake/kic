@@ -1,9 +1,9 @@
 extern crate walkdir;
 
 use constant::*;
-use self::walkdir::{DirEntry, WalkDir, WalkDirIterator};
+use self::walkdir::{WalkDir, WalkDirIterator};
 use std::collections::BTreeSet;
-use std::ffi::{OsStr, OsString};
+use std::ffi::OsString;
 use std::path::{Path, PathBuf};
 use std::result::Result;
 
@@ -33,18 +33,26 @@ pub fn extract_base(full_path: &PathBuf) -> &Path {
     }
 }
 
-fn is_hidden(entry: &DirEntry) -> bool {
+fn is_hidden(entry: &walkdir::DirEntry) -> bool {
     entry
         .file_name()
         .to_str()
         .map_or(false, |s| s.starts_with(".") && s.len() > 1 && s != "..")
 }
 
-fn is_pinned(entry: &DirEntry) -> bool {
+fn is_pinned(entry: &walkdir::DirEntry) -> bool {
     entry
         .file_name()
         .to_str()
         .map_or(false, |s| s == WORKING_DIR_NAME || s == KEEPED_FILE_NAME)
+}
+
+fn to_string(entry: walkdir::DirEntry) -> Result<String, OsString> {
+    entry
+        .path()
+        .as_os_str()
+        .to_os_string()
+        .into_string()
 }
 
 pub fn walk_dir<P: AsRef<Path>>(root: P) -> BTreeSet<String> {
@@ -54,14 +62,33 @@ pub fn walk_dir<P: AsRef<Path>>(root: P) -> BTreeSet<String> {
         .filter_entry(|e| !is_pinned(e))
         .filter_map(Result::ok)
         .filter(|e| !e.file_type().is_dir())
-        .collect::<Vec<DirEntry>>();
+        .collect::<Vec<walkdir::DirEntry>>();
 
     walker
-        .iter()
-        .map(DirEntry::path)
-        .map(Path::as_os_str)
-        .map(OsStr::to_os_string)
-        .map(OsString::into_string)
+        .into_iter()
+        .map(to_string)
         .filter_map(Result::ok)
         .collect::<BTreeSet<String>>()
+}
+
+pub fn enumerate_only_dirs_under<P: AsRef<Path>>(root: P) -> Vec<String> {
+    let mut walker = WalkDir::new(root)
+        .into_iter()
+        .filter_entry(|e| !is_hidden(e))
+        .filter_entry(|e| !is_pinned(e))
+        .filter_entry(|e| e.file_type().is_dir())
+        .filter_map(Result::ok)
+        .collect::<Vec<walkdir::DirEntry>>();
+
+    walker.sort_by(|l, r| {
+        let l_depth = &l.depth();
+        let r_depth = &r.depth();
+        r_depth.cmp(l_depth)
+    });
+
+    walker
+        .into_iter()
+        .map(to_string)
+        .filter_map(Result::ok)
+        .collect::<Vec<String>>()
 }
