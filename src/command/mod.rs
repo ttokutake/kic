@@ -20,25 +20,25 @@ use lib::util::*;
 
 trait Command {
     fn validation(&self) -> bool;
-    fn validate(&self) -> Option<String> {
+    fn validate(&self) -> Result<(), String> {
         fn message(subject: String) -> String {
-            format!(r#"WARNING: {} does not exist. Please type "kic init"."#, subject)
+            format!(r#"WARNING: {} does not exist. Please use "init" command."#, subject)
         }
 
         if !working_dir_exists() {
-            return Some(message(format!(r#""{}" directory"#, WORKING_DIR_NAME)));
+            return Err(message(format!(r#""{}" directory"#, WORKING_DIR_NAME)));
         }
         if !storage_dir_exists() {
-            return Some(message(format!(r#""{}" directory"#, STORAGE_DIR_NAME)));
+            return Err(message(format!(r#""{}" directory"#, STORAGE_DIR_NAME)));
         }
         if !config_file_exists() {
-            return Some(message(format!(r#""{}" file"#, CONFIG_FILE_NAME)));
+            return Err(message(format!(r#""{}" file"#, CONFIG_FILE_NAME)));
         }
         if !ignore_file_exists() {
-            return Some(message(format!(r#""{}" file"#, IGNORE_FILE_NAME)));
+            return Err(message(format!(r#""{}" file"#, IGNORE_FILE_NAME)));
         }
 
-        None
+        Ok(())
     }
 
     fn help_message(&self) -> &'static str;
@@ -50,7 +50,7 @@ trait Command {
 
     fn exec(&self, need_help: bool) {
         if self.validation() {
-            if let Some(message) = self.validate() {
+            if let Err(message) = self.validate() {
                 return println!("{}", message);
             }
         }
