@@ -47,6 +47,10 @@ fn is_pinned(entry: &walkdir::DirEntry) -> bool {
         .map_or(false, |s| s == WORKING_DIR_NAME || s == KEEPED_FILE_NAME)
 }
 
+fn is_target(entry: &walkdir::DirEntry) -> bool {
+    !is_hidden(entry) && !is_pinned(entry)
+}
+
 fn to_string(entry: walkdir::DirEntry) -> Result<String, OsString> {
     entry
         .path()
@@ -58,8 +62,7 @@ fn to_string(entry: walkdir::DirEntry) -> Result<String, OsString> {
 pub fn walk_dir<P: AsRef<Path>>(root: P) -> BTreeSet<String> {
     let walker = WalkDir::new(root)
         .into_iter()
-        .filter_entry(|e| !is_hidden(e))
-        .filter_entry(|e| !is_pinned(e))
+        .filter_entry(is_target)
         .filter_map(Result::ok)
         .filter(|e| !e.file_type().is_dir())
         .collect::<Vec<walkdir::DirEntry>>();
@@ -71,11 +74,10 @@ pub fn walk_dir<P: AsRef<Path>>(root: P) -> BTreeSet<String> {
         .collect::<BTreeSet<String>>()
 }
 
-pub fn enumerate_only_dirs_under<P: AsRef<Path>>(root: P) -> Vec<String> {
+pub fn dirs_ordered_by_descending_depth<P: AsRef<Path>>(root: P) -> Vec<String> {
     let mut walker = WalkDir::new(root)
         .into_iter()
-        .filter_entry(|e| !is_hidden(e))
-        .filter_entry(|e| !is_pinned(e))
+        .filter_entry(is_target)
         .filter_entry(|e| e.file_type().is_dir())
         .filter_map(Result::ok)
         .collect::<Vec<walkdir::DirEntry>>();
