@@ -16,7 +16,6 @@ use self::destroy::Destroy;
 
 use constant::*;
 use lib::setting::*;
-use lib::util::*;
 
 trait Command {
     fn validation(&self) -> bool;
@@ -85,8 +84,6 @@ pub fn execute(args: Vec<String>) {
 }
 
 pub fn print_usage() {
-    let bin_name = exe_name();
-
     println!(
 r#"Usage:
     {} <command> [--help|-h]
@@ -99,9 +96,9 @@ Command:
     start   # Start "{}".
     end     # End "{}".
     destroy # Destroy "{}"."#,
-        bin_name,
-        bin_name,
-        bin_name,
-        bin_name,
+        ME,
+        ME,
+        ME,
+        ME,
     );
 }

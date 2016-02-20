@@ -1,8 +1,8 @@
 use super::Command;
 
+use constant::*;
 use lib::io::*;
 use lib::setting::*;
-use lib::util::*;
 
 pub struct Destroy;
 
@@ -16,7 +16,7 @@ impl Command for Destroy {
     fn main(&self) {
         println!("Destroy ...\n");
 
-        let caution = format!(r#"CAUTION: Do you want to clear all files related to "{}"? [yes/no]: "#, exe_name());
+        let caution = format!(r#"CAUTION: Do you want to clear all files related to "{}"? [yes/no]: "#, ME);
         echo(caution);
 
         let input = read_line_from_stdin();

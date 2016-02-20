@@ -1,3 +1,5 @@
+pub const ME: &'static str = "kic";
+
 pub const BANNED_DIRS: [&'static str; 20] = [
     "/",
     "/bin",
