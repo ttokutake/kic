@@ -1,5 +1,6 @@
 use constant::*;
 use lib::fs::*;
+use lib::io::*;
 use std::collections::BTreeSet;
 use std::fs::{self, File};
 use std::io::{Read, Write};
@@ -49,24 +50,26 @@ pub fn create_storage_dir() {
 }
 
 fn create_essential_dir(path_to_dir: PathBuf) {
-    println!(r#"EXECUTION: Create "{}" directory."#, extract_file_name(&path_to_dir));
+    let file_name = extract_file_name(&path_to_dir);
+    print_with_tag(0, Tag::Execution, format!("Create \"{}\" directory", file_name));
 
     if path_to_dir.is_dir() {
-        println!("  NOTICE: the directory has already exist.");
+        print_with_tag(1, Tag::Notice, "The directory has already exist");
     } else {
         match fs::create_dir(&path_to_dir) {
-            Ok(_)    => println!("  OK: Created the directory."),
-            Err(why) => panic!("  ERROR: {}", why),
+            Ok(_)    => print_with_tag(1, Tag::Okay, "Created the directory"),
+            Err(why) => panic!(format_with_tag(1, Tag::Error, why)),
         }
     }
 }
 
 pub fn create_essential_dir_all(path_to_dir: &PathBuf) {
-    println!(r#"EXECUTION: Create "{}" directory with its parents."#, extract_file_name(path_to_dir));
+    let file_name = extract_file_name(path_to_dir);
+    print_with_tag(0, Tag::Execution, format!("Create \"{}\" directory with its parents", file_name));
 
     match fs::create_dir_all(path_to_dir) {
-        Ok(_)    => println!("  OK: Created directories."),
-        Err(why) => panic!("  ERROR: {}", why),
+        Ok(_)    => print_with_tag(1, Tag::Okay, "Created directories"),
+        Err(why) => panic!(format_with_tag(1, Tag::Error, why)),
     }
 }
 
@@ -80,37 +83,37 @@ pub fn create_ignore_file<S: AsRef<str>>(contents: S) {
 }
 
 fn create_setting_file<S: AsRef<str>>(path_to_file: PathBuf, contents: S) {
-    println!(r#"EXECUTION: Create "{}" file."#, extract_file_name(&path_to_file));
+    let file_name = extract_file_name(&path_to_file);
+    print_with_tag(0, Tag::Execution, format!("Create \"{}\" file", file_name));
 
     if path_to_file.is_file() {
-        println!("  NOTICE: The file has already exist.");
+        print_with_tag(1, Tag::Notice, "The file has already exist");
     } else {
         match File::create(&path_to_file) {
             Ok(mut f) => {
-                println!("  OK: Created the file.");
+                print_with_tag(1, Tag::Okay, "Created the file");
                 if let Err(why) = f.write(contents.as_ref().as_bytes()) {
-                    panic!("  ERROR: {}", why);
+                    panic!(format_with_tag(1, Tag::Error, why));
                 }
             },
-            Err(why) => panic!("  ERROR: {}", why),
+            Err(why) => panic!(format_with_tag(1, Tag::Error, why)),
         }
     }
 }
 
 
 pub fn read_ignore_file() -> BTreeSet<String> {
-    let path_to_ignore = ignore_file();
-    println!(r#"EXECUTION: Read "{}" file."#, extract_file_name(&path_to_ignore));
+    print_with_tag(0, Tag::Execution, format!("Read \"{}\" file", IGNORE_FILE_NAME));
 
-    let mut f = match File::open(path_to_ignore) {
+    let mut f = match File::open(ignore_file()) {
         Ok(f)    => f,
-        Err(why) => panic!("  ERROR: {}", why),
+        Err(why) => panic!(format_with_tag(1, Tag::Error, why)),
     };
 
     let mut contents = String::new();
     match f.read_to_string(&mut contents) {
-        Ok(_)    => println!("  OK: Read the file."),
-        Err(why) => panic!("  ERROR: {}", why),
+        Ok(_)    => print_with_tag(1, Tag::Okay, "Read the file"),
+        Err(why) => panic!(format_with_tag(1, Tag::Error, why)),
     }
 
     contents
@@ -121,10 +124,10 @@ pub fn read_ignore_file() -> BTreeSet<String> {
 
 
 pub fn delete_all_setting_files() {
-    println!(r#"EXECUTION: Remove all files and directories under "{}"."#, WORKING_DIR_NAME);
+    print_with_tag(0, Tag::Execution, format!("Remove all files and directories under \"{}\"", WORKING_DIR_NAME));
 
     match fs::remove_dir_all(WORKING_DIR_NAME) {
-        Ok(_)    => println!("  OK: Removed files and directories."),
-        Err(why) => println!("  ERROR: {}", why),
+        Ok(_)    => print_with_tag(1, Tag::Okay , "Removed files and directories"),
+        Err(why) => print_with_tag(1, Tag::Error, why),
     }
 }

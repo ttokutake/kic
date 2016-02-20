@@ -19,17 +19,17 @@ pub fn extract_file_name(full_path: &PathBuf) -> &str {
         Some(osstr) => {
             match osstr.to_str() {
                 Some(file_name) => file_name,
-                None            => panic!("ERROR: Use UTF-8 characters as file name."),
+                None            => panic!("Use UTF-8 characters as file name."),
             }
         },
-        None => panic!("ERROR: Invalid path."),
+        None => panic!("Invalid path."),
     }
 }
 
 pub fn extract_base(full_path: &PathBuf) -> &Path {
     match full_path.parent() {
         Some(p) => p,
-        None    => panic!("ERROR: Cannot extract base name."),
+        None    => panic!("Cannot extract base name."),
     }
 }
 

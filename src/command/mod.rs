@@ -15,26 +15,27 @@ use self::end::End;
 use self::destroy::Destroy;
 
 use constant::*;
+use lib::io::*;
 use lib::setting::*;
 
 trait Command {
     fn validation(&self) -> bool;
     fn validate(&self) -> Result<(), String> {
         fn message(subject: String) -> String {
-            format!(r#"WARNING: {} does not exist. Please use "init" command."#, subject)
+            format!("{} does not exist. Please use \"init\" command", subject)
         }
 
         if !working_dir_exists() {
-            return Err(message(format!(r#""{}" directory"#, WORKING_DIR_NAME)));
+            return Err(message(format!("\"{}\" directory", WORKING_DIR_NAME)));
         }
         if !storage_dir_exists() {
-            return Err(message(format!(r#""{}" directory"#, STORAGE_DIR_NAME)));
+            return Err(message(format!("\"{}\" directory", STORAGE_DIR_NAME)));
         }
         if !config_file_exists() {
-            return Err(message(format!(r#""{}" file"#, CONFIG_FILE_NAME)));
+            return Err(message(format!("\"{}\" file", CONFIG_FILE_NAME)));
         }
         if !ignore_file_exists() {
-            return Err(message(format!(r#""{}" file"#, IGNORE_FILE_NAME)));
+            return Err(message(format!("\"{}\" file", IGNORE_FILE_NAME)));
         }
 
         Ok(())
@@ -50,7 +51,7 @@ trait Command {
     fn exec(&self, help: bool) {
         if self.validation() {
             if let Err(message) = self.validate() {
-                return println!("{}", message);
+                return print_with_tag(0, Tag::Warning, message);
             }
         }
 

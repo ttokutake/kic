@@ -15,3 +15,32 @@ pub fn read_line_from_stdin() -> String {
     }
     input.trim().to_string()
 }
+
+
+pub enum Tag {
+    Execution,
+    Notice,
+    Warning,
+    Error,
+    Okay,
+    Caution,
+}
+
+pub fn format_with_tag<S: Display>(indent_level: usize, tag: Tag, message: S) -> String {
+    let indent = (0 .. indent_level).map(|_| "  ").collect::<String>();
+
+    let tag = match tag {
+        Tag::Execution => "EXECUTION",
+        Tag::Notice    => "NOTICE",
+        Tag::Warning   => "WARNING",
+        Tag::Error     => "ERROR",
+        Tag::Okay      => "OK",
+        Tag::Caution   => "CAUTION",
+    };
+
+    format!("{}{}: {}", indent, tag, message)
+}
+
+pub fn print_with_tag<S: Display>(indent_level: usize, tag: Tag, message: S) {
+    println!("{}", format_with_tag(indent_level, tag, message));
+}

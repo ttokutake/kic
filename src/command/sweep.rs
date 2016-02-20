@@ -3,6 +3,7 @@ use super::Command;
 extern crate chrono;
 
 use lib::fs::*;
+use lib::io::*;
 use lib::setting::*;
 use self::chrono::Local;
 use std::fs;
@@ -47,12 +48,12 @@ fn move_files_to_dust_box(target_files: Vec<String>, path_to_dust_box: &PathBuf)
 
         create_essential_dir_all(&to);
 
-        println!(r#"EXECUTION: Move "{}" to dust box."#, target_name);
+        print_with_tag(0, Tag::Execution, format!("Move \"{}\" to dust box", target_name));
 
         // forcedly overwrite if the file exists with same name.
         match fs::rename(target, path_buf![to, target_name]) {
-            Ok(_)    => println!("  OK: Moved the file to dust box."),
-            Err(why) => panic!("  ERROR: {}", why),
+            Ok(_)    => print_with_tag(1, Tag::Okay, "Moved the file to dust box"),
+            Err(why) => panic!(format_with_tag(1, Tag::Error, why)),
         }
     }
 }
@@ -60,16 +61,16 @@ fn move_files_to_dust_box(target_files: Vec<String>, path_to_dust_box: &PathBuf)
 fn move_empty_dir_to_dust_box(path_to_dust_box: &PathBuf) {
     let all_dirs = dirs_ordered_by_descending_depth(".");
     for dir in all_dirs.iter().filter(|d| *d != ".") {
-        println!(r#"EXECUTION: Remove "{}" directory."#, dir);
+        print_with_tag(0, Tag::Execution, format!("EXECUTION: Remove \"{}\" directory", dir));
 
         match fs::remove_dir(dir) {
             Ok(_) => {
-                println!("  OK: Removed the directory.");
+                print_with_tag(1, Tag::Okay, "Removed the directory");
                 create_essential_dir_all(&path_buf![&path_to_dust_box, dir]);
             },
             Err(why) => match why.raw_os_error() {
-                Some(39) => println!("  NOTICE: the directory is not empty."),
-                _        => panic!("  ERROR: {}", why),
+                Some(39) => print_with_tag(1, Tag::Notice, "The directory is not empty. Cancelled to remove it"),
+                _        => panic!(format_with_tag(1, Tag::Error, why)),
             },
         }
     }
