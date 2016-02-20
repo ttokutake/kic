@@ -47,14 +47,14 @@ trait Command {
 
     fn main(&self);
 
-    fn exec(&self, need_help: bool) {
+    fn exec(&self, help: bool) {
         if self.validation() {
             if let Err(message) = self.validate() {
                 return println!("{}", message);
             }
         }
 
-        if need_help {
+        if help {
             self.help();
         } else {
             self.main();
@@ -67,7 +67,7 @@ pub fn execute(args: Vec<String>) {
         return print_usage();
     }
 
-    let need_help = args.iter().any(|a| *a == "-h" || *a == "--help");
+    let help = args.iter().any(|a| *a == "-h" || *a == "--help");
 
     let command: Box<Command> = match args[0].as_ref() {
         "init"    => Box::new(Init   ),
@@ -80,7 +80,7 @@ pub fn execute(args: Vec<String>) {
         _         => return print_usage(),
     };
 
-    command.exec(need_help);
+    command.exec(help);
 }
 
 pub fn print_usage() {
