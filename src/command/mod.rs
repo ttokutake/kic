@@ -63,21 +63,22 @@ trait Command {
 }
 
 pub fn execute(args: Vec<String>) {
-    if args.is_empty() {
-        return print_usage();
-    }
-
     let help = args.iter().any(|a| *a == "-h" || *a == "--help");
 
-    let command: Box<Command> = match args[0].as_ref() {
-        "init"    => Box::new(Init   ),
-        "set"     => Box::new(Set    ),
-        "sweep"   => Box::new(Sweep  ),
-        "burn"    => Box::new(Burn   ),
-        "start"   => Box::new(Start  ),
-        "end"     => Box::new(End    ),
-        "destroy" => Box::new(Destroy),
-        _         => return print_usage(),
+    let mut args = args.iter();
+
+    let command: Box<Command> = match args.nth(0) {
+        Some(first) => match first.as_ref() {
+            "init"    => Box::new(Init   ),
+            "set"     => Box::new(Set    ),
+            "sweep"   => Box::new(Sweep  ),
+            "burn"    => Box::new(Burn   ),
+            "start"   => Box::new(Start  ),
+            "end"     => Box::new(End    ),
+            "destroy" => Box::new(Destroy),
+            _         => return print_usage(),
+        },
+        None => return print_usage(),
     };
 
     command.exec(help);
