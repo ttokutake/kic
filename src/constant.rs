@@ -37,7 +37,4 @@ r#"[sweep]
 
 [burn]
   after = "2 weeks"
-
-[hidden-file]
-  delete = false
 "#;
