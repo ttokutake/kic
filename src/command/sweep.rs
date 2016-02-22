@@ -22,7 +22,7 @@ impl Command for Sweep {
         println!("Sweep ...\n");
 
         let now  = Local::now();
-        let date = format!("{}", now.format("%Y-%m-%d"));
+        let date = now.format("%Y-%m-%d").to_string();
 
         let path_to_dust_box = path_buf![storage_dir(), date, "dusts"];
         create_essential_dir_all(&path_to_dust_box);
