@@ -40,7 +40,7 @@ impl Command for Sweep {
 }
 
 fn move_files_to_dust_box(target_files: Vec<String>, path_to_dust_box: &PathBuf) {
-    for target in target_files.iter() {
+    for target in &target_files {
         let target_path = path_buf![&target];
         let target_name = extract_file_name(&target_path);
         let target_base = extract_base(&target_path);
