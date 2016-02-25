@@ -1,10 +1,13 @@
+extern crate toml;
+
 use constant::*;
 use lib::fs::*;
 use lib::io::*;
 use std::collections::BTreeSet;
+use std::fmt::Debug;
 use std::fs::{self, File};
 use std::io::{Read, Write};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 
 pub fn working_dir() -> PathBuf {
@@ -102,6 +105,28 @@ fn create_setting_file<S: AsRef<str>>(path_to_file: PathBuf, contents: S) {
 }
 
 
+pub fn read_config_file() -> toml::Value {
+    print_with_tag(0, Tag::Execution, format!("Read \"{}\" file", CONFIG_FILE_NAME));
+
+    let mut f = match File::open(config_file()) {
+        Ok(f)    => f,
+        Err(why) => panic!(format_with_tag(1, Tag::Error, why)),
+    };
+
+    let mut contents = String::new();
+    if let Err(why) = f.read_to_string(&mut contents) {
+        panic!(format_with_tag(1, Tag::Error, why));
+    }
+
+    match contents.parse() {
+        Ok(v) => {
+            print_with_tag(1, Tag::Okay, "Read the file as TOML");
+            v
+        },
+        Err(why) => panic!(format_with_tag(1, Tag::Error, format!("{:?}", why))),
+    }
+}
+
 pub fn read_ignore_file() -> BTreeSet<String> {
     print_with_tag(0, Tag::Execution, format!("Read \"{}\" file", IGNORE_FILE_NAME));
 
@@ -124,9 +149,13 @@ pub fn read_ignore_file() -> BTreeSet<String> {
 
 
 pub fn delete_all_setting_files() {
-    print_with_tag(0, Tag::Execution, format!("Remove all files and directories under \"{}\"", WORKING_DIR_NAME));
+    delete_dir_all(WORKING_DIR_NAME);
+}
 
-    match fs::remove_dir_all(WORKING_DIR_NAME) {
+pub fn delete_dir_all<P: AsRef<Path> + Debug>(path: P) {
+    print_with_tag(0, Tag::Execution, format!("Remove all files and directories under {:?}", path));
+
+    match fs::remove_dir_all(path) {
         Ok(_)    => print_with_tag(1, Tag::Okay , "Removed files and directories"),
         Err(why) => print_with_tag(1, Tag::Error, why),
     }
