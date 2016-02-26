@@ -19,11 +19,12 @@ impl Command for Destroy {
         let message = format!("Do you want to clear all files related to \"{}\"? [yes/no]: ", ME);
         echo(format_with_tag(0, Tag::Caution, message));
 
-        let input = read_line_from_stdin();
-
-        match input.to_lowercase().as_ref() {
-            "y" | "yes" => delete_all_setting_files(),
-            _           => print_with_tag(1, Tag::Notice, "Interrupted by user"),
+        match read_line_from_stdin() {
+            Ok(input) => match input.to_lowercase().as_ref() {
+                "y" | "yes" => delete_all_setting_files(),
+                _           => print_with_tag(1, Tag::Notice, "Interrupted by user"),
+            },
+            Err(why)  => print_with_tag(1, Tag::Error, why),
         }
     }
 }

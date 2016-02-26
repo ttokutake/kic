@@ -8,12 +8,10 @@ pub fn echo<S: Display>(message: S) {
     }
 }
 
-pub fn read_line_from_stdin() -> String {
+pub fn read_line_from_stdin() -> Result<String, io::Error>  {
     let mut input = String::new();
-    if let Err(why) = io::stdin().read_line(&mut input) {
-        panic!("{}", why);
-    }
-    input.trim().to_string()
+    io::stdin().read_line(&mut input)
+        .map(|_| input.trim().to_string())
 }
 
 
