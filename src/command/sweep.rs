@@ -43,8 +43,11 @@ fn move_files_to_dust_box(target_files: Vec<String>, path_to_dust_box: &PathBuf)
     for target in &target_files {
         let target_path = path_buf![&target];
         let target_name = extract_file_name(&target_path);
-        let target_base = extract_base(&target_path);
-        let to          = path_buf![&path_to_dust_box, target_base];
+        let target_base = match target_path.parent() {
+            Some(base_name) => base_name,
+            None            => panic!(format_with_tag(1, Tag::Error, "Cannot extract base name")),
+        };
+        let to = path_buf![&path_to_dust_box, target_base];
 
         create_essential_dir_all(&to);
 
