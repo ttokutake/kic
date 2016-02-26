@@ -3,7 +3,7 @@ extern crate walkdir;
 use constant::*;
 use self::walkdir::{WalkDir, WalkDirIterator};
 use std::collections::BTreeSet;
-use std::ffi::OsString;
+use std::ffi::{OsStr, OsString};
 use std::path::{Path, PathBuf};
 use std::result::Result;
 
@@ -14,16 +14,10 @@ macro_rules! path_buf {
     };
 }
 
-pub fn extract_file_name(full_path: &PathBuf) -> &str {
-    match full_path.file_name() {
-        Some(osstr) => {
-            match osstr.to_str() {
-                Some(file_name) => file_name,
-                None            => panic!("Use UTF-8 characters as file name."),
-            }
-        },
-        None => panic!("Invalid path."),
-    }
+pub fn extract_file_name(full_path: &PathBuf) -> Option<&str> {
+    full_path
+        .file_name()
+        .and_then(OsStr::to_str)
 }
 
 fn is_hidden(entry: &walkdir::DirEntry) -> bool {

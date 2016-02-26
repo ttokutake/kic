@@ -53,7 +53,10 @@ pub fn create_storage_dir() {
 }
 
 fn create_essential_dir(path_to_dir: PathBuf) {
-    let file_name = extract_file_name(&path_to_dir);
+    let file_name = match extract_file_name(&path_to_dir) {
+        Some(name) => name,
+        None       => panic!(format_with_tag(0, Tag::Error, "Cannot convert the file name to UTF-8")),
+    };
     print_with_tag(0, Tag::Execution, format!("Create \"{}\" directory", file_name));
 
     if path_to_dir.is_dir() {
@@ -67,7 +70,10 @@ fn create_essential_dir(path_to_dir: PathBuf) {
 }
 
 pub fn create_essential_dir_all(path_to_dir: &PathBuf) {
-    let file_name = extract_file_name(path_to_dir);
+    let file_name = match extract_file_name(path_to_dir) {
+        Some(name) => name,
+        None       => panic!(format_with_tag(0, Tag::Error, "Cannot convert the file name to UTF-8")),
+    };
     print_with_tag(0, Tag::Execution, format!("Create \"{}\" directory with its parents", file_name));
 
     match fs::create_dir_all(path_to_dir) {
@@ -86,7 +92,10 @@ pub fn create_ignore_file<S: AsRef<str>>(contents: S) {
 }
 
 fn create_setting_file<S: AsRef<str>>(path_to_file: PathBuf, contents: S) {
-    let file_name = extract_file_name(&path_to_file);
+    let file_name = match extract_file_name(&path_to_file) {
+        Some(name) => name,
+        None       => panic!(format_with_tag(0, Tag::Error, "Cannot convert the file name to UTF-8")),
+    };
     print_with_tag(0, Tag::Execution, format!("Create \"{}\" file", file_name));
 
     if path_to_file.is_file() {
