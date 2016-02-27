@@ -27,6 +27,11 @@ pub enum Tag {
 pub fn format_with_tag<S: Display>(indent_level: usize, tag: Tag, message: S) -> String {
     let indent = (0 .. indent_level).map(|_| "  ").collect::<String>();
 
+    let extra = match tag {
+        Tag::Okay | Tag::Notice => "\n",
+        _                       => "",
+    };
+
     let tag = match tag {
         Tag::Execution => "EXECUTION",
         Tag::Okay      => "OK",
@@ -36,7 +41,7 @@ pub fn format_with_tag<S: Display>(indent_level: usize, tag: Tag, message: S) ->
         Tag::Caution   => "CAUTION",
     };
 
-    format!("{}{}: {}", indent, tag, message)
+    format!("{}{}: {}{}", indent, tag, message, extra)
 }
 
 pub fn print_with_tag<S: Display>(indent_level: usize, tag: Tag, message: S) {
