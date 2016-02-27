@@ -3,14 +3,13 @@ use super::Command;
 extern crate chrono;
 extern crate regex;
 
+use lib::fs::*;
 use lib::io::*;
 use lib::setting::*;
 use self::chrono::offset::TimeZone;
 use self::chrono::{Duration, Local};
 use self::regex::Regex;
-use std::fs;
 use std::path::PathBuf;
-use std::result::Result;
 
 pub struct Burn;
 
@@ -69,8 +68,8 @@ fn search_target_storages(moratorium: Duration) -> Vec<PathBuf> {
     print_with_tag(0, Tag::Execution, "Search target dusts");
 
     let path_to_storage = storage_dir();
-    let dirs            = match fs::read_dir(&path_to_storage) {
-        Ok(rd)   => rd.filter_map(Result::ok),
+    let dirs            = match ls(&path_to_storage) {
+        Ok(rd)   => rd,
         Err(why) => panic!(format_with_tag(1, Tag::Error, why)),
     };
 
@@ -78,11 +77,7 @@ fn search_target_storages(moratorium: Duration) -> Vec<PathBuf> {
 
     print_with_tag(1, Tag::Okay, "Searched target dusts");
     dirs
-        .filter_map(|dir| dir
-            .file_name()
-            .into_string()
-            .ok()
-        )
+        .into_iter()
         .filter(|date| match Local.datetime_from_str(format!("{} 00:00:00", date).as_ref(), "%Y-%m-%d %H:%M:%S") {
             Ok(created_date) => created_date + moratorium < today,
             Err(_)           => false,

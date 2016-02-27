@@ -4,6 +4,8 @@ use constant::*;
 use self::walkdir::{WalkDir, WalkDirIterator};
 use std::collections::BTreeSet;
 use std::ffi::{OsStr, OsString};
+use std::fs;
+use std::io;
 use std::path::{Path, PathBuf};
 use std::result::Result;
 
@@ -18,6 +20,17 @@ pub fn extract_file_name(full_path: &PathBuf) -> Option<&str> {
     full_path
         .file_name()
         .and_then(OsStr::to_str)
+}
+
+pub fn ls<P: AsRef<Path>>(path: &P) -> Result<BTreeSet<String>, io::Error> {
+    let dirs = try!(fs::read_dir(path));
+    let dirs = dirs
+        .filter_map(Result::ok)
+        .map(|d| d.file_name())
+        .map(OsString::into_string)
+        .filter_map(Result::ok)
+        .collect::<BTreeSet<String>>();
+    Ok(dirs)
 }
 
 fn is_hidden(entry: &walkdir::DirEntry) -> bool {
