@@ -1,5 +1,6 @@
 mod init;
 mod config;
+mod ignore;
 mod sweep;
 mod burn;
 mod start;
@@ -8,6 +9,7 @@ mod destroy;
 
 use self::init::Init;
 use self::config::Config;
+use self::ignore::Ignore;
 use self::sweep::Sweep;
 use self::burn::Burn;
 use self::start::Start;
@@ -72,6 +74,7 @@ pub fn execute(args: Vec<String>) {
         Some(first) => match first.as_ref() {
             "init"    => Box::new(Init   ),
             "config"  => Box::new(Config ),
+            "ignore"  => Box::new(Ignore ),
             "sweep"   => Box::new(Sweep  ),
             "burn"    => Box::new(Burn   ),
             "start"   => Box::new(Start  ),
@@ -93,6 +96,7 @@ r#"Usage:
 Command:
     init    # Register current directory.
     config  # Set config's parameters.
+    ignore  # Set ignored files.
     sweep   # Sweep files in current directory.
     burn    # Burn sweeped files.
     start   # Start "{}".
