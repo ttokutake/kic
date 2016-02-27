@@ -1,6 +1,9 @@
 use super::Command;
 
-pub struct Ignore;
+pub struct Ignore {
+    pub command: Option<String>,
+    pub value  : Option<String>,
+}
 
 impl Command for Ignore {
     fn validation(&self) -> bool { true }
@@ -10,6 +13,7 @@ impl Command for Ignore {
     }
 
     fn main(&self) {
-        unimplemented!()
+        println!("{:?}", self.command);
+        println!("{:?}", self.value);
     }
 }

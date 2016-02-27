@@ -68,13 +68,13 @@ trait Command {
 pub fn execute(args: Vec<String>) {
     let help = args.iter().any(|a| *a == "-h" || *a == "--help");
 
-    let mut args = args.iter();
+    let mut args = args.into_iter();
 
-    let command: Box<Command> = match args.nth(0) {
+    let command: Box<Command> = match args.next() {
         Some(first) => match first.as_ref() {
             "init"    => Box::new(Init   ),
             "config"  => Box::new(Config ),
-            "ignore"  => Box::new(Ignore ),
+            "ignore"  => Box::new(Ignore { command: args.next(), value: args.next() }),
             "sweep"   => Box::new(Sweep  ),
             "burn"    => Box::new(Burn   ),
             "start"   => Box::new(Start  ),
