@@ -17,10 +17,10 @@ pub fn read_line_from_stdin() -> Result<String, io::Error>  {
 
 pub enum Tag {
     Execution,
+    Okay,
     Notice,
     Warning,
     Error,
-    Okay,
     Caution,
 }
 
@@ -29,10 +29,10 @@ pub fn format_with_tag<S: Display>(indent_level: usize, tag: Tag, message: S) ->
 
     let tag = match tag {
         Tag::Execution => "EXECUTION",
+        Tag::Okay      => "OK",
         Tag::Notice    => "NOTICE",
         Tag::Warning   => "WARNING",
         Tag::Error     => "ERROR",
-        Tag::Okay      => "OK",
         Tag::Caution   => "CAUTION",
     };
 
