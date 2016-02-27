@@ -1,12 +1,12 @@
 use super::Command;
 
-pub struct Set;
+pub struct Config;
 
-impl Command for Set {
+impl Command for Config {
     fn validation(&self) -> bool { true }
 
     fn help_message(&self) -> &'static str {
-        return "set!";
+        return "config!";
     }
 
     fn main(&self) {

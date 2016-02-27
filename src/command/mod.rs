@@ -1,5 +1,5 @@
 mod init;
-mod set;
+mod config;
 mod sweep;
 mod burn;
 mod start;
@@ -7,7 +7,7 @@ mod end;
 mod destroy;
 
 use self::init::Init;
-use self::set::Set;
+use self::config::Config;
 use self::sweep::Sweep;
 use self::burn::Burn;
 use self::start::Start;
@@ -71,7 +71,7 @@ pub fn execute(args: Vec<String>) {
     let command: Box<Command> = match args.nth(0) {
         Some(first) => match first.as_ref() {
             "init"    => Box::new(Init   ),
-            "set"     => Box::new(Set    ),
+            "config"  => Box::new(Config ),
             "sweep"   => Box::new(Sweep  ),
             "burn"    => Box::new(Burn   ),
             "start"   => Box::new(Start  ),
@@ -92,7 +92,7 @@ r#"Usage:
 
 Command:
     init    # Register current directory.
-    set     # Set parameters.
+    config  # Set config's parameters.
     sweep   # Sweep files in current directory.
     burn    # Burn sweeped files.
     start   # Start "{}".
