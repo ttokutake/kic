@@ -74,7 +74,7 @@ pub fn execute(args: Vec<String>) {
         Some(first) => match first.as_ref() {
             "init"    => Box::new(Init   ),
             "config"  => Box::new(Config ),
-            "ignore"  => Box::new(Ignore { command: args.next(), value: args.next() }),
+            "ignore"  => Box::new(Ignore { command: args.next(), path: args.next() }),
             "sweep"   => Box::new(Sweep  ),
             "burn"    => Box::new(Burn   ),
             "start"   => Box::new(Start  ),
