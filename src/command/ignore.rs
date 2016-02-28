@@ -2,7 +2,7 @@ use super::Command;
 
 pub struct Ignore {
     pub command: Option<String>,
-    pub path   : Option<String>,
+    pub paths  : Vec<String>,
 }
 
 impl Command for Ignore {
@@ -27,30 +27,20 @@ impl Command for Ignore {
 }
 
 
-fn extract_path(ignore: &Ignore) -> Result<&String, ()> {
-    match ignore.path {
-        Some(ref p) => Ok(p),
-        None        => {
-            ignore.help();
-            Err(())
-        },
-    }
-}
-
 fn add(ignore: &Ignore) {
-    let path = match extract_path(ignore) {
-        Ok(p)  => p,
-        Err(_) => return,
-    };
-    println!("do add command with {:?}", path);
+    let paths = &ignore.paths;
+    if paths.len() == 0 {
+        return ignore.help();
+    }
+    println!("do add command with {:?}", paths);
 }
 
 fn remove(ignore: &Ignore) {
-    let path = match extract_path(ignore) {
-        Ok(p)  => p,
-        Err(_) => return,
-    };
-    println!("do remove command with {:?}", path);
+    let paths = &ignore.paths;
+    if paths.len() == 0 {
+        return ignore.help();
+    }
+    println!("do remove command with {:?}", paths);
 }
 
 fn ignore_current_files() {
