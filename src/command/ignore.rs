@@ -72,11 +72,11 @@ fn add(ignore: &Ignore) {
 
     match File::create(ignore_file()) {
         Ok(mut f) => {
-            print_with_tag(1, Tag::Okay, "Created the file");
+            print_with_okay(1);
 
             print_with_tag(0, Tag::Execution, "Write the file contents");
             match f.write(new_ignores.as_bytes()) {
-                Ok(_)    => print_with_tag(1, Tag::Okay, "Done"),
+                Ok(_)    => print_with_okay(1),
                 Err(why) => print_with_tag(1, Tag::Error, why),
             }
         },

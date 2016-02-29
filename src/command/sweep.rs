@@ -54,7 +54,7 @@ fn move_files_to_dust_box(target_files: Vec<String>, path_to_dust_box: &PathBuf)
         };
         let to = path_buf![&path_to_dust_box, target_base];
 
-        print_with_tag(1, Tag::Okay, "Analyzed the path to file");
+        print_with_okay(1);
 
         create_essential_dir_all(&to);
 
@@ -62,7 +62,7 @@ fn move_files_to_dust_box(target_files: Vec<String>, path_to_dust_box: &PathBuf)
 
         // forcedly overwrite if the file exists with same name.
         match fs::rename(target, path_buf![to, target_name]) {
-            Ok(_)    => print_with_tag(1, Tag::Okay, "Moved the file to dust box"),
+            Ok(_)    => print_with_okay(1),
             Err(why) => panic!(format_with_tag(1, Tag::Error, why)),
         }
     }
@@ -75,7 +75,7 @@ fn move_empty_dir_to_dust_box(path_to_dust_box: &PathBuf) {
 
         match fs::remove_dir(dir) {
             Ok(_) => {
-                print_with_tag(1, Tag::Okay, "Removed the directory");
+                print_with_okay(1);
                 create_essential_dir_all(&path_buf![&path_to_dust_box, dir]);
             },
             Err(why) => match why.raw_os_error() {

@@ -55,7 +55,7 @@ fn read_param_for_burn() -> Duration {
         Err(why) => panic!(format_with_tag(1, Tag::Error, why)),
     };
 
-    print_with_tag(1, Tag::Okay, "Extracted the parameter");
+    print_with_okay(1);
 
     match unit {
         "day"  | "days"  => Duration::days(num as i64),
@@ -75,7 +75,7 @@ fn search_target_storages(moratorium: Duration) -> Vec<PathBuf> {
 
     let today = Local::now();
 
-    print_with_tag(1, Tag::Okay, "Searched target dusts");
+    print_with_okay(1);
     dirs
         .into_iter()
         .filter(|date| match Local.datetime_from_str(format!("{} 00:00:00", date).as_ref(), "%Y-%m-%d %H:%M:%S") {

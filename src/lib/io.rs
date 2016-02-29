@@ -1,6 +1,7 @@
 use std::fmt::Display;
 use std::io::{self, Write};
 
+
 pub fn echo<S: Display>(message: S) {
     print!("{}", message);
     if let Err(why) = io::stdout().flush() {
@@ -46,4 +47,8 @@ pub fn format_with_tag<S: Display>(indent_level: usize, tag: Tag, message: S) ->
 
 pub fn print_with_tag<S: Display>(indent_level: usize, tag: Tag, message: S) {
     println!("{}", format_with_tag(indent_level, tag, message));
+}
+
+pub fn print_with_okay(indent_level: usize) {
+    print_with_tag(indent_level, Tag::Okay, "Done");
 }

@@ -60,7 +60,7 @@ fn create_essential_dir(path_to_dir: PathBuf) {
         print_with_tag(1, Tag::Notice, "The directory has already exist");
     } else {
         match fs::create_dir(&path_to_dir) {
-            Ok(_)    => print_with_tag(1, Tag::Okay, "Created the directory"),
+            Ok(_)    => print_with_okay(1),
             Err(why) => panic!(format_with_tag(1, Tag::Error, why)),
         }
     }
@@ -71,7 +71,7 @@ pub fn create_essential_dir_all(path_to_dir: &PathBuf) {
     print_with_tag(0, Tag::Execution, format!("Create \"{}\" directory with its parents", file_name));
 
     match fs::create_dir_all(path_to_dir) {
-        Ok(_)    => print_with_tag(1, Tag::Okay, "Created directories"),
+        Ok(_)    => print_with_okay(1),
         Err(why) => panic!(format_with_tag(1, Tag::Error, why)),
     }
 }
@@ -94,7 +94,7 @@ fn create_setting_file<S: AsRef<str>>(path_to_file: PathBuf, contents: S) {
     } else {
         match File::create(&path_to_file) {
             Ok(mut f) => {
-                print_with_tag(1, Tag::Okay, "Created the file");
+                print_with_okay(1);
                 if let Err(why) = f.write(contents.as_ref().as_bytes()) {
                     panic!(format_with_tag(1, Tag::Error, why));
                 }
@@ -106,7 +106,7 @@ fn create_setting_file<S: AsRef<str>>(path_to_file: PathBuf, contents: S) {
 
 
 pub fn read_config_file() -> toml::Value {
-    print_with_tag(0, Tag::Execution, format!("Read \"{}\" file", CONFIG_FILE_NAME));
+    print_with_tag(0, Tag::Execution, format!("Read \"{}\" file as TOML", CONFIG_FILE_NAME));
 
     let mut f = match File::open(config_file()) {
         Ok(f)    => f,
@@ -120,7 +120,7 @@ pub fn read_config_file() -> toml::Value {
 
     match contents.parse() {
         Ok(v) => {
-            print_with_tag(1, Tag::Okay, "Read the file as TOML");
+            print_with_okay(1);
             v
         },
         Err(why) => panic!(format_with_tag(1, Tag::Error, format!("{:?}", why))),
@@ -137,7 +137,7 @@ pub fn read_ignore_file() -> BTreeSet<String> {
 
     let mut contents = String::new();
     match f.read_to_string(&mut contents) {
-        Ok(_)    => print_with_tag(1, Tag::Okay, "Read the file"),
+        Ok(_)    => print_with_okay(1),
         Err(why) => panic!(format_with_tag(1, Tag::Error, why)),
     }
 
@@ -156,7 +156,7 @@ pub fn delete_dir_all<P: AsRef<Path> + Debug>(path: P) {
     print_with_tag(0, Tag::Execution, format!("Remove all files and directories under {:?}", path));
 
     match fs::remove_dir_all(path) {
-        Ok(_)    => print_with_tag(1, Tag::Okay , "Removed files and directories"),
+        Ok(_)    => print_with_okay(1),
         Err(why) => print_with_tag(1, Tag::Error, why),
     }
 }
