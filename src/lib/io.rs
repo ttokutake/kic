@@ -52,3 +52,7 @@ pub fn print_with_tag<S: Display>(indent_level: usize, tag: Tag, message: S) {
 pub fn print_with_okay(indent_level: usize) {
     print_with_tag(indent_level, Tag::Okay, "Done");
 }
+
+pub fn print_with_error<S: Display>(indent_level: usize, why: S) {
+    print_with_tag(indent_level, Tag::Error, why);
+}

@@ -71,7 +71,7 @@ fn move_files_to_dust_box(target_files: Vec<String>, path_to_dust_box: &PathBuf)
 fn move_empty_dir_to_dust_box(path_to_dust_box: &PathBuf) {
     let all_dirs = dirs_ordered_by_descending_depth(".");
     for dir in all_dirs.iter().filter(|d| *d != ".") {
-        print_with_tag(0, Tag::Execution, format!("EXECUTION: Remove \"{}\" directory", dir));
+        print_with_tag(0, Tag::Execution, format!("Remove \"{}\" directory", dir));
 
         match fs::remove_dir(dir) {
             Ok(_) => {

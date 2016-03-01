@@ -22,22 +22,32 @@ use lib::setting::*;
 
 trait Command {
     fn validation(&self) -> bool;
-    fn validate(&self) -> Result<(), String> {
+    fn validate(&self) -> Result<(), ()> {
         fn message(subject: String) -> String {
             format!("{} does not exist. Please use \"init\" command", subject)
         }
+        fn message_for_dir(dir_name: &'static str) -> String {
+            message(format!("\"{}\" directory", dir_name))
+        }
+        fn message_for_file(file_name: &'static str) -> String {
+            message(format!("\"{}\" file", file_name))
+        }
 
         if !working_dir_exists() {
-            return Err(message(format!("\"{}\" directory", WORKING_DIR_NAME)));
+            print_with_tag(0, Tag::Warning, message_for_dir(WORKING_DIR_NAME));
+            return Err(());
         }
         if !storage_dir_exists() {
-            return Err(message(format!("\"{}\" directory", STORAGE_DIR_NAME)));
+            print_with_tag(0, Tag::Warning, message_for_dir(STORAGE_DIR_NAME));
+            return Err(());
         }
         if !config_file_exists() {
-            return Err(message(format!("\"{}\" file", CONFIG_FILE_NAME)));
+            print_with_tag(0, Tag::Warning, message_for_file(CONFIG_FILE_NAME));
+            return Err(());
         }
         if !ignore_file_exists() {
-            return Err(message(format!("\"{}\" file", IGNORE_FILE_NAME)));
+            print_with_tag(0, Tag::Warning, message_for_file(IGNORE_FILE_NAME));
+            return Err(());
         }
 
         Ok(())
@@ -52,8 +62,8 @@ trait Command {
 
     fn exec(&self, help: bool) {
         if self.validation() {
-            if let Err(message) = self.validate() {
-                return print_with_tag(0, Tag::Warning, message);
+            if let Err(_) = self.validate() {
+                return;
             }
         }
 

@@ -9,8 +9,8 @@ use lib::io::*;
 use std::env;
 
 fn main() {
-    if let Err(message) = validate_at_first() {
-        return print_with_tag(0, Tag::Error, message);
+    if let Err(_) = validate_at_first() {
+        return;
     }
 
     let args = env::args()
@@ -20,14 +20,20 @@ fn main() {
     command::execute(args);
 }
 
-fn validate_at_first() -> Result<(), String> {
+fn validate_at_first() -> Result<(), ()> {
     let current_dir = match env::current_dir() {
         Ok(dir)  => dir,
-        Err(why) => return Err(why.to_string()),
+        Err(why) => {
+            print_with_error(0, why);
+            return Err(());
+        }
     };
 
-    BANNED_DIRS
-        .iter()
-        .find(|d| current_dir.ends_with(d))
-        .map_or(Ok(()), |dir| Err(format!("Cannot run in \"{}\"", dir)))
+    match BANNED_DIRS.iter().find(|d| current_dir.ends_with(d)) {
+        Some(dir) => {
+            print_with_error(0, format!("Cannot run in \"{}\" directory", dir));
+            Err(())
+        },
+        None => Ok(()),
+    }
 }

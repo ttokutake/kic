@@ -77,10 +77,10 @@ fn add(ignore: &Ignore) {
             print_with_tag(0, Tag::Execution, "Write the file contents");
             match f.write(new_ignores.as_bytes()) {
                 Ok(_)    => print_with_okay(1),
-                Err(why) => print_with_tag(1, Tag::Error, why),
+                Err(why) => print_with_error(1, why),
             }
         },
-        Err(why) => print_with_tag(1, Tag::Error, why),
+        Err(why) => print_with_error(1, why),
     }
 }
 
