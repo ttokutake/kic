@@ -61,7 +61,7 @@ fn add(ignore: &Ignore) {
     }
 
     for file in &ignores_to_be_added {
-        print_with_tag(1, Tag::Okay, format!("\"{}\" will be ignored", file));
+        print_with_tag(1, Tag::Info, format!("\"{}\" will be ignored", file));
     }
 
     let new_ignores = read_ignore_file()
