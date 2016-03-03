@@ -49,9 +49,9 @@ trait Command {
     }
 
     fn help_message(&self) -> &'static str;
-    fn help(&self) {
+    fn help(&self) -> ! {
         println!("{}", self.help_message());
-        process::exit(1);
+        process::exit(1)
     }
 
     fn main(&self);
@@ -92,7 +92,7 @@ pub fn execute(args: Vec<String>) {
     command.exec(help);
 }
 
-pub fn print_usage() {
+pub fn print_usage() -> ! {
     println!(
 r#"Usage:
     {} <command> [--help|-h]
