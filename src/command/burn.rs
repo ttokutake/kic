@@ -44,7 +44,7 @@ fn read_param_for_burn() -> Duration {
 
     let re = match Regex::new(r"(?P<num>\d+)\s*(?P<unit>days?|weeks?)") {
         Ok(re)   => re,
-        Err(why) => panic!(why.to_string()),
+        Err(why) => panic!(why),
     };
     let (num, unit) = match re.captures(after.as_ref()).map(|caps| (caps.name("num"), caps.name("unit"))) {
         Some((Some(num), Some(unit))) => (num, unit),

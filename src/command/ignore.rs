@@ -30,7 +30,7 @@ impl Command for Ignore {
                 _         => self.help(),
             },
             None => self.help(),
-        }
+        };
     }
 }
 
