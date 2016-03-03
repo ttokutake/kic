@@ -46,11 +46,11 @@ fn move_files_to_dust_box(target_files: Vec<String>, path_to_dust_box: &PathBuf)
         let target_path = path_buf![&target];
         let target_name = match extract_file_name(&target_path) {
             Some(file_name) => file_name,
-            None            => panic!(format_with_tag(1, Tag::Error, "Cannot convert the file name to UTF-8")),
+            None            => print_with_error(1, "Cannot convert the file name to UTF-8"),
         };
         let target_base = match target_path.parent() {
             Some(base_name) => base_name,
-            None            => panic!(format_with_tag(1, Tag::Error, "Cannot extract the base name")),
+            None            => print_with_error(1, "Cannot extract the base name"),
         };
         let to = path_buf![&path_to_dust_box, target_base];
 
@@ -63,8 +63,8 @@ fn move_files_to_dust_box(target_files: Vec<String>, path_to_dust_box: &PathBuf)
         // forcedly overwrite if the file exists with same name.
         match fs::rename(target, path_buf![to, target_name]) {
             Ok(_)    => print_with_okay(1),
-            Err(why) => panic!(format_with_tag(1, Tag::Error, why)),
-        }
+            Err(why) => print_with_error(1, why),
+        };
     }
 }
 
@@ -80,8 +80,8 @@ fn move_empty_dir_to_dust_box(path_to_dust_box: &PathBuf) {
             },
             Err(why) => match why.raw_os_error() {
                 Some(39) => print_with_tag(1, Tag::Notice, "The directory is not empty. Cancelled to remove it"),
-                _        => panic!(format_with_tag(1, Tag::Error, why)),
+                _        => print_with_error(1, why),
             },
-        }
+        };
     }
 }

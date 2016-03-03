@@ -24,7 +24,7 @@ impl Command for Destroy {
                 "y" | "yes" => delete_all_setting_files(),
                 _           => print_with_tag(1, Tag::Notice, "Interrupted by user"),
             },
-            Err(why)  => print_with_tag(1, Tag::Error, why),
-        }
+            Err(why) => print_with_error(1, why),
+        };
     }
 }

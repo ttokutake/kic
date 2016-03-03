@@ -19,10 +19,11 @@ use self::destroy::Destroy;
 use constant::*;
 use lib::io::*;
 use lib::setting::*;
+use std::process;
 
 trait Command {
     fn validation(&self) -> bool;
-    fn validate(&self) -> Result<(), ()> {
+    fn validate(&self) {
         fn message(subject: String) -> String {
             format!("{} does not exist. Please use \"init\" command", subject)
         }
@@ -34,37 +35,30 @@ trait Command {
         }
 
         if !working_dir_exists() {
-            print_with_tag(0, Tag::Warning, message_for_dir(WORKING_DIR_NAME));
-            return Err(());
+            print_with_warning(0, message_for_dir(WORKING_DIR_NAME));
         }
         if !storage_dir_exists() {
-            print_with_tag(0, Tag::Warning, message_for_dir(STORAGE_DIR_NAME));
-            return Err(());
+            print_with_warning(0, message_for_dir(STORAGE_DIR_NAME));
         }
         if !config_file_exists() {
-            print_with_tag(0, Tag::Warning, message_for_file(CONFIG_FILE_NAME));
-            return Err(());
+            print_with_warning(0, message_for_file(CONFIG_FILE_NAME));
         }
         if !ignore_file_exists() {
-            print_with_tag(0, Tag::Warning, message_for_file(IGNORE_FILE_NAME));
-            return Err(());
+            print_with_warning(0, message_for_file(IGNORE_FILE_NAME));
         }
-
-        Ok(())
     }
 
     fn help_message(&self) -> &'static str;
     fn help(&self) {
         println!("{}", self.help_message());
+        process::exit(1);
     }
 
     fn main(&self);
 
     fn exec(&self, help: bool) {
         if self.validation() {
-            if let Err(_) = self.validate() {
-                return;
-            }
+            self.validate();
         }
 
         if help {
@@ -117,4 +111,5 @@ Command:
         ME,
         ME,
     );
+    process::exit(1)
 }

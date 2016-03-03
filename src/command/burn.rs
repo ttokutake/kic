@@ -39,7 +39,7 @@ fn read_param_for_burn() -> Duration {
 
     let after = match config.lookup(key) {
         Some(v) => v.to_string(),
-        None    => panic!(format_with_tag(1, Tag::Error, "The key was not found")),
+        None    => print_with_error(1, "The key was not found"),
     };
 
     let re = match Regex::new(r"(?P<num>\d+)\s*(?P<unit>days?|weeks?)") {
@@ -48,11 +48,11 @@ fn read_param_for_burn() -> Duration {
     };
     let (num, unit) = match re.captures(after.as_ref()).map(|caps| (caps.name("num"), caps.name("unit"))) {
         Some((Some(num), Some(unit))) => (num, unit),
-        _                             => panic!(format_with_tag(1, Tag::Error, "The value is invalid"))
+        _                             => print_with_error(1, "The value is invalid"),
     };
     let num = match num.parse::<u32>() {
         Ok(n)    => n,
-        Err(why) => panic!(format_with_tag(1, Tag::Error, why)),
+        Err(why) => print_with_error(1, why),
     };
 
     print_with_okay(1);
@@ -70,7 +70,7 @@ fn search_target_storages(moratorium: Duration) -> Vec<PathBuf> {
     let path_to_storage = storage_dir();
     let dirs            = match ls(&path_to_storage) {
         Ok(rd)   => rd,
-        Err(why) => panic!(format_with_tag(1, Tag::Error, why)),
+        Err(why) => print_with_error(1, why),
     };
 
     let today = Local::now();

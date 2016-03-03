@@ -1,5 +1,6 @@
 use std::fmt::Display;
 use std::io::{self, Write};
+use std::process;
 
 
 pub fn echo<S: Display>(message: S) {
@@ -53,6 +54,12 @@ pub fn print_with_okay(indent_level: usize) {
     print_with_tag(indent_level, Tag::Okay, "Done");
 }
 
-pub fn print_with_error<S: Display>(indent_level: usize, why: S) {
+pub fn print_with_warning<S: Display>(indent_level: usize, why: S) -> ! {
+    print_with_tag(indent_level, Tag::Warning, why);
+    process::exit(1)
+}
+
+pub fn print_with_error<S: Display>(indent_level: usize, why: S) -> ! {
     print_with_tag(indent_level, Tag::Error, why);
+    process::exit(1)
 }

@@ -61,8 +61,8 @@ fn create_essential_dir(path_to_dir: PathBuf) {
     } else {
         match fs::create_dir(&path_to_dir) {
             Ok(_)    => print_with_okay(1),
-            Err(why) => panic!(format_with_tag(1, Tag::Error, why)),
-        }
+            Err(why) => print_with_error(1, why),
+        };
     }
 }
 
@@ -72,8 +72,8 @@ pub fn create_essential_dir_all(path_to_dir: &PathBuf) {
 
     match fs::create_dir_all(path_to_dir) {
         Ok(_)    => print_with_okay(1),
-        Err(why) => panic!(format_with_tag(1, Tag::Error, why)),
-    }
+        Err(why) => print_with_error(1, why),
+    };
 }
 
 
@@ -96,11 +96,11 @@ fn create_setting_file<S: AsRef<str>>(path_to_file: PathBuf, contents: S) {
             Ok(mut f) => {
                 print_with_okay(1);
                 if let Err(why) = f.write(contents.as_ref().as_bytes()) {
-                    panic!(format_with_tag(1, Tag::Error, why));
+                    print_with_error(1, why);
                 }
             },
-            Err(why) => panic!(format_with_tag(1, Tag::Error, why)),
-        }
+            Err(why) => print_with_error(1, why),
+        };
     }
 }
 
@@ -110,12 +110,12 @@ pub fn read_config_file() -> toml::Value {
 
     let mut f = match File::open(config_file()) {
         Ok(f)    => f,
-        Err(why) => panic!(format_with_tag(1, Tag::Error, why)),
+        Err(why) => print_with_error(1, why),
     };
 
     let mut contents = String::new();
     if let Err(why) = f.read_to_string(&mut contents) {
-        panic!(format_with_tag(1, Tag::Error, why));
+        print_with_error(1, why);
     }
 
     match contents.parse() {
@@ -123,7 +123,7 @@ pub fn read_config_file() -> toml::Value {
             print_with_okay(1);
             v
         },
-        Err(why) => panic!(format_with_tag(1, Tag::Error, format!("{:?}", why))),
+        Err(why) => print_with_error(1, format!("{:?}", why)),
     }
 }
 
@@ -132,14 +132,14 @@ pub fn read_ignore_file() -> BTreeSet<String> {
 
     let mut f = match File::open(ignore_file()) {
         Ok(f)    => f,
-        Err(why) => panic!(format_with_tag(1, Tag::Error, why)),
+        Err(why) => print_with_error(1, why),
     };
 
     let mut contents = String::new();
     match f.read_to_string(&mut contents) {
         Ok(_)    => print_with_okay(1),
-        Err(why) => panic!(format_with_tag(1, Tag::Error, why)),
-    }
+        Err(why) => print_with_error(1, why),
+    };
 
     contents
         .lines()
@@ -157,6 +157,6 @@ pub fn delete_dir_all<P: AsRef<Path> + Debug>(path: P) {
 
     match fs::remove_dir_all(path) {
         Ok(_)    => print_with_okay(1),
-        Err(why) => print_with_tag(1, Tag::Error, why),
-    }
+        Err(why) => print_with_error(1, why),
+    };
 }
