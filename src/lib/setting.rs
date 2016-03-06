@@ -89,19 +89,18 @@ fn create_setting_file<S: AsRef<str>>(path_to_file: PathBuf, contents: S) {
     let file_name = extract_file_name(&path_to_file).unwrap_or("<UnknownFileName>");
     print_with_tag(0, Tag::Execution, format!("Create \"{}\" file", file_name));
 
-    if path_to_file.is_file() {
-        print_with_tag(1, Tag::Notice, "The file has already exist");
-    } else {
-        match File::create(&path_to_file) {
-            Ok(mut f) => {
-                print_with_okay(1);
-                if let Err(why) = f.write(contents.as_ref().as_bytes()) {
-                    print_with_error(1, why);
-                }
-            },
-            Err(why) => print_with_error(1, why),
-        };
-    }
+    match File::create(&path_to_file) {
+        Ok(mut f) => {
+            print_with_okay(1);
+
+            print_with_tag(0, Tag::Execution, "Write contents into the file");
+            match f.write(contents.as_ref().as_bytes()) {
+                Ok(_)    => print_with_okay(1),
+                Err(why) => print_with_error(1, why),
+            };
+        },
+        Err(why) => print_with_error(1, why),
+    };
 }
 
 
