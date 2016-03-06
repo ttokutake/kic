@@ -46,11 +46,11 @@ fn move_files_to_dust_box(target_files: Vec<String>, path_to_dust_box: &PathBuf)
         let target_path = path_buf![&target];
         let target_name = match extract_file_name(&target_path) {
             Some(file_name) => file_name,
-            None            => print_with_error(1, "Cannot convert the file name to UTF-8"),
+            None            => panic!("Cannot happen"),
         };
         let target_base = match target_path.parent() {
             Some(base_name) => base_name,
-            None            => print_with_error(1, "Cannot extract the base name"),
+            None            => panic!("Cannot happen"),
         };
         let to = path_buf![&path_to_dust_box, target_base];
 
