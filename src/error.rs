@@ -36,6 +36,11 @@ impl From<io::Error> for CliError {
         CliError::Io(e)
     }
 }
+impl From<RunningPlaceError> for CliError {
+    fn from(e: RunningPlaceError) -> CliError {
+        CliError::RunningPlace(e)
+    }
+}
 
 
 #[derive(Debug)]

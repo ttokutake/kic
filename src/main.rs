@@ -25,9 +25,8 @@ fn main() {
 fn validate_at_first() -> Result<(), CliError> {
     let current_dir = try!(env::current_dir());
 
-    if let Some(d) = BANNED_DIRS.iter().find(|d| current_dir.ends_with(d)) {
-        return Err(CliError::RunningPlace(RunningPlaceError { dir: d.to_string() }));
+    match BANNED_DIRS.iter().find(|d| current_dir.ends_with(d)) {
+        Some(d) => Err(From::from(RunningPlaceError { dir: d.to_string() })),
+        None    => Ok(()),
     }
-
-    Ok(())
 }
