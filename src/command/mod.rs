@@ -16,7 +16,6 @@ use self::start::Start;
 use self::end::End;
 use self::destroy::Destroy;
 
-use constant::*;
 use error::*;
 use lib::io::*;
 use lib::setting::*;
@@ -41,7 +40,7 @@ trait Command {
         Ok(())
     }
 
-    fn help_message(&self) -> &'static str;
+    fn help_message(&self) -> Usage;
     fn help(&self) -> ! {
         println!("{}", self.help_message());
         process::exit(1)
@@ -79,32 +78,15 @@ pub fn execute(args: Vec<String>) {
             "start"   => Box::new(Start  ),
             "end"     => Box::new(End    ),
             "destroy" => Box::new(Destroy),
-            _         => return print_usage(),
+            _         => print_usage(Usage { kind: UsageKind::Nothing }),
         },
-        None => return print_usage(),
+        None => print_usage(Usage { kind: UsageKind::Nothing }),
     };
 
     command.exec(help);
 }
 
-pub fn print_usage() -> ! {
-    println!(
-r#"Usage:
-    {} <command> [--help|-h]
-
-Command:
-    init    # Register current directory.
-    config  # Set config's parameters.
-    ignore  # Set ignored files.
-    sweep   # Sweep files in current directory.
-    burn    # Burn sweeped files.
-    start   # Start "{}".
-    end     # End "{}".
-    destroy # Destroy "{}"."#,
-        ME,
-        ME,
-        ME,
-        ME,
-    );
+pub fn print_usage(u: Usage) -> ! {
+    println!("{}", u);
     process::exit(1)
 }

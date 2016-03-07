@@ -92,3 +92,64 @@ impl error::Error for EssentialLack {
 
     fn description(&self) -> &str { "essential file does not exist" }
 }
+
+
+#[derive(Debug)]
+pub enum UsageKind {
+    Nothing,
+    Init,
+    Config,
+    Ignore,
+    Sweep,
+    Burn,
+    Start,
+    End,
+    Destroy,
+}
+impl Display for UsageKind {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", match *self {
+            UsageKind::Nothing => format!(
+r#"Usage:
+    {} <command> [--help|-h]
+
+Command:
+    init    # Register current directory.
+    config  # Set config's parameters.
+    ignore  # Set ignored files.
+    sweep   # Sweep files in current directory.
+    burn    # Burn sweeped files.
+    start   # Start "{}".
+    end     # End "{}".
+    destroy # Destroy "{}"."#,
+                ME,
+                ME,
+                ME,
+                ME,
+            ),
+            UsageKind::Init    => "init!"   .to_string(),
+            UsageKind::Config  => "config!" .to_string(),
+            UsageKind::Ignore  => "ignore!" .to_string(),
+            UsageKind::Sweep   => "sweep!"  .to_string(),
+            UsageKind::Burn    => "burn!"   .to_string(),
+            UsageKind::Start   => "start!"  .to_string(),
+            UsageKind::End     => "end!"    .to_string(),
+            UsageKind::Destroy => "destroy!".to_string(),
+        })
+    }
+}
+
+#[derive(Debug)]
+pub struct Usage {
+    pub kind: UsageKind,
+}
+impl Display for Usage {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.kind)
+    }
+}
+impl error::Error for Usage {
+    fn cause(&self) -> Option<&error::Error> { None }
+
+    fn description(&self) -> &str { "show usage" }
+}

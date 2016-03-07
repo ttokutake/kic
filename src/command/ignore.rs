@@ -1,3 +1,4 @@
+use error::*;
 use super::Command;
 
 use constant::*;
@@ -14,8 +15,8 @@ pub struct Ignore {
 impl Command for Ignore {
     fn validation(&self) -> bool { true }
 
-    fn help_message(&self) -> &'static str {
-        return "ignore!";
+    fn help_message(&self) -> Usage {
+        return Usage { kind: UsageKind::Ignore };
     }
 
     fn main(&self) {

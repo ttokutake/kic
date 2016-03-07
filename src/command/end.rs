@@ -1,3 +1,4 @@
+use error::*;
 use super::Command;
 
 pub struct End;
@@ -5,8 +6,8 @@ pub struct End;
 impl Command for End {
     fn validation(&self) -> bool { true }
 
-    fn help_message(&self) -> &'static str {
-        return "end!";
+    fn help_message(&self) -> Usage {
+        return Usage { kind: UsageKind::End };
     }
 
     fn main(&self) {

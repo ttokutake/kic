@@ -1,3 +1,4 @@
+use error::*;
 use super::Command;
 
 extern crate chrono;
@@ -16,8 +17,8 @@ pub struct Burn;
 impl Command for Burn {
     fn validation(&self) -> bool { true }
 
-    fn help_message(&self) -> &'static str {
-        return "burn!";
+    fn help_message(&self) -> Usage {
+        return Usage { kind: UsageKind::Burn };
     }
 
     fn main(&self) {

@@ -1,3 +1,4 @@
+use error::*;
 use super::Command;
 
 use constant::*;
@@ -9,8 +10,8 @@ pub struct Init;
 impl Command for Init {
     fn validation(&self) -> bool { false }
 
-    fn help_message(&self) -> &'static str {
-        return "init!";
+    fn help_message(&self) -> Usage {
+        return Usage { kind: UsageKind::Init };
     }
 
     fn main(&self) {

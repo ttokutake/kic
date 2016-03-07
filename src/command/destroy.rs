@@ -1,3 +1,4 @@
+use error::*;
 use super::Command;
 
 use constant::*;
@@ -9,8 +10,8 @@ pub struct Destroy;
 impl Command for Destroy {
     fn validation(&self) -> bool { true }
 
-    fn help_message(&self) -> &'static str {
-        return "destroy!";
+    fn help_message(&self) -> Usage {
+        return Usage { kind: UsageKind::Destroy };
     }
 
     fn main(&self) {
