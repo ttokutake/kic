@@ -42,8 +42,7 @@ trait Command {
 
     fn usage(&self) -> Usage;
     fn help(&self) -> ! {
-        println!("{}", self.usage());
-        process::exit(1)
+        print_usage(self.usage());
     }
 
     fn main(&self);
