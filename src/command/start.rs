@@ -6,7 +6,7 @@ pub struct Start;
 impl Command for Start {
     fn validation(&self) -> bool { true }
 
-    fn help_message(&self) -> Usage {
+    fn usage(&self) -> Usage {
         return Usage { kind: UsageKind::Start };
     }
 

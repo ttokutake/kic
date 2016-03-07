@@ -10,7 +10,7 @@ pub struct Init;
 impl Command for Init {
     fn validation(&self) -> bool { false }
 
-    fn help_message(&self) -> Usage {
+    fn usage(&self) -> Usage {
         return Usage { kind: UsageKind::Init };
     }
 

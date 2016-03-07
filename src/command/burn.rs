@@ -17,7 +17,7 @@ pub struct Burn;
 impl Command for Burn {
     fn validation(&self) -> bool { true }
 
-    fn help_message(&self) -> Usage {
+    fn usage(&self) -> Usage {
         return Usage { kind: UsageKind::Burn };
     }
 

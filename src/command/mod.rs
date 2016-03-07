@@ -40,9 +40,9 @@ trait Command {
         Ok(())
     }
 
-    fn help_message(&self) -> Usage;
+    fn usage(&self) -> Usage;
     fn help(&self) -> ! {
-        println!("{}", self.help_message());
+        println!("{}", self.usage());
         process::exit(1)
     }
 

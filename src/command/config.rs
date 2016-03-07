@@ -6,7 +6,7 @@ pub struct Config;
 impl Command for Config {
     fn validation(&self) -> bool { true }
 
-    fn help_message(&self) -> Usage {
+    fn usage(&self) -> Usage {
         return Usage { kind: UsageKind::Config };
     }
 

@@ -10,7 +10,7 @@ pub struct Destroy;
 impl Command for Destroy {
     fn validation(&self) -> bool { true }
 
-    fn help_message(&self) -> Usage {
+    fn usage(&self) -> Usage {
         return Usage { kind: UsageKind::Destroy };
     }
 
