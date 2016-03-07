@@ -1,3 +1,4 @@
+use constant::*;
 use std::error;
 use std::fmt::{self, Display};
 use std::io;
@@ -56,4 +57,38 @@ impl error::Error for RunningPlaceError {
     fn cause(&self) -> Option<&error::Error> { None }
 
     fn description(&self) -> &str { "cannot run in banned directories" }
+}
+
+
+#[derive(Debug)]
+pub enum EssentialKind {
+    WorkingDir,
+    StorageDir,
+    ConfigFile,
+    IgnoreFile,
+}
+impl Display for EssentialKind {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", match *self {
+            EssentialKind::WorkingDir => format!("{} directory", WORKING_DIR_NAME),
+            EssentialKind::StorageDir => format!("{} directory", STORAGE_DIR_NAME),
+            EssentialKind::ConfigFile => format!("{} file"     , CONFIG_FILE_NAME),
+            EssentialKind::IgnoreFile => format!("{} file"     , IGNORE_FILE_NAME),
+        })
+    }
+}
+
+#[derive(Debug)]
+pub struct EssentialLack {
+    pub what: EssentialKind,
+}
+impl Display for EssentialLack {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{} does not exist. Please use \"init\" command", self.what)
+    }
+}
+impl error::Error for EssentialLack {
+    fn cause(&self) -> Option<&error::Error> { None }
+
+    fn description(&self) -> &str { "essential file does not exist" }
 }

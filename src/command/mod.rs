@@ -17,35 +17,28 @@ use self::end::End;
 use self::destroy::Destroy;
 
 use constant::*;
+use error::*;
 use lib::io::*;
 use lib::setting::*;
 use std::process;
 
 trait Command {
     fn validation(&self) -> bool;
-    fn validate(&self) {
-        fn message(subject: String) -> String {
-            format!("{} does not exist. Please use \"init\" command", subject)
-        }
-        fn message_for_dir(dir_name: &'static str) -> String {
-            message(format!("\"{}\" directory", dir_name))
-        }
-        fn message_for_file(file_name: &'static str) -> String {
-            message(format!("\"{}\" file", file_name))
-        }
-
+    fn validate(&self) -> Result<(), EssentialLack> {
         if !working_dir_exists() {
-            print_with_warning(0, message_for_dir(WORKING_DIR_NAME));
+            return Err(EssentialLack { what: EssentialKind::WorkingDir });
         }
         if !storage_dir_exists() {
-            print_with_warning(0, message_for_dir(STORAGE_DIR_NAME));
+            return Err(EssentialLack { what: EssentialKind::StorageDir });
         }
         if !config_file_exists() {
-            print_with_warning(0, message_for_file(CONFIG_FILE_NAME));
+            return Err(EssentialLack { what: EssentialKind::ConfigFile });
         }
         if !ignore_file_exists() {
-            print_with_warning(0, message_for_file(IGNORE_FILE_NAME));
+            return Err(EssentialLack { what: EssentialKind::IgnoreFile });
         }
+
+        Ok(())
     }
 
     fn help_message(&self) -> &'static str;
@@ -58,7 +51,9 @@ trait Command {
 
     fn exec(&self, help: bool) {
         if self.validation() {
-            self.validate();
+            if let Err(why) = self.validate() {
+                print_with_warning(0, why);
+            }
         }
 
         if help {
