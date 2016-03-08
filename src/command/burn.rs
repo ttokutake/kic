@@ -27,7 +27,9 @@ impl Command for Burn {
         let moratorium  = read_param_for_burn();
         let target_dirs = search_target_storages(moratorium);
         for dir in &target_dirs {
-            delete_dir_all(dir);
+            if let Err(why) = delete_dir_all(dir) {
+                print_with_error(1, why);
+            };
         }
     }
 }

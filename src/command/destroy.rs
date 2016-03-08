@@ -22,8 +22,12 @@ impl Command for Destroy {
 
         match read_line_from_stdin() {
             Ok(input) => match input.to_lowercase().as_ref() {
-                "y" | "yes" => delete_all_setting_files(),
-                _           => print_with_tag(1, Tag::Notice, "Interrupted by user"),
+                "y" | "yes" => {
+                    if let Err(why) = delete_all_setting_files() {
+                        print_with_error(1, why);
+                    };
+                },
+                _ => print_with_tag(1, Tag::Notice, "Interrupted by user"),
             },
             Err(why) => print_with_error(1, why),
         };

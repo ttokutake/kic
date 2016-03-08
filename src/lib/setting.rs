@@ -140,15 +140,15 @@ pub fn read_ignore_file() -> Result<BTreeSet<String>, io::Error> {
 }
 
 
-pub fn delete_all_setting_files() {
-    delete_dir_all(WORKING_DIR_NAME);
+pub fn delete_all_setting_files() -> Result<(), io::Error> {
+    delete_dir_all(WORKING_DIR_NAME)
 }
 
-pub fn delete_dir_all<P: AsRef<Path> + Debug>(path: P) {
+pub fn delete_dir_all<P: AsRef<Path> + Debug>(path: P) -> Result<(), io::Error> {
     print_with_tag(0, Tag::Execution, format!("Remove all files and directories under {:?}", path));
 
-    match fs::remove_dir_all(path) {
-        Ok(_)    => print_with_okay(1),
-        Err(why) => print_with_error(1, why),
-    };
+    try!(fs::remove_dir_all(path));
+    print_with_okay(1);
+
+    Ok(())
 }
