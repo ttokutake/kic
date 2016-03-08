@@ -69,7 +69,9 @@ fn add(ignore: &Ignore) {
 
     print_with_tag(0, Tag::Execution, format!("Recreate \"{}\" file", IGNORE_FILE_NAME));
 
-    create_ignore_file(new_ignores);
+    if let Err(why) = create_ignore_file(new_ignores) {
+        print_with_error(1, why);
+    };
 }
 
 fn remove(ignore: &Ignore) {

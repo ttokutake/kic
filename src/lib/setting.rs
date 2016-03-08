@@ -6,7 +6,7 @@ use lib::io::*;
 use std::collections::BTreeSet;
 use std::fmt::Debug;
 use std::fs::{self, File};
-use std::io::{Read, Write};
+use std::io::{self, Read, Write};
 use std::path::{Path, PathBuf};
 
 
@@ -44,26 +44,26 @@ pub fn ignore_file_exists() -> bool {
 }
 
 
-pub fn create_working_dir() {
-    create_essential_dir(working_dir());
+pub fn create_working_dir() -> Result<(), io::Error> {
+    create_essential_dir(working_dir())
 }
 
-pub fn create_storage_dir() {
-    create_essential_dir(storage_dir());
+pub fn create_storage_dir() -> Result<(), io::Error> {
+    create_essential_dir(storage_dir())
 }
 
-fn create_essential_dir(path_to_dir: PathBuf) {
+fn create_essential_dir(path_to_dir: PathBuf) -> Result<(), io::Error> {
     let file_name = extract_file_name(&path_to_dir).unwrap_or("<UnknownFileName>");
     print_with_tag(0, Tag::Execution, format!("Create \"{}\" directory", file_name));
 
     if path_to_dir.is_dir() {
         print_with_tag(1, Tag::Notice, "The directory has already exist");
     } else {
-        match fs::create_dir(&path_to_dir) {
-            Ok(_)    => print_with_okay(1),
-            Err(why) => print_with_error(1, why),
-        };
+        try!(fs::create_dir(&path_to_dir));
+        print_with_okay(1);
     }
+
+    Ok(())
 }
 
 pub fn create_essential_dir_all(path_to_dir: &PathBuf) {
@@ -77,30 +77,26 @@ pub fn create_essential_dir_all(path_to_dir: &PathBuf) {
 }
 
 
-pub fn create_config_file<S: AsRef<str>>(contents: S) {
-    create_setting_file(config_file(), contents);
+pub fn create_config_file<S: AsRef<str>>(contents: S) -> Result<(), io::Error> {
+    create_setting_file(config_file(), contents)
 }
 
-pub fn create_ignore_file<S: AsRef<str>>(contents: S) {
-    create_setting_file(ignore_file(), contents);
+pub fn create_ignore_file<S: AsRef<str>>(contents: S) -> Result<(), io::Error> {
+    create_setting_file(ignore_file(), contents)
 }
 
-fn create_setting_file<S: AsRef<str>>(path_to_file: PathBuf, contents: S) {
+fn create_setting_file<S: AsRef<str>>(path_to_file: PathBuf, contents: S) -> Result<(), io::Error> {
     let file_name = extract_file_name(&path_to_file).unwrap_or("<UnknownFileName>");
+
     print_with_tag(0, Tag::Execution, format!("Create \"{}\" file", file_name));
+    let mut f = try!(File::create(&path_to_file));
+    print_with_okay(1);
 
-    match File::create(&path_to_file) {
-        Ok(mut f) => {
-            print_with_okay(1);
+    print_with_tag(0, Tag::Execution, "Write contents into the file");
+    try!(f.write(contents.as_ref().as_bytes()));
+    print_with_okay(1);
 
-            print_with_tag(0, Tag::Execution, "Write contents into the file");
-            match f.write(contents.as_ref().as_bytes()) {
-                Ok(_)    => print_with_okay(1),
-                Err(why) => print_with_error(1, why),
-            };
-        },
-        Err(why) => print_with_error(1, why),
-    };
+    Ok(())
 }
 
 
