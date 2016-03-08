@@ -1,3 +1,5 @@
+extern crate toml;
+
 use constant::*;
 use std::error;
 use std::fmt::{self, Display};
@@ -6,13 +8,17 @@ use std::io;
 
 #[derive(Debug)]
 pub enum CliError {
+    CannotHappen(CannotHappenError),
     Io(io::Error),
+    ParseToml(toml::ParserError),
     RunningPlace(RunningPlaceError),
 }
 impl Display for CliError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
+            CliError::CannotHappen(ref e) => e.fmt(f),
             CliError::Io(ref e)           => e.fmt(f),
+            CliError::ParseToml(ref e)    => e.fmt(f),
             CliError::RunningPlace(ref e) => e.fmt(f),
         }
     }
@@ -20,21 +26,35 @@ impl Display for CliError {
 impl error::Error for CliError {
     fn cause(&self) -> Option<&error::Error> {
         match *self {
+            CliError::CannotHappen(ref e) => Some(e),
             CliError::Io(ref e)           => Some(e),
+            CliError::ParseToml(ref e)    => Some(e),
             CliError::RunningPlace(ref e) => Some(e),
         }
     }
 
     fn description(&self) -> &str {
         match *self {
+            CliError::CannotHappen(ref e) => e.description(),
             CliError::Io(ref e)           => e.description(),
+            CliError::ParseToml(ref e)    => e.description(),
             CliError::RunningPlace(ref e) => e.description(),
         }
+    }
+}
+impl From<CannotHappenError> for CliError {
+    fn from(e: CannotHappenError) -> CliError {
+        CliError::CannotHappen(e)
     }
 }
 impl From<io::Error> for CliError {
     fn from(e: io::Error) -> CliError {
         CliError::Io(e)
+    }
+}
+impl From<toml::ParserError> for CliError {
+    fn from(e: toml::ParserError) -> CliError {
+        CliError::ParseToml(e)
     }
 }
 impl From<RunningPlaceError> for CliError {
@@ -152,4 +172,18 @@ impl error::Error for Usage {
     fn cause(&self) -> Option<&error::Error> { None }
 
     fn description(&self) -> &str { "show usage" }
+}
+
+
+#[derive(Debug)]
+pub struct CannotHappenError;
+impl Display for CannotHappenError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "Cannot happen")
+    }
+}
+impl error::Error for CannotHappenError {
+    fn cause(&self) -> Option<&error::Error> { None }
+
+    fn description(&self) -> &str { "cannot happen" }
 }

@@ -1,6 +1,7 @@
 extern crate toml;
 
 use constant::*;
+use error::*;
 use lib::fs::*;
 use lib::io::*;
 use std::collections::BTreeSet;
@@ -100,26 +101,27 @@ fn create_setting_file<S: AsRef<str>>(path_to_file: PathBuf, contents: S) -> Res
 }
 
 
-pub fn read_config_file() -> toml::Value {
+pub fn read_config_file() -> Result<toml::Value, CliError> {
     print_with_tag(0, Tag::Execution, format!("Read \"{}\" file as TOML", CONFIG_FILE_NAME));
 
-    let mut f = match File::open(config_file()) {
-        Ok(f)    => f,
-        Err(why) => print_with_error(1, why),
-    };
+    let mut f = try!(File::open(config_file()));
 
     let mut contents = String::new();
-    if let Err(why) = f.read_to_string(&mut contents) {
-        print_with_error(1, why);
-    }
+    try!(f.read_to_string(&mut contents));
 
-    match contents.parse() {
-        Ok(v) => {
-            print_with_okay(1);
-            v
+    let result = contents
+        .parse()
+        .map_err(|e: Vec<_>| e.into_iter().find(|_| true));
+    let toml = match result {
+        Ok(toml)    => toml,
+        Err(option) => match option {
+            Some(e) => return Err(From::from(e)),
+            None    => return Err(From::from(CannotHappenError)),
         },
-        Err(why) => print_with_error(1, format!("{:?}", why)),
-    }
+    };
+    print_with_okay(1);
+
+    Ok(toml)
 }
 
 pub fn read_ignore_file() -> Result<BTreeSet<String>, io::Error> {

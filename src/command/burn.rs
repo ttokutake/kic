@@ -35,8 +35,11 @@ impl Command for Burn {
 }
 
 fn read_param_for_burn() -> Duration {
-    let config = read_config_file();
-    let key    = "burn.after";
+    let config = match read_config_file() {
+        Ok(toml) => toml,
+        Err(why) => print_with_error(1, why),
+    };
+    let key = "burn.after";
 
     print_with_tag(0, Tag::Execution, format!("Extract \"{}\" parameter", key));
 
