@@ -63,7 +63,12 @@ fn add(ignore: &Ignore) {
         print_with_tag(1, Tag::Info, format!("\"{}\" will be ignored", file));
     }
 
-    let new_ignores = read_ignore_file()
+    let original_ignores = match read_ignore_file() {
+        Ok(files) => files,
+        Err(why)  => print_with_error(1, why),
+    };
+
+    let new_ignores = original_ignores
         .union(&ignores_to_be_added)
         .fold(String::new(), |c, ref f| c + f + "\n");
 

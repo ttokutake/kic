@@ -66,14 +66,14 @@ fn create_essential_dir(path_to_dir: PathBuf) -> Result<(), io::Error> {
     Ok(())
 }
 
-pub fn create_essential_dir_all(path_to_dir: &PathBuf) {
+pub fn create_essential_dir_all(path_to_dir: &PathBuf) -> Result<(), io::Error> {
     let file_name = extract_file_name(path_to_dir).unwrap_or("<UnknownDirectoryName>");
     print_with_tag(0, Tag::Execution, format!("Create \"{}\" directory with its parents", file_name));
 
-    match fs::create_dir_all(path_to_dir) {
-        Ok(_)    => print_with_okay(1),
-        Err(why) => print_with_error(1, why),
-    };
+    try!(fs::create_dir_all(path_to_dir));
+    print_with_okay(1);
+
+    Ok(())
 }
 
 
@@ -122,24 +122,21 @@ pub fn read_config_file() -> toml::Value {
     }
 }
 
-pub fn read_ignore_file() -> BTreeSet<String> {
+pub fn read_ignore_file() -> Result<BTreeSet<String>, io::Error> {
     print_with_tag(0, Tag::Execution, format!("Read \"{}\" file", IGNORE_FILE_NAME));
 
-    let mut f = match File::open(ignore_file()) {
-        Ok(f)    => f,
-        Err(why) => print_with_error(1, why),
-    };
+    let mut f = try!(File::open(ignore_file()));
 
     let mut contents = String::new();
-    match f.read_to_string(&mut contents) {
-        Ok(_)    => print_with_okay(1),
-        Err(why) => print_with_error(1, why),
-    };
+    try!(f.read_to_string(&mut contents));
+    print_with_okay(1);
 
-    contents
+    let files = contents
         .lines()
         .map(|l| l.trim().to_string())
-        .collect::<BTreeSet<String>>()
+        .collect::<BTreeSet<String>>();
+
+    Ok(files)
 }
 
 
