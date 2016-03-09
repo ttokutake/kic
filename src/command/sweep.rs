@@ -50,18 +50,18 @@ impl Command for Sweep {
     }
 }
 
-fn move_files_to_dust_box(target_files: Vec<String>, path_to_dust_box: &PathBuf) -> Result<(), io::Error> {
+fn move_files_to_dust_box(target_files: Vec<String>, path_to_dust_box: &PathBuf) -> Result<(), CliError> {
     for target in &target_files {
         print_with_tag(0, Tag::Execution, "Analyze the path to file");
 
         let target_path = path_buf![&target];
         let target_name = match extract_file_name(&target_path) {
             Some(file_name) => file_name,
-            None            => panic!("Cannot happen"),
+            None            => return Err(From::from(CannotHappenError)),
         };
         let target_base = match target_path.parent() {
             Some(base_name) => base_name,
-            None            => panic!("Cannot happen"),
+            None            => return Err(From::from(CannotHappenError)),
         };
         let to = path_buf![&path_to_dust_box, target_base];
 

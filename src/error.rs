@@ -1,6 +1,8 @@
+extern crate regex;
 extern crate toml;
 
 use constant::*;
+use std::num::ParseIntError;
 use std::error;
 use std::fmt::{self, Display};
 use std::io;
@@ -10,7 +12,9 @@ use std::io;
 pub enum CliError {
     CannotHappen(CannotHappenError),
     Io(io::Error),
+    ParseInt(ParseIntError),
     ParseToml(toml::ParserError),
+    Regex(regex::Error),
     RunningPlace(RunningPlaceError),
 }
 impl Display for CliError {
@@ -18,7 +22,9 @@ impl Display for CliError {
         match *self {
             CliError::CannotHappen(ref e) => e.fmt(f),
             CliError::Io(ref e)           => e.fmt(f),
+            CliError::ParseInt(ref e)     => e.fmt(f),
             CliError::ParseToml(ref e)    => e.fmt(f),
+            CliError::Regex(ref e)        => e.fmt(f),
             CliError::RunningPlace(ref e) => e.fmt(f),
         }
     }
@@ -28,7 +34,9 @@ impl error::Error for CliError {
         match *self {
             CliError::CannotHappen(ref e) => Some(e),
             CliError::Io(ref e)           => Some(e),
+            CliError::ParseInt(ref e)     => Some(e),
             CliError::ParseToml(ref e)    => Some(e),
+            CliError::Regex(ref e)        => Some(e),
             CliError::RunningPlace(ref e) => Some(e),
         }
     }
@@ -37,7 +45,9 @@ impl error::Error for CliError {
         match *self {
             CliError::CannotHappen(ref e) => e.description(),
             CliError::Io(ref e)           => e.description(),
+            CliError::ParseInt(ref e)     => e.description(),
             CliError::ParseToml(ref e)    => e.description(),
+            CliError::Regex(ref e)        => e.description(),
             CliError::RunningPlace(ref e) => e.description(),
         }
     }
@@ -52,9 +62,19 @@ impl From<io::Error> for CliError {
         CliError::Io(e)
     }
 }
+impl From<ParseIntError> for CliError {
+    fn from(e: ParseIntError) -> CliError {
+        CliError::ParseInt(e)
+    }
+}
 impl From<toml::ParserError> for CliError {
     fn from(e: toml::ParserError) -> CliError {
         CliError::ParseToml(e)
+    }
+}
+impl From<regex::Error> for CliError {
+    fn from(e: regex::Error) -> CliError {
+        CliError::Regex(e)
     }
 }
 impl From<RunningPlaceError> for CliError {
