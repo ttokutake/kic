@@ -8,7 +8,7 @@ use lib::io::*;
 use lib::setting::*;
 use self::chrono::Local;
 use std::fs;
-use std::io;
+use std::io::Error as IoError;
 use std::path::PathBuf;
 
 pub struct Sweep;
@@ -73,7 +73,7 @@ fn move_files_to_dust_box(target_files: Vec<String>, path_to_dust_box: &PathBuf)
     Ok(())
 }
 
-fn move_empty_dir_to_dust_box(path_to_dust_box: &PathBuf) -> Result<(), io::Error> {
+fn move_empty_dir_to_dust_box(path_to_dust_box: &PathBuf) -> Result<(), IoError> {
     let all_dirs = dirs_ordered_by_descending_depth(".");
     for dir in all_dirs.iter().filter(|d| *d != ".") {
         print_with_tag(0, Tag::Execution, format!("Remove \"{}\" directory", dir));

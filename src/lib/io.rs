@@ -1,5 +1,5 @@
 use std::fmt::Display;
-use std::io::{self, Write};
+use std::io::{self, Error as IoError, Write};
 use std::process;
 
 
@@ -10,7 +10,7 @@ pub fn echo<S: Display>(message: S) {
     }
 }
 
-pub fn read_line_from_stdin() -> Result<String, io::Error>  {
+pub fn read_line_from_stdin() -> Result<String, IoError>  {
     let mut input = String::new();
     io::stdin().read_line(&mut input)
         .map(|_| input.trim().to_string())

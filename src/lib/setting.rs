@@ -7,7 +7,7 @@ use lib::io::*;
 use std::collections::BTreeSet;
 use std::fmt::Debug;
 use std::fs::{self, File};
-use std::io::{self, Read, Write};
+use std::io::{Error as IoError, Read, Write};
 use std::path::{Path, PathBuf};
 
 
@@ -45,15 +45,15 @@ pub fn ignore_file_exists() -> bool {
 }
 
 
-pub fn create_working_dir() -> Result<(), io::Error> {
+pub fn create_working_dir() -> Result<(), IoError> {
     create_essential_dir(working_dir())
 }
 
-pub fn create_storage_dir() -> Result<(), io::Error> {
+pub fn create_storage_dir() -> Result<(), IoError> {
     create_essential_dir(storage_dir())
 }
 
-fn create_essential_dir(path_to_dir: PathBuf) -> Result<(), io::Error> {
+fn create_essential_dir(path_to_dir: PathBuf) -> Result<(), IoError> {
     let file_name = extract_file_name(&path_to_dir).unwrap_or("<UnknownFileName>");
     print_with_tag(0, Tag::Execution, format!("Create \"{}\" directory", file_name));
 
@@ -67,7 +67,7 @@ fn create_essential_dir(path_to_dir: PathBuf) -> Result<(), io::Error> {
     Ok(())
 }
 
-pub fn create_essential_dir_all(path_to_dir: &PathBuf) -> Result<(), io::Error> {
+pub fn create_essential_dir_all(path_to_dir: &PathBuf) -> Result<(), IoError> {
     let file_name = extract_file_name(path_to_dir).unwrap_or("<UnknownDirectoryName>");
     print_with_tag(0, Tag::Execution, format!("Create \"{}\" directory with its parents", file_name));
 
@@ -78,15 +78,15 @@ pub fn create_essential_dir_all(path_to_dir: &PathBuf) -> Result<(), io::Error> 
 }
 
 
-pub fn create_config_file<S: AsRef<str>>(contents: S) -> Result<(), io::Error> {
+pub fn create_config_file<S: AsRef<str>>(contents: S) -> Result<(), IoError> {
     create_setting_file(config_file(), contents)
 }
 
-pub fn create_ignore_file<S: AsRef<str>>(contents: S) -> Result<(), io::Error> {
+pub fn create_ignore_file<S: AsRef<str>>(contents: S) -> Result<(), IoError> {
     create_setting_file(ignore_file(), contents)
 }
 
-fn create_setting_file<S: AsRef<str>>(path_to_file: PathBuf, contents: S) -> Result<(), io::Error> {
+fn create_setting_file<S: AsRef<str>>(path_to_file: PathBuf, contents: S) -> Result<(), IoError> {
     let file_name = extract_file_name(&path_to_file).unwrap_or("<UnknownFileName>");
 
     print_with_tag(0, Tag::Execution, format!("Create \"{}\" file", file_name));
@@ -124,7 +124,7 @@ pub fn read_config_file() -> Result<toml::Value, CliError> {
     Ok(toml)
 }
 
-pub fn read_ignore_file() -> Result<BTreeSet<String>, io::Error> {
+pub fn read_ignore_file() -> Result<BTreeSet<String>, IoError> {
     print_with_tag(0, Tag::Execution, format!("Read \"{}\" file", IGNORE_FILE_NAME));
 
     let mut f = try!(File::open(ignore_file()));
@@ -142,11 +142,11 @@ pub fn read_ignore_file() -> Result<BTreeSet<String>, io::Error> {
 }
 
 
-pub fn delete_all_setting_files() -> Result<(), io::Error> {
+pub fn delete_all_setting_files() -> Result<(), IoError> {
     delete_dir_all(WORKING_DIR_NAME)
 }
 
-pub fn delete_dir_all<P: AsRef<Path> + Debug>(path: P) -> Result<(), io::Error> {
+pub fn delete_dir_all<P: AsRef<Path> + Debug>(path: P) -> Result<(), IoError> {
     print_with_tag(0, Tag::Execution, format!("Remove all files and directories under {:?}", path));
 
     try!(fs::remove_dir_all(path));

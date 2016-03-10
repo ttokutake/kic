@@ -5,7 +5,7 @@ use self::walkdir::{WalkDir, WalkDirIterator};
 use std::collections::BTreeSet;
 use std::ffi::{OsStr, OsString};
 use std::fs;
-use std::io;
+use std::io::Error as IoError;
 use std::path::{Path, PathBuf};
 use std::result::Result;
 
@@ -22,7 +22,7 @@ pub fn extract_file_name(full_path: &PathBuf) -> Option<&str> {
         .and_then(OsStr::to_str)
 }
 
-pub fn ls<P: AsRef<Path>>(path: &P) -> Result<BTreeSet<String>, io::Error> {
+pub fn ls<P: AsRef<Path>>(path: &P) -> Result<BTreeSet<String>, IoError> {
     let dirs = try!(fs::read_dir(path));
     let dirs = dirs
         .filter_map(Result::ok)

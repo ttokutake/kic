@@ -5,14 +5,14 @@ use constant::*;
 use std::num::ParseIntError;
 use std::error;
 use std::fmt::{self, Display};
-use std::io;
+use std::io::Error as IoError;
 
 
 #[derive(Debug)]
 pub enum CliError {
     CannotHappen(CannotHappenError),
     Config(ConfigError),
-    Io(io::Error),
+    Io(IoError),
     ParseInt(ParseIntError),
     ParseToml(toml::ParserError),
     Regex(regex::Error),
@@ -66,8 +66,8 @@ impl From<ConfigError> for CliError {
         CliError::Config(e)
     }
 }
-impl From<io::Error> for CliError {
-    fn from(e: io::Error) -> CliError {
+impl From<IoError> for CliError {
+    fn from(e: IoError) -> CliError {
         CliError::Io(e)
     }
 }

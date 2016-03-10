@@ -10,7 +10,7 @@ use lib::setting::*;
 use self::chrono::offset::TimeZone;
 use self::chrono::{Duration, Local};
 use self::regex::Regex;
-use std::io;
+use std::io::Error as IoError;
 use std::path::PathBuf;
 
 pub struct Burn;
@@ -68,7 +68,7 @@ fn read_param_for_burn() -> Result<Duration, CliError> {
     Ok(duration)
 }
 
-fn search_target_storages(moratorium: Duration) -> Result<Vec<PathBuf>, io::Error> {
+fn search_target_storages(moratorium: Duration) -> Result<Vec<PathBuf>, IoError> {
     print_with_tag(0, Tag::Execution, "Search target dusts");
 
     let path_to_storage = storage_dir();
