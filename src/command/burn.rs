@@ -49,13 +49,15 @@ fn read_param_for_burn() -> Result<Duration, CliError> {
 
     let after = match config.lookup(key) {
         Some(v) => v.to_string(),
-        None    => print_with_error(1, "The key was not found"),
+        None    => return Err(From::from(ConfigError{ kind: ConfigErrorKind::NotFoundBurnAfter })),
     };
 
     let re = try!(Regex::new(r"(?P<num>\d+)\s*(?P<unit>days?|weeks?)"));
     let (num, unit) = match re.captures(after.as_ref()).map(|caps| (caps.name("num"), caps.name("unit"))) {
         Some((Some(num), Some(unit))) => (num, unit),
-        _                             => print_with_error(1, "The value is invalid"),
+        Some((None     , Some(_)   )) => return Err(From::from(ConfigError{ kind: ConfigErrorKind::NumOfBurnAfter })),
+        Some((Some(_)  , None      )) => return Err(From::from(ConfigError{ kind: ConfigErrorKind::UnitOfBurnAfter })),
+        _                             => return Err(From::from(ConfigError{ kind: ConfigErrorKind::BurnAfter })),
     };
     let num = try!(num.parse::<u32>());
 

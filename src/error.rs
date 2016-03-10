@@ -11,6 +11,7 @@ use std::io;
 #[derive(Debug)]
 pub enum CliError {
     CannotHappen(CannotHappenError),
+    Config(ConfigError),
     Io(io::Error),
     ParseInt(ParseIntError),
     ParseToml(toml::ParserError),
@@ -21,6 +22,7 @@ impl Display for CliError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
             CliError::CannotHappen(ref e) => e.fmt(f),
+            CliError::Config(ref e)       => e.fmt(f),
             CliError::Io(ref e)           => e.fmt(f),
             CliError::ParseInt(ref e)     => e.fmt(f),
             CliError::ParseToml(ref e)    => e.fmt(f),
@@ -33,6 +35,7 @@ impl error::Error for CliError {
     fn cause(&self) -> Option<&error::Error> {
         match *self {
             CliError::CannotHappen(ref e) => Some(e),
+            CliError::Config(ref e)       => Some(e),
             CliError::Io(ref e)           => Some(e),
             CliError::ParseInt(ref e)     => Some(e),
             CliError::ParseToml(ref e)    => Some(e),
@@ -44,6 +47,7 @@ impl error::Error for CliError {
     fn description(&self) -> &str {
         match *self {
             CliError::CannotHappen(ref e) => e.description(),
+            CliError::Config(ref e)       => e.description(),
             CliError::Io(ref e)           => e.description(),
             CliError::ParseInt(ref e)     => e.description(),
             CliError::ParseToml(ref e)    => e.description(),
@@ -55,6 +59,11 @@ impl error::Error for CliError {
 impl From<CannotHappenError> for CliError {
     fn from(e: CannotHappenError) -> CliError {
         CliError::CannotHappen(e)
+    }
+}
+impl From<ConfigError> for CliError {
+    fn from(e: ConfigError) -> CliError {
+        CliError::Config(e)
     }
 }
 impl From<io::Error> for CliError {
@@ -206,4 +215,38 @@ impl error::Error for CannotHappenError {
     fn cause(&self) -> Option<&error::Error> { None }
 
     fn description(&self) -> &str { "cannot happen" }
+}
+
+
+#[derive(Debug)]
+pub enum ConfigErrorKind {
+    NotFoundBurnAfter,
+    BurnAfter,
+    NumOfBurnAfter,
+    UnitOfBurnAfter,
+}
+impl Display for ConfigErrorKind {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", match *self {
+            ConfigErrorKind::NotFoundBurnAfter => r#"Please set [burn]after param"#,
+            ConfigErrorKind::BurnAfter         => r#"Invalid "[burn]after" param"#,
+            ConfigErrorKind::NumOfBurnAfter    => r#"Please set positive number as "[burn]after""#,
+            ConfigErrorKind::UnitOfBurnAfter   => r#"Please set "day" or "week" as "[burn]after""#,
+        })
+    }
+}
+
+#[derive(Debug)]
+pub struct ConfigError {
+    pub kind: ConfigErrorKind,
+}
+impl Display for ConfigError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.kind)
+    }
+}
+impl error::Error for ConfigError {
+    fn cause(&self) -> Option<&error::Error> { None }
+
+    fn description(&self) -> &str { "invalid params" }
 }
