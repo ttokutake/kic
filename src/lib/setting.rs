@@ -4,6 +4,7 @@ use constant::*;
 use error::*;
 use lib::fs::*;
 use lib::io::*;
+use self::toml::Value as TomlValue;
 use std::collections::BTreeSet;
 use std::fmt::Debug;
 use std::fs::{self, File};
@@ -101,7 +102,7 @@ fn create_setting_file<S: AsRef<str>>(path_to_file: PathBuf, contents: S) -> Res
 }
 
 
-pub fn read_config_file() -> Result<toml::Value, CliError> {
+pub fn read_config_file() -> Result<TomlValue, CliError> {
     print_with_tag(0, Tag::Execution, format!("Read \"{}\" file as TOML", CONFIG_FILE_NAME));
 
     let mut f = try!(File::open(config_file()));
