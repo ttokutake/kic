@@ -55,14 +55,8 @@ fn move_files_to_dust_box(target_files: Vec<String>, path_to_dust_box: &PathBuf)
         print_with_tag(0, Tag::Execution, "Analyze the path to file");
 
         let target_path = path_buf![&target];
-        let target_name = match extract_file_name(&target_path) {
-            Some(file_name) => file_name,
-            None            => return Err(From::from(CannotHappenError)),
-        };
-        let target_base = match target_path.parent() {
-            Some(base_name) => base_name,
-            None            => return Err(From::from(CannotHappenError)),
-        };
+        let target_name = try!(extract_file_name(&target_path).ok_or(CannotHappenError));
+        let target_base = try!(target_path.parent().ok_or(CannotHappenError));
         let to = path_buf![&path_to_dust_box, target_base];
 
         print_with_okay(1);

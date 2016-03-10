@@ -47,10 +47,7 @@ fn read_param_for_burn() -> Result<Duration, CliError> {
 
     print_with_tag(0, Tag::Execution, format!("Extract \"{}\" parameter", key));
 
-    let after = match config.lookup(key) {
-        Some(v) => v.to_string(),
-        None    => return Err(From::from(ConfigError{ kind: ConfigErrorKind::NotFoundBurnAfter })),
-    };
+    let after = try!(config.lookup(key).ok_or(ConfigError{ kind: ConfigErrorKind::NotFoundBurnAfter })).to_string();
 
     let re = try!(Regex::new(r"(?P<num>\d+)\s*(?P<unit>days?|weeks?)"));
     let (num, unit) = match re.captures(after.as_ref()).map(|caps| (caps.name("num"), caps.name("unit"))) {
