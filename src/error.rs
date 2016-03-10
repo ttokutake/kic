@@ -2,6 +2,7 @@ extern crate regex;
 extern crate toml;
 
 use constant::*;
+use self::regex::Error as RegexError;
 use std::num::ParseIntError;
 use std::error;
 use std::fmt::{self, Display};
@@ -15,7 +16,7 @@ pub enum CliError {
     Io(IoError),
     ParseInt(ParseIntError),
     ParseToml(toml::ParserError),
-    Regex(regex::Error),
+    Regex(RegexError),
     RunningPlace(RunningPlaceError),
 }
 impl Display for CliError {
@@ -81,8 +82,8 @@ impl From<toml::ParserError> for CliError {
         CliError::ParseToml(e)
     }
 }
-impl From<regex::Error> for CliError {
-    fn from(e: regex::Error) -> CliError {
+impl From<RegexError> for CliError {
+    fn from(e: RegexError) -> CliError {
         CliError::Regex(e)
     }
 }
