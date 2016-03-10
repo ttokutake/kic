@@ -1,7 +1,7 @@
 extern crate walkdir;
 
 use constant::*;
-use self::walkdir::{WalkDir, WalkDirIterator};
+use self::walkdir::{DirEntry as WalkDirEntry, WalkDir, WalkDirIterator};
 use std::collections::BTreeSet;
 use std::ffi::{OsStr, OsString};
 use std::fs;
@@ -33,25 +33,25 @@ pub fn ls<P: AsRef<Path>>(path: &P) -> Result<BTreeSet<String>, IoError> {
     Ok(dirs)
 }
 
-fn is_hidden(entry: &walkdir::DirEntry) -> bool {
+fn is_hidden(entry: &WalkDirEntry) -> bool {
     entry
         .file_name()
         .to_str()
         .map_or(false, |s| s.starts_with(".") && s.len() > 1 && s != "..")
 }
 
-fn is_pinned(entry: &walkdir::DirEntry) -> bool {
+fn is_pinned(entry: &WalkDirEntry) -> bool {
     entry
         .file_name()
         .to_str()
         .map_or(false, |s| s == WORKING_DIR_NAME || s == KEEPED_FILE_NAME)
 }
 
-fn is_target(entry: &walkdir::DirEntry) -> bool {
+fn is_target(entry: &WalkDirEntry) -> bool {
     !is_hidden(entry) && !is_pinned(entry)
 }
 
-fn to_string(entry: walkdir::DirEntry) -> Result<String, OsString> {
+fn to_string(entry: WalkDirEntry) -> Result<String, OsString> {
     entry
         .path()
         .as_os_str()
@@ -65,7 +65,7 @@ pub fn walk_dir<P: AsRef<Path>>(root: P) -> BTreeSet<String> {
         .filter_entry(is_target)
         .filter_map(Result::ok)
         .filter(|e| !e.file_type().is_dir())
-        .collect::<Vec<walkdir::DirEntry>>();
+        .collect::<Vec<WalkDirEntry>>();
 
     walker
         .into_iter()
@@ -80,7 +80,7 @@ pub fn dirs_ordered_by_descending_depth<P: AsRef<Path>>(root: P) -> Vec<String> 
         .filter_entry(is_target)
         .filter_entry(|e| e.file_type().is_dir())
         .filter_map(Result::ok)
-        .collect::<Vec<walkdir::DirEntry>>();
+        .collect::<Vec<WalkDirEntry>>();
 
     walker.sort_by(|l, r| {
         let l_depth = &l.depth();
