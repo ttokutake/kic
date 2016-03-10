@@ -6,7 +6,7 @@ use self::regex::Error as RegexError;
 use self::toml::ParserError as ParseTomlError;
 use std::num::ParseIntError;
 use std::error::Error;
-use std::fmt::{self, Display};
+use std::fmt::{Display, Formatter, Result as FmtResult};
 use std::io::Error as IoError;
 
 
@@ -21,7 +21,7 @@ pub enum CliError {
     RunningPlace(RunningPlaceError),
 }
 impl Display for CliError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut Formatter) -> FmtResult {
         match *self {
             CliError::CannotHappen(ref e) => e.fmt(f),
             CliError::Config(ref e)       => e.fmt(f),
@@ -100,7 +100,7 @@ pub struct RunningPlaceError {
     pub dir: String,
 }
 impl Display for RunningPlaceError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut Formatter) -> FmtResult {
         write!(f, "Cannot run in \"{}\" directory", self.dir)
     }
 }
@@ -119,7 +119,7 @@ pub enum EssentialKind {
     IgnoreFile,
 }
 impl Display for EssentialKind {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut Formatter) -> FmtResult {
         write!(f, "{}", match *self {
             EssentialKind::WorkingDir => format!("{} directory", WORKING_DIR_NAME),
             EssentialKind::StorageDir => format!("{} directory", STORAGE_DIR_NAME),
@@ -134,7 +134,7 @@ pub struct EssentialLack {
     pub what: EssentialKind,
 }
 impl Display for EssentialLack {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut Formatter) -> FmtResult {
         write!(f, "{} does not exist. Please use \"init\" command", self.what)
     }
 }
@@ -158,7 +158,7 @@ pub enum UsageKind {
     Destroy,
 }
 impl Display for UsageKind {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut Formatter) -> FmtResult {
         write!(f, "{}", match *self {
             UsageKind::Nothing => format!(
 r#"Usage:
@@ -195,7 +195,7 @@ pub struct Usage {
     pub kind: UsageKind,
 }
 impl Display for Usage {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut Formatter) -> FmtResult {
         write!(f, "{}", self.kind)
     }
 }
@@ -209,7 +209,7 @@ impl Error for Usage {
 #[derive(Debug)]
 pub struct CannotHappenError;
 impl Display for CannotHappenError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut Formatter) -> FmtResult {
         write!(f, "Cannot happen")
     }
 }
@@ -228,7 +228,7 @@ pub enum ConfigErrorKind {
     UnitOfBurnAfter,
 }
 impl Display for ConfigErrorKind {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut Formatter) -> FmtResult {
         write!(f, "{}", match *self {
             ConfigErrorKind::NotFoundBurnAfter => r#"Please set [burn]after param"#,
             ConfigErrorKind::BurnAfter         => r#"Invalid "[burn]after" param"#,
@@ -243,7 +243,7 @@ pub struct ConfigError {
     pub kind: ConfigErrorKind,
 }
 impl Display for ConfigError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut Formatter) -> FmtResult {
         write!(f, "{}", self.kind)
     }
 }
