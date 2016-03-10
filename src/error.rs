@@ -118,24 +118,18 @@ pub enum EssentialKind {
     ConfigFile,
     IgnoreFile,
 }
-impl Display for EssentialKind {
-    fn fmt(&self, f: &mut Formatter) -> FmtResult {
-        write!(f, "{}", match *self {
-            EssentialKind::WorkingDir => format!("{} directory", WORKING_DIR_NAME),
-            EssentialKind::StorageDir => format!("{} directory", STORAGE_DIR_NAME),
-            EssentialKind::ConfigFile => format!("{} file"     , CONFIG_FILE_NAME),
-            EssentialKind::IgnoreFile => format!("{} file"     , IGNORE_FILE_NAME),
-        })
-    }
-}
-
 #[derive(Debug)]
 pub struct EssentialLack {
     pub what: EssentialKind,
 }
 impl Display for EssentialLack {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
-        write!(f, "{} does not exist. Please use \"init\" command", self.what)
+        write!(f, "{} does not exist. Please use \"init\" command", match self.what {
+            EssentialKind::WorkingDir => format!("{} directory", WORKING_DIR_NAME),
+            EssentialKind::StorageDir => format!("{} directory", STORAGE_DIR_NAME),
+            EssentialKind::ConfigFile => format!("{} file"     , CONFIG_FILE_NAME),
+            EssentialKind::IgnoreFile => format!("{} file"     , IGNORE_FILE_NAME),
+        })
     }
 }
 impl Error for EssentialLack {
@@ -157,9 +151,13 @@ pub enum UsageKind {
     End,
     Destroy,
 }
-impl Display for UsageKind {
+#[derive(Debug)]
+pub struct Usage {
+    pub kind: UsageKind,
+}
+impl Display for Usage {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
-        write!(f, "{}", match *self {
+        write!(f, "{}", match self.kind {
             UsageKind::Nothing => format!(
 r#"Usage:
     {} <command> [--help|-h]
@@ -187,16 +185,6 @@ Command:
             UsageKind::End     => "end!"    .to_string(),
             UsageKind::Destroy => "destroy!".to_string(),
         })
-    }
-}
-
-#[derive(Debug)]
-pub struct Usage {
-    pub kind: UsageKind,
-}
-impl Display for Usage {
-    fn fmt(&self, f: &mut Formatter) -> FmtResult {
-        write!(f, "{}", self.kind)
     }
 }
 impl Error for Usage {
@@ -227,24 +215,18 @@ pub enum ConfigErrorKind {
     NumOfBurnAfter,
     UnitOfBurnAfter,
 }
-impl Display for ConfigErrorKind {
-    fn fmt(&self, f: &mut Formatter) -> FmtResult {
-        write!(f, "{}", match *self {
-            ConfigErrorKind::NotFoundBurnAfter => r#"Please set [burn]after param"#,
-            ConfigErrorKind::BurnAfter         => r#"Invalid "[burn]after" param"#,
-            ConfigErrorKind::NumOfBurnAfter    => r#"Please set positive number as "[burn]after""#,
-            ConfigErrorKind::UnitOfBurnAfter   => r#"Please set "day" or "week" as "[burn]after""#,
-        })
-    }
-}
-
 #[derive(Debug)]
 pub struct ConfigError {
     pub kind: ConfigErrorKind,
 }
 impl Display for ConfigError {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
-        write!(f, "{}", self.kind)
+        write!(f, "{}", match self.kind {
+            ConfigErrorKind::NotFoundBurnAfter => r#"Please set [burn]after param"#,
+            ConfigErrorKind::BurnAfter         => r#"Invalid "[burn]after" param"#,
+            ConfigErrorKind::NumOfBurnAfter    => r#"Please set positive number as "[burn]after""#,
+            ConfigErrorKind::UnitOfBurnAfter   => r#"Please set "day" or "week" as "[burn]after""#,
+        })
     }
 }
 impl Error for ConfigError {
