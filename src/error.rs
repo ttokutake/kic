@@ -96,18 +96,44 @@ impl From<RunningPlaceError> for CliError {
 
 
 #[derive(Debug)]
-pub struct RunningPlaceError {
-    pub dir: String,
-}
-impl Display for RunningPlaceError {
+pub struct CannotHappenError;
+impl Display for CannotHappenError {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
-        write!(f, "Cannot run in \"{}\" directory", self.dir)
+        write!(f, "Cannot happen")
     }
 }
-impl Error for RunningPlaceError {
+impl Error for CannotHappenError {
     fn cause(&self) -> Option<&Error> { None }
 
-    fn description(&self) -> &str { "cannot run in banned directories" }
+    fn description(&self) -> &str { "cannot happen" }
+}
+
+
+#[derive(Debug)]
+pub enum ConfigErrorKind {
+    NotFoundBurnAfter,
+    BurnAfter,
+    NumOfBurnAfter,
+    UnitOfBurnAfter,
+}
+#[derive(Debug)]
+pub struct ConfigError {
+    pub kind: ConfigErrorKind,
+}
+impl Display for ConfigError {
+    fn fmt(&self, f: &mut Formatter) -> FmtResult {
+        write!(f, "{}", match self.kind {
+            ConfigErrorKind::NotFoundBurnAfter => r#"Please set [burn]after param"#,
+            ConfigErrorKind::BurnAfter         => r#"Invalid "[burn]after" param"#,
+            ConfigErrorKind::NumOfBurnAfter    => r#"Please set positive number as "[burn]after""#,
+            ConfigErrorKind::UnitOfBurnAfter   => r#"Please set "day" or "week" as "[burn]after""#,
+        })
+    }
+}
+impl Error for ConfigError {
+    fn cause(&self) -> Option<&Error> { None }
+
+    fn description(&self) -> &str { "invalid params" }
 }
 
 
@@ -195,42 +221,16 @@ impl Error for Usage {
 
 
 #[derive(Debug)]
-pub struct CannotHappenError;
-impl Display for CannotHappenError {
+pub struct RunningPlaceError {
+    pub dir: String,
+}
+impl Display for RunningPlaceError {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
-        write!(f, "Cannot happen")
+        write!(f, "Cannot run in \"{}\" directory", self.dir)
     }
 }
-impl Error for CannotHappenError {
+impl Error for RunningPlaceError {
     fn cause(&self) -> Option<&Error> { None }
 
-    fn description(&self) -> &str { "cannot happen" }
-}
-
-
-#[derive(Debug)]
-pub enum ConfigErrorKind {
-    NotFoundBurnAfter,
-    BurnAfter,
-    NumOfBurnAfter,
-    UnitOfBurnAfter,
-}
-#[derive(Debug)]
-pub struct ConfigError {
-    pub kind: ConfigErrorKind,
-}
-impl Display for ConfigError {
-    fn fmt(&self, f: &mut Formatter) -> FmtResult {
-        write!(f, "{}", match self.kind {
-            ConfigErrorKind::NotFoundBurnAfter => r#"Please set [burn]after param"#,
-            ConfigErrorKind::BurnAfter         => r#"Invalid "[burn]after" param"#,
-            ConfigErrorKind::NumOfBurnAfter    => r#"Please set positive number as "[burn]after""#,
-            ConfigErrorKind::UnitOfBurnAfter   => r#"Please set "day" or "week" as "[burn]after""#,
-        })
-    }
-}
-impl Error for ConfigError {
-    fn cause(&self) -> Option<&Error> { None }
-
-    fn description(&self) -> &str { "invalid params" }
+    fn description(&self) -> &str { "cannot run in banned directories" }
 }
