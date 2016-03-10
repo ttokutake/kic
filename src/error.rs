@@ -4,7 +4,7 @@ extern crate toml;
 use constant::*;
 use self::regex::Error as RegexError;
 use std::num::ParseIntError;
-use std::error;
+use std::error::Error;
 use std::fmt::{self, Display};
 use std::io::Error as IoError;
 
@@ -32,8 +32,8 @@ impl Display for CliError {
         }
     }
 }
-impl error::Error for CliError {
-    fn cause(&self) -> Option<&error::Error> {
+impl Error for CliError {
+    fn cause(&self) -> Option<&Error> {
         match *self {
             CliError::CannotHappen(ref e) => Some(e),
             CliError::Config(ref e)       => Some(e),
@@ -103,8 +103,8 @@ impl Display for RunningPlaceError {
         write!(f, "Cannot run in \"{}\" directory", self.dir)
     }
 }
-impl error::Error for RunningPlaceError {
-    fn cause(&self) -> Option<&error::Error> { None }
+impl Error for RunningPlaceError {
+    fn cause(&self) -> Option<&Error> { None }
 
     fn description(&self) -> &str { "cannot run in banned directories" }
 }
@@ -137,8 +137,8 @@ impl Display for EssentialLack {
         write!(f, "{} does not exist. Please use \"init\" command", self.what)
     }
 }
-impl error::Error for EssentialLack {
-    fn cause(&self) -> Option<&error::Error> { None }
+impl Error for EssentialLack {
+    fn cause(&self) -> Option<&Error> { None }
 
     fn description(&self) -> &str { "essential file does not exist" }
 }
@@ -198,8 +198,8 @@ impl Display for Usage {
         write!(f, "{}", self.kind)
     }
 }
-impl error::Error for Usage {
-    fn cause(&self) -> Option<&error::Error> { None }
+impl Error for Usage {
+    fn cause(&self) -> Option<&Error> { None }
 
     fn description(&self) -> &str { "show usage" }
 }
@@ -212,8 +212,8 @@ impl Display for CannotHappenError {
         write!(f, "Cannot happen")
     }
 }
-impl error::Error for CannotHappenError {
-    fn cause(&self) -> Option<&error::Error> { None }
+impl Error for CannotHappenError {
+    fn cause(&self) -> Option<&Error> { None }
 
     fn description(&self) -> &str { "cannot happen" }
 }
@@ -246,8 +246,8 @@ impl Display for ConfigError {
         write!(f, "{}", self.kind)
     }
 }
-impl error::Error for ConfigError {
-    fn cause(&self) -> Option<&error::Error> { None }
+impl Error for ConfigError {
+    fn cause(&self) -> Option<&Error> { None }
 
     fn description(&self) -> &str { "invalid params" }
 }
