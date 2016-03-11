@@ -103,8 +103,6 @@ impl Display for CannotHappenError {
     }
 }
 impl Error for CannotHappenError {
-    fn cause(&self) -> Option<&Error> { None }
-
     fn description(&self) -> &str { "cannot happen" }
 }
 
@@ -131,8 +129,6 @@ impl Display for ConfigError {
     }
 }
 impl Error for ConfigError {
-    fn cause(&self) -> Option<&Error> { None }
-
     fn description(&self) -> &str { "invalid params" }
 }
 
@@ -159,8 +155,6 @@ impl Display for EssentialLack {
     }
 }
 impl Error for EssentialLack {
-    fn cause(&self) -> Option<&Error> { None }
-
     fn description(&self) -> &str { "essential file does not exist" }
 }
 
@@ -214,8 +208,6 @@ Command:
     }
 }
 impl Error for Usage {
-    fn cause(&self) -> Option<&Error> { None }
-
     fn description(&self) -> &str { "show usage" }
 }
 
@@ -230,7 +222,5 @@ impl Display for RunningPlaceError {
     }
 }
 impl Error for RunningPlaceError {
-    fn cause(&self) -> Option<&Error> { None }
-
     fn description(&self) -> &str { "cannot run in banned directories" }
 }
