@@ -7,7 +7,7 @@ impl Command for Config {
     fn validation(&self) -> bool { true }
 
     fn usage(&self) -> Usage {
-        return Usage { kind: UsageKind::Config };
+        return Usage::new(UsageKind::Config);
     }
 
     fn main(&self) {

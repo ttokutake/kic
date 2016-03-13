@@ -11,7 +11,7 @@ impl Command for Destroy {
     fn validation(&self) -> bool { true }
 
     fn usage(&self) -> Usage {
-        return Usage { kind: UsageKind::Destroy };
+        return Usage::new(UsageKind::Destroy);
     }
 
     fn main(&self) {

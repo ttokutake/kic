@@ -16,7 +16,7 @@ impl Command for Ignore {
     fn validation(&self) -> bool { true }
 
     fn usage(&self) -> Usage {
-        return Usage { kind: UsageKind::Ignore };
+        return Usage::new(UsageKind::Ignore);
     }
 
     fn main(&self) {

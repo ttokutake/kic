@@ -7,7 +7,7 @@ impl Command for End {
     fn validation(&self) -> bool { true }
 
     fn usage(&self) -> Usage {
-        return Usage { kind: UsageKind::End };
+        return Usage::new(UsageKind::End);
     }
 
     fn main(&self) {

@@ -12,7 +12,7 @@ impl Command for Init {
     fn validation(&self) -> bool { false }
 
     fn usage(&self) -> Usage {
-        return Usage { kind: UsageKind::Init };
+        return Usage::new(UsageKind::Init);
     }
 
     fn main(&self) {

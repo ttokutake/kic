@@ -25,16 +25,16 @@ trait Command {
     fn validation(&self) -> bool;
     fn validate(&self) -> Result<(), EssentialLack> {
         if !working_dir_exists() {
-            return Err(EssentialLack { what: EssentialKind::WorkingDir });
+            return Err(EssentialLack::new(EssentialKind::WorkingDir));
         }
         if !storage_dir_exists() {
-            return Err(EssentialLack { what: EssentialKind::StorageDir });
+            return Err(EssentialLack::new(EssentialKind::StorageDir));
         }
         if !config_file_exists() {
-            return Err(EssentialLack { what: EssentialKind::ConfigFile });
+            return Err(EssentialLack::new(EssentialKind::ConfigFile));
         }
         if !ignore_file_exists() {
-            return Err(EssentialLack { what: EssentialKind::IgnoreFile });
+            return Err(EssentialLack::new(EssentialKind::IgnoreFile));
         }
 
         Ok(())
@@ -77,9 +77,9 @@ pub fn execute(args: Vec<String>) {
             "start"   => Box::new(Start  ),
             "end"     => Box::new(End    ),
             "destroy" => Box::new(Destroy),
-            _         => print_usage(Usage { kind: UsageKind::Nothing }),
+            _         => print_usage(Usage::new(UsageKind::Nothing)),
         },
-        None => print_usage(Usage { kind: UsageKind::Nothing }),
+        None => print_usage(Usage::new(UsageKind::Nothing)),
     };
 
     command.exec(help);

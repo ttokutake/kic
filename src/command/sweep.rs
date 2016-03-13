@@ -17,7 +17,7 @@ impl Command for Sweep {
     fn validation(&self) -> bool { true }
 
     fn usage(&self) -> Usage {
-        return Usage { kind: UsageKind::Sweep };
+        return Usage::new(UsageKind::Sweep);
     }
 
     fn main(&self) {

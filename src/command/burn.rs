@@ -19,7 +19,7 @@ impl Command for Burn {
     fn validation(&self) -> bool { true }
 
     fn usage(&self) -> Usage {
-        return Usage { kind: UsageKind::Burn };
+        return Usage::new(UsageKind::Burn);
     }
 
     fn main(&self) {
@@ -47,14 +47,14 @@ fn read_param_for_burn() -> Result<Duration, CliError> {
 
     print_with_tag(0, Tag::Execution, format!("Extract \"{}\" parameter", key));
 
-    let after = try!(config.lookup(key).ok_or(ConfigError{ kind: ConfigErrorKind::NotFoundBurnAfter })).to_string();
+    let after = try!(config.lookup(key).ok_or(ConfigError::new(ConfigErrorKind::NotFoundBurnAfter))).to_string();
 
     let re = try!(Regex::new(r"(?P<num>\d+)\s*(?P<unit>days?|weeks?)"));
     let (num, unit) = match re.captures(after.as_ref()).map(|caps| (caps.name("num"), caps.name("unit"))) {
         Some((Some(num), Some(unit))) => (num, unit),
-        Some((None     , Some(_)   )) => return Err(From::from(ConfigError{ kind: ConfigErrorKind::NumOfBurnAfter })),
-        Some((Some(_)  , None      )) => return Err(From::from(ConfigError{ kind: ConfigErrorKind::UnitOfBurnAfter })),
-        _                             => return Err(From::from(ConfigError{ kind: ConfigErrorKind::BurnAfter })),
+        Some((None     , Some(_)   )) => return Err(From::from(ConfigError::new(ConfigErrorKind::NumOfBurnAfter))),
+        Some((Some(_)  , None      )) => return Err(From::from(ConfigError::new(ConfigErrorKind::UnitOfBurnAfter))),
+        _                             => return Err(From::from(ConfigError::new(ConfigErrorKind::BurnAfter))),
     };
     let num = try!(num.parse::<u32>());
 

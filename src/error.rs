@@ -116,7 +116,12 @@ pub enum ConfigErrorKind {
 }
 #[derive(Debug)]
 pub struct ConfigError {
-    pub kind: ConfigErrorKind,
+    kind: ConfigErrorKind,
+}
+impl ConfigError {
+    pub fn new(kind: ConfigErrorKind) -> ConfigError {
+        ConfigError { kind: kind }
+    }
 }
 impl Display for ConfigError {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
@@ -142,7 +147,12 @@ pub enum EssentialKind {
 }
 #[derive(Debug)]
 pub struct EssentialLack {
-    pub what: EssentialKind,
+    what: EssentialKind,
+}
+impl EssentialLack {
+    pub fn new(what: EssentialKind) -> EssentialLack {
+        EssentialLack { what: what }
+    }
 }
 impl Display for EssentialLack {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
@@ -173,7 +183,12 @@ pub enum UsageKind {
 }
 #[derive(Debug)]
 pub struct Usage {
-    pub kind: UsageKind,
+    kind: UsageKind,
+}
+impl Usage {
+    pub fn new(kind: UsageKind) -> Usage {
+        Usage { kind: kind }
+    }
 }
 impl Display for Usage {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
@@ -214,7 +229,12 @@ impl Error for Usage {
 
 #[derive(Debug)]
 pub struct RunningPlaceError {
-    pub dir: String,
+    dir: String,
+}
+impl RunningPlaceError {
+    pub fn new(dir: String) -> RunningPlaceError {
+        RunningPlaceError { dir: dir }
+    }
 }
 impl Display for RunningPlaceError {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
