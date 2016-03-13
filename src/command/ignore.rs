@@ -22,10 +22,10 @@ impl Command for Ignore {
     fn main(&self) -> Result<(), CliError> {
         match self.command {
             Some(ref c) => match c.as_ref() {
-                "add"     => add(self),
-                "remove"  => remove(self),
-                "current" => ignore_current_files(),
-                "clear"   => clear_ignore_file(),
+                "add"     => self.add(),
+                "remove"  => self.remove(),
+                "current" => self.ignore_current_files(),
+                "clear"   => self.clear_ignore_file(),
                 _         => Err(From::from(self.usage())),
             },
             None => Err(From::from(self.usage())),
@@ -40,75 +40,77 @@ fn append_prefix_if_need(path: &String) -> String {
     format!("{}{}", if path.starts_with(prefix) { "" } else { prefix }, path)
 }
 
-fn add(ignore: &Ignore) -> Result<(), CliError> {
-    let paths = &ignore.paths;
+impl Ignore {
+    fn add(&self) -> Result<(), CliError> {
+        let paths = &self.paths;
 
-    if paths.len() == 0 {
-        return Err(From::from(ignore.usage()));
+        if paths.len() == 0 {
+            return Err(From::from(self.usage()));
+        }
+
+        print_with_tag(0, Tag::Execution, format!("Confirm files to be added to \"{}\"", IGNORE_FILE_NAME));
+
+        let ignores_to_be_added = paths
+            .iter()
+            .map(append_prefix_if_need)
+            .filter(|p| Path::new(p).is_file())
+            .collect::<BTreeSet<String>>();
+
+        for file in &ignores_to_be_added {
+            print_with_tag(1, Tag::Info, format!("\"{}\" will be ignored", file));
+        }
+
+        let original_ignores = try!(read_ignore_file());
+
+        let new_ignores = original_ignores
+            .union(&ignores_to_be_added)
+            .fold(String::new(), |c, ref f| c + f + "\n");
+
+        print_with_tag(0, Tag::Execution, format!("Recreate \"{}\" file", IGNORE_FILE_NAME));
+
+        try!(create_ignore_file(new_ignores));
+
+        Ok(())
     }
 
-    print_with_tag(0, Tag::Execution, format!("Confirm files to be added to \"{}\"", IGNORE_FILE_NAME));
+    fn remove(&self) -> Result<(), CliError> {
+        let paths = &self.paths;
 
-    let ignores_to_be_added = paths
-        .iter()
-        .map(append_prefix_if_need)
-        .filter(|p| Path::new(p).is_file())
-        .collect::<BTreeSet<String>>();
+        if paths.len() == 0 {
+            return Err(From::from(self.usage()));
+        }
 
-    for file in &ignores_to_be_added {
-        print_with_tag(1, Tag::Info, format!("\"{}\" will be ignored", file));
+        let ignores_to_be_removed = paths
+            .iter()
+            .map(append_prefix_if_need)
+            .collect::<BTreeSet<String>>();
+
+        for file in &ignores_to_be_removed {
+            print_with_tag(1, Tag::Info, format!("\"{}\" will not be ignored", file));
+        }
+
+        let original_ignores = try!(read_ignore_file());
+
+        let new_ignores = original_ignores
+            .difference(&ignores_to_be_removed)
+            .fold(String::new(), |c, ref f| c + f + "\n");
+
+        print_with_tag(0, Tag::Execution, format!("Recreate \"{}\" file", IGNORE_FILE_NAME));
+
+        try!(create_ignore_file(new_ignores));
+
+        Ok(())
     }
 
-    let original_ignores = try!(read_ignore_file());
+    fn ignore_current_files(&self) -> Result<(), CliError> {
+        println!("do current command");
 
-    let new_ignores = original_ignores
-        .union(&ignores_to_be_added)
-        .fold(String::new(), |c, ref f| c + f + "\n");
-
-    print_with_tag(0, Tag::Execution, format!("Recreate \"{}\" file", IGNORE_FILE_NAME));
-
-    try!(create_ignore_file(new_ignores));
-
-    Ok(())
-}
-
-fn remove(ignore: &Ignore) -> Result<(), CliError> {
-    let paths = &ignore.paths;
-
-    if paths.len() == 0 {
-        return Err(From::from(ignore.usage()));
+        Ok(())
     }
 
-    let ignores_to_be_removed = paths
-        .iter()
-        .map(append_prefix_if_need)
-        .collect::<BTreeSet<String>>();
+    fn clear_ignore_file(&self) -> Result<(), CliError> {
+        println!("do clear command");
 
-    for file in &ignores_to_be_removed {
-        print_with_tag(1, Tag::Info, format!("\"{}\" will not be ignored", file));
+        Ok(())
     }
-
-    let original_ignores = try!(read_ignore_file());
-
-    let new_ignores = original_ignores
-        .difference(&ignores_to_be_removed)
-        .fold(String::new(), |c, ref f| c + f + "\n");
-
-    print_with_tag(0, Tag::Execution, format!("Recreate \"{}\" file", IGNORE_FILE_NAME));
-
-    try!(create_ignore_file(new_ignores));
-
-    Ok(())
-}
-
-fn ignore_current_files() -> Result<(), CliError> {
-    println!("do current command");
-
-    Ok(())
-}
-
-fn clear_ignore_file() -> Result<(), CliError> {
-    println!("do clear command");
-
-    Ok(())
 }
