@@ -9,8 +9,8 @@ use std::collections::BTreeSet;
 use std::path::Path;
 
 pub struct Ignore {
-    pub command: Option<String>,
-    pub paths  : Vec<String>,
+    command: Option<String>,
+    paths  : Vec<String>,
 }
 
 impl Command for Ignore {
@@ -35,6 +35,10 @@ impl Command for Ignore {
 }
 
 impl Ignore {
+    pub fn new(command: Option<String>, paths: Vec<String>) -> Ignore {
+        Ignore { command: command, paths: paths }
+    }
+
     fn add(&self) -> Result<(), CliError> {
         let paths = &self.paths;
 

@@ -79,14 +79,14 @@ pub fn execute() -> Result<(), CliError> {
 
     let command: Box<Command> = match args.next() {
         Some(first) => match first.as_ref() {
-            "init"    => Box::new(Init   ),
-            "config"  => Box::new(Config ),
-            "ignore"  => Box::new(Ignore { command: args.next(), paths: args.collect() }),
-            "sweep"   => Box::new(Sweep  ),
-            "burn"    => Box::new(Burn   ),
-            "start"   => Box::new(Start  ),
-            "end"     => Box::new(End    ),
-            "destroy" => Box::new(Destroy),
+            "init"    => Box::new(Init                                    ),
+            "config"  => Box::new(Config                                  ),
+            "ignore"  => Box::new(Ignore::new(args.next(), args.collect())),
+            "sweep"   => Box::new(Sweep                                   ),
+            "burn"    => Box::new(Burn                                    ),
+            "start"   => Box::new(Start                                   ),
+            "end"     => Box::new(End                                     ),
+            "destroy" => Box::new(Destroy                                 ),
             _         => return Err(From::from(Usage::new(UsageKind::Nothing))),
         },
         None => return Err(From::from(Usage::new(UsageKind::Nothing))),
