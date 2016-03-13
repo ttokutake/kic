@@ -14,6 +14,7 @@ use std::io::Error as IoError;
 pub enum CliError {
     CannotHappen(CannotHappenError),
     Config(ConfigError),
+    Essential(EssentialLack),
     Io(IoError),
     ParseInt(ParseIntError),
     ParseToml(ParseTomlError),
@@ -26,12 +27,13 @@ impl Display for CliError {
         match *self {
             CliError::CannotHappen(ref e) => e.fmt(f),
             CliError::Config(ref e)       => e.fmt(f),
+            CliError::Essential(ref e)    => e.fmt(f),
             CliError::Io(ref e)           => e.fmt(f),
             CliError::ParseInt(ref e)     => e.fmt(f),
             CliError::ParseToml(ref e)    => e.fmt(f),
             CliError::Regex(ref e)        => e.fmt(f),
             CliError::RunningPlace(ref e) => e.fmt(f),
-            CliError::Usage(ref e)        => e.fmt(f),
+            CliError::Usage(ref u)        => u.fmt(f),
         }
     }
 }
@@ -40,12 +42,13 @@ impl Error for CliError {
         match *self {
             CliError::CannotHappen(ref e) => Some(e),
             CliError::Config(ref e)       => Some(e),
+            CliError::Essential(ref e)    => Some(e),
             CliError::Io(ref e)           => Some(e),
             CliError::ParseInt(ref e)     => Some(e),
             CliError::ParseToml(ref e)    => Some(e),
             CliError::Regex(ref e)        => Some(e),
             CliError::RunningPlace(ref e) => Some(e),
-            CliError::Usage(ref e)        => Some(e),
+            CliError::Usage(ref u)        => Some(u),
         }
     }
 
@@ -53,12 +56,13 @@ impl Error for CliError {
         match *self {
             CliError::CannotHappen(ref e) => e.description(),
             CliError::Config(ref e)       => e.description(),
+            CliError::Essential(ref e)    => e.description(),
             CliError::Io(ref e)           => e.description(),
             CliError::ParseInt(ref e)     => e.description(),
             CliError::ParseToml(ref e)    => e.description(),
             CliError::Regex(ref e)        => e.description(),
             CliError::RunningPlace(ref e) => e.description(),
-            CliError::Usage(ref e)        => e.description(),
+            CliError::Usage(ref u)        => u.description(),
         }
     }
 }
@@ -70,6 +74,11 @@ impl From<CannotHappenError> for CliError {
 impl From<ConfigError> for CliError {
     fn from(e: ConfigError) -> CliError {
         CliError::Config(e)
+    }
+}
+impl From<EssentialLack> for CliError {
+    fn from(e: EssentialLack) -> CliError {
+        CliError::Essential(e)
     }
 }
 impl From<IoError> for CliError {
@@ -98,8 +107,8 @@ impl From<RunningPlaceError> for CliError {
     }
 }
 impl From<Usage> for CliError {
-    fn from(e: Usage) -> CliError {
-        CliError::Usage(e)
+    fn from(u: Usage) -> CliError {
+        CliError::Usage(u)
     }
 }
 

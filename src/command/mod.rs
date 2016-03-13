@@ -16,10 +16,10 @@ use self::start::Start;
 use self::end::End;
 use self::destroy::Destroy;
 
+use constant::*;
 use error::*;
-use lib::io::*;
 use lib::setting::*;
-use std::process;
+use std::env;
 
 trait Command {
     fn validation(&self) -> bool;
@@ -41,30 +41,38 @@ trait Command {
     }
 
     fn usage(&self) -> Usage;
-    fn help(&self) -> ! {
-        print_usage(self.usage());
-    }
 
     fn main(&self) -> Result<(), CliError>;
 
-    fn exec(&self, help: bool) {
+    fn exec(&self, help: bool) -> Result<(), CliError> {
         if self.validation() {
-            if let Err(why) = self.validate() {
-                print_with_warning(0, why);
-            }
+            try!(self.validate());
         }
 
         if help {
-            self.help();
+            Err(From::from(self.usage()))
         } else {
-            if let Err(why) = self.main() {
-                print_with_error(1, why);
-            }
+            self.main()
         }
     }
 }
 
-pub fn execute(args: Vec<String>) {
+fn validate_at_first() -> Result<(), CliError> {
+    let current_dir = try!(env::current_dir());
+
+    match BANNED_DIRS.iter().find(|d| current_dir.ends_with(d)) {
+        Some(d) => Err(From::from(RunningPlaceError::new(d.to_string()))),
+        None    => Ok(()),
+    }
+}
+
+pub fn execute() -> Result<(), CliError> {
+    try!(validate_at_first());
+
+    let args = env::args()
+        .skip(1)
+        .collect::<Vec<String>>();
+
     let help = args.iter().any(|a| *a == "-h" || *a == "--help");
 
     let mut args = args.into_iter();
@@ -79,15 +87,10 @@ pub fn execute(args: Vec<String>) {
             "start"   => Box::new(Start  ),
             "end"     => Box::new(End    ),
             "destroy" => Box::new(Destroy),
-            _         => print_usage(Usage::new(UsageKind::Nothing)),
+            _         => return Err(From::from(Usage::new(UsageKind::Nothing))),
         },
-        None => print_usage(Usage::new(UsageKind::Nothing)),
+        None => return Err(From::from(Usage::new(UsageKind::Nothing))),
     };
 
-    command.exec(help);
-}
-
-pub fn print_usage(u: Usage) -> ! {
-    println!("{}", u);
-    process::exit(1)
+    command.exec(help)
 }
