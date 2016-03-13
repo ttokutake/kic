@@ -2,10 +2,11 @@ use error::*;
 use super::Command;
 
 use constant::*;
+use lib::fs::*;
 use lib::io::*;
 use lib::setting::*;
 use std::collections::BTreeSet;
-use std::path::{MAIN_SEPARATOR, Path};
+use std::path::Path;
 
 pub struct Ignore {
     pub command: Option<String>,
@@ -31,13 +32,6 @@ impl Command for Ignore {
             None => Err(From::from(self.usage())),
         }
     }
-}
-
-
-fn append_prefix_if_need(path: &String) -> String {
-    let prefix       = format!(".{}", MAIN_SEPARATOR);
-    let prefix: &str = prefix.as_ref();
-    format!("{}{}", if path.starts_with(prefix) { "" } else { prefix }, path)
 }
 
 impl Ignore {

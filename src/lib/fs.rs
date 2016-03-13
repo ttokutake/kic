@@ -6,7 +6,7 @@ use std::collections::BTreeSet;
 use std::ffi::{OsStr, OsString};
 use std::fs;
 use std::io::Error as IoError;
-use std::path::{Path, PathBuf};
+use std::path::{MAIN_SEPARATOR, Path, PathBuf};
 use std::result::Result;
 
 macro_rules! path_buf {
@@ -14,6 +14,13 @@ macro_rules! path_buf {
         PathBuf::new()
             $(.join($x))*
     };
+}
+
+pub fn append_prefix_if_need<S: AsRef<str>>(path: S) -> String {
+    let path         = path.as_ref();
+    let prefix       = format!(".{}", MAIN_SEPARATOR);
+    let prefix: &str = prefix.as_ref();
+    format!("{}{}", if path.starts_with(prefix) { "" } else { prefix }, path)
 }
 
 pub fn extract_file_name(full_path: &PathBuf) -> Option<&str> {
