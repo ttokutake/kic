@@ -35,54 +35,56 @@ impl Command for Sweep {
             .difference(&ignore)
             .cloned()
             .collect::<Vec<String>>();
-        try!(move_files_to_dust_box(target_files, &path_to_dust_box));
+        try!(Self::move_files_to_dust_box(target_files, &path_to_dust_box));
 
-        try!(move_empty_dir_to_dust_box(&path_to_dust_box));
+        try!(Self::move_empty_dir_to_dust_box(&path_to_dust_box));
 
         Ok(())
     }
 }
 
-fn move_files_to_dust_box(target_files: Vec<String>, path_to_dust_box: &PathBuf) -> Result<(), CliError> {
-    for target in &target_files {
-        print_with_tag(0, Tag::Execution, "Analyze the path to file");
+impl Sweep {
+    fn move_files_to_dust_box(target_files: Vec<String>, path_to_dust_box: &PathBuf) -> Result<(), CliError> {
+        for target in &target_files {
+            print_with_tag(0, Tag::Execution, "Analyze the path to file");
 
-        let target_path = path_buf![&target];
-        let target_file = try!(target_path.file_name().ok_or(CannotHappenError));
-        let target_base = try!(target_path.parent().ok_or(CannotHappenError));
-        let to = path_buf![&path_to_dust_box, target_base];
+            let target_path = path_buf![&target];
+            let target_file = try!(target_path.file_name().ok_or(CannotHappenError));
+            let target_base = try!(target_path.parent().ok_or(CannotHappenError));
+            let to = path_buf![&path_to_dust_box, target_base];
 
-        print_with_okay(1);
+            print_with_okay(1);
 
-        try!(create_essential_dir_all(&to));
+            try!(create_essential_dir_all(&to));
 
-        let target_name = extract_file_name(&target_path).unwrap_or("<Unknown File Name>");
-        print_with_tag(0, Tag::Execution, format!("Move \"{}\" to dust box", target_name));
+            let target_name = extract_file_name(&target_path).unwrap_or("<Unknown File Name>");
+            print_with_tag(0, Tag::Execution, format!("Move \"{}\" to dust box", target_name));
 
-        // forcedly overwrite if the file exists with same name.
-        try!(fs::rename(target, path_buf![to, target_file]));
-        print_with_okay(1);
+            // forcedly overwrite if the file exists with same name.
+            try!(fs::rename(target, path_buf![to, target_file]));
+            print_with_okay(1);
+        }
+
+        Ok(())
     }
 
-    Ok(())
-}
+    fn move_empty_dir_to_dust_box(path_to_dust_box: &PathBuf) -> Result<(), IoError> {
+        let all_dirs = dirs_ordered_by_descending_depth(".");
+        for dir in all_dirs.iter().filter(|d| *d != ".") {
+            print_with_tag(0, Tag::Execution, format!("Remove \"{}\" directory", dir));
 
-fn move_empty_dir_to_dust_box(path_to_dust_box: &PathBuf) -> Result<(), IoError> {
-    let all_dirs = dirs_ordered_by_descending_depth(".");
-    for dir in all_dirs.iter().filter(|d| *d != ".") {
-        print_with_tag(0, Tag::Execution, format!("Remove \"{}\" directory", dir));
+            match fs::remove_dir(dir) {
+                Ok(_) => {
+                    print_with_okay(1);
+                    try!(create_essential_dir_all(&path_buf![&path_to_dust_box, dir]));
+                },
+                Err(why) => match why.raw_os_error() {
+                    Some(39) => print_with_tag(1, Tag::Notice, "The directory is not empty. Cancelled to remove it"),
+                    _        => return Err(why),
+                },
+            };
+        }
 
-        match fs::remove_dir(dir) {
-            Ok(_) => {
-                print_with_okay(1);
-                try!(create_essential_dir_all(&path_buf![&path_to_dust_box, dir]));
-            },
-            Err(why) => match why.raw_os_error() {
-                Some(39) => print_with_tag(1, Tag::Notice, "The directory is not empty. Cancelled to remove it"),
-                _        => return Err(why),
-            },
-        };
+        Ok(())
     }
-
-    Ok(())
 }
