@@ -74,10 +74,29 @@ fn add(ignore: &Ignore) -> Result<(), CliError> {
 
 fn remove(ignore: &Ignore) -> Result<(), CliError> {
     let paths = &ignore.paths;
+
     if paths.len() == 0 {
         return Err(From::from(ignore.usage()));
     }
-    println!("do remove command with {:?}", paths);
+
+    let ignores_to_be_removed = paths
+        .iter()
+        .map(append_prefix_if_need)
+        .collect::<BTreeSet<String>>();
+
+    for file in &ignores_to_be_removed {
+        print_with_tag(1, Tag::Info, format!("\"{}\" will not be ignored", file));
+    }
+
+    let original_ignores = try!(read_ignore_file());
+
+    let new_ignores = original_ignores
+        .difference(&ignores_to_be_removed)
+        .fold(String::new(), |c, ref f| c + f + "\n");
+
+    print_with_tag(0, Tag::Execution, format!("Recreate \"{}\" file", IGNORE_FILE_NAME));
+
+    try!(create_ignore_file(new_ignores));
 
     Ok(())
 }
