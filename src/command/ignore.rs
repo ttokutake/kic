@@ -74,6 +74,8 @@ impl Ignore {
             return Err(From::from(self.usage()));
         }
 
+        print_with_tag(0, Tag::Execution, format!("Confirm files to be removed from \"{}\"", IGNORE_FILE_NAME));
+
         let ignores_to_be_removed = paths
             .iter()
             .map(append_prefix_if_need)
