@@ -99,13 +99,16 @@ impl Ignore {
     }
 
     fn ignore_current_files() -> Result<(), CliError> {
-        println!("do current command");
+        print_with_tag(0, Tag::Execution, "Ignore all current files");
+
+        try!(create_initial_ignore_file());
 
         Ok(())
     }
 
     fn clear_ignore_file() -> Result<(), CliError> {
         print_with_tag(0, Tag::Execution, format!("Clear contents of \"{}\"", IGNORE_FILE_NAME));
+
         try!(create_ignore_file("\n"));
 
         Ok(())

@@ -83,6 +83,12 @@ pub fn create_config_file<S: AsRef<str>>(contents: S) -> Result<(), IoError> {
     create_setting_file(config_file(), contents)
 }
 
+pub fn create_initial_ignore_file() -> Result<(), IoError> {
+    let ignore_contents = walk_dir(".")
+        .iter()
+        .fold(String::new(), |c, f| c + f + "\n");
+    create_ignore_file(ignore_contents)
+}
 pub fn create_ignore_file<S: AsRef<str>>(contents: S) -> Result<(), IoError> {
     create_setting_file(ignore_file(), contents)
 }
