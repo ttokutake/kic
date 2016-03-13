@@ -45,7 +45,7 @@ trait Command {
         print_usage(self.usage());
     }
 
-    fn main(&self);
+    fn main(&self) -> Result<(), CliError>;
 
     fn exec(&self, help: bool) {
         if self.validation() {
@@ -57,7 +57,9 @@ trait Command {
         if help {
             self.help();
         } else {
-            self.main();
+            if let Err(why) = self.main() {
+                print_with_error(1, why);
+            }
         }
     }
 }

@@ -10,7 +10,8 @@ impl Command for End {
         return Usage::new(UsageKind::End);
     }
 
-    fn main(&self) {
-        unimplemented!()
+    fn main(&self) -> Result<(), CliError> {
+        unimplemented!();
+        Ok(())
     }
 }

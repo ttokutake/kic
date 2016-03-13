@@ -10,7 +10,8 @@ impl Command for Config {
         return Usage::new(UsageKind::Config);
     }
 
-    fn main(&self) {
-        unimplemented!()
+    fn main(&self) -> Result<(), CliError> {
+        unimplemented!();
+        Ok(())
     }
 }

@@ -22,22 +22,16 @@ impl Command for Burn {
         return Usage::new(UsageKind::Burn);
     }
 
-    fn main(&self) {
+    fn main(&self) -> Result<(), CliError> {
         println!("Burn ...\n");
 
-        let moratorium  = match read_param_for_burn() {
-            Ok(m)    => m,
-            Err(why) => print_with_error(1, why),
-        };
-        let target_dirs = match search_target_storages(moratorium) {
-            Ok(dirs) => dirs,
-            Err(why) => print_with_error(1, why),
-        };
+        let moratorium  = try!(read_param_for_burn());
+        let target_dirs = try!(search_target_storages(moratorium));
         for dir in &target_dirs {
-            if let Err(why) = delete_dir_all(dir) {
-                print_with_error(1, why);
-            };
-        }
+            try!(delete_dir_all(dir));
+        };
+
+        Ok(())
     }
 }
 

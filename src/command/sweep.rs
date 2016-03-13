@@ -20,33 +20,26 @@ impl Command for Sweep {
         return Usage::new(UsageKind::Sweep);
     }
 
-    fn main(&self) {
+    fn main(&self) -> Result<(), CliError> {
         println!("Sweep ...\n");
 
         let now  = Local::now();
         let date = now.format("%Y-%m-%d").to_string();
 
         let path_to_dust_box = path_buf![storage_dir(), date, "dusts"];
-        if let Err(why) = create_essential_dir_all(&path_to_dust_box) {
-            print_with_error(1, why);
-        };
+        try!(create_essential_dir_all(&path_to_dust_box));
 
-        let ignore = match read_ignore_file() {
-            Ok(files) => files,
-            Err(why)  => print_with_error(1, why),
-        };
+        let ignore = try!(read_ignore_file());
 
         let target_files = walk_dir(".")
             .difference(&ignore)
             .cloned()
             .collect::<Vec<String>>();
-        if let Err(why) = move_files_to_dust_box(target_files, &path_to_dust_box) {
-            print_with_error(1, why);
-        };
+        try!(move_files_to_dust_box(target_files, &path_to_dust_box));
 
-        if let Err(why) = move_empty_dir_to_dust_box(&path_to_dust_box) {
-            print_with_error(1, why);
-        };
+        try!(move_empty_dir_to_dust_box(&path_to_dust_box));
+
+        Ok(())
     }
 }
 

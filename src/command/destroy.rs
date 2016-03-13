@@ -14,22 +14,17 @@ impl Command for Destroy {
         return Usage::new(UsageKind::Destroy);
     }
 
-    fn main(&self) {
+    fn main(&self) -> Result<(), CliError> {
         println!("Destroy ...\n");
 
         let message = format!("Do you want to clear all files related to \"{}\"? [yes/no]: ", ME);
         echo(format_with_tag(0, Tag::Caution, message));
 
-        match read_line_from_stdin() {
-            Ok(input) => match input.to_lowercase().as_ref() {
-                "y" | "yes" => {
-                    if let Err(why) = delete_all_setting_files() {
-                        print_with_error(1, why);
-                    };
-                },
-                _ => print_with_tag(1, Tag::Notice, "Interrupted by user"),
-            },
-            Err(why) => print_with_error(1, why),
+        match try!(read_line_from_stdin()).to_lowercase().as_ref() {
+            "y" | "yes" => try!(delete_all_setting_files()),
+            _           => print_with_tag(1, Tag::Notice, "Interrupted by user"),
         };
+
+        Ok(())
     }
 }

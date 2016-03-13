@@ -10,7 +10,8 @@ impl Command for Start {
         return Usage::new(UsageKind::Start);
     }
 
-    fn main(&self) {
-        unimplemented!()
+    fn main(&self) -> Result<(), CliError> {
+        unimplemented!();
+        Ok(())
     }
 }

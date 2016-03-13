@@ -19,6 +19,7 @@ pub enum CliError {
     ParseToml(ParseTomlError),
     Regex(RegexError),
     RunningPlace(RunningPlaceError),
+    Usage(Usage),
 }
 impl Display for CliError {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
@@ -30,6 +31,7 @@ impl Display for CliError {
             CliError::ParseToml(ref e)    => e.fmt(f),
             CliError::Regex(ref e)        => e.fmt(f),
             CliError::RunningPlace(ref e) => e.fmt(f),
+            CliError::Usage(ref e)        => e.fmt(f),
         }
     }
 }
@@ -43,6 +45,7 @@ impl Error for CliError {
             CliError::ParseToml(ref e)    => Some(e),
             CliError::Regex(ref e)        => Some(e),
             CliError::RunningPlace(ref e) => Some(e),
+            CliError::Usage(ref e)        => Some(e),
         }
     }
 
@@ -55,6 +58,7 @@ impl Error for CliError {
             CliError::ParseToml(ref e)    => e.description(),
             CliError::Regex(ref e)        => e.description(),
             CliError::RunningPlace(ref e) => e.description(),
+            CliError::Usage(ref e)        => e.description(),
         }
     }
 }
@@ -91,6 +95,11 @@ impl From<RegexError> for CliError {
 impl From<RunningPlaceError> for CliError {
     fn from(e: RunningPlaceError) -> CliError {
         CliError::RunningPlace(e)
+    }
+}
+impl From<Usage> for CliError {
+    fn from(e: Usage) -> CliError {
+        CliError::Usage(e)
     }
 }
 
@@ -170,6 +179,25 @@ impl Error for EssentialLack {
 
 
 #[derive(Debug)]
+pub struct RunningPlaceError {
+    dir: String,
+}
+impl RunningPlaceError {
+    pub fn new(dir: String) -> RunningPlaceError {
+        RunningPlaceError { dir: dir }
+    }
+}
+impl Display for RunningPlaceError {
+    fn fmt(&self, f: &mut Formatter) -> FmtResult {
+        write!(f, "Cannot run in \"{}\" directory", self.dir)
+    }
+}
+impl Error for RunningPlaceError {
+    fn description(&self) -> &str { "cannot run in banned directories" }
+}
+
+
+#[derive(Debug)]
 pub enum UsageKind {
     Nothing,
     Init,
@@ -224,23 +252,4 @@ Command:
 }
 impl Error for Usage {
     fn description(&self) -> &str { "show usage" }
-}
-
-
-#[derive(Debug)]
-pub struct RunningPlaceError {
-    dir: String,
-}
-impl RunningPlaceError {
-    pub fn new(dir: String) -> RunningPlaceError {
-        RunningPlaceError { dir: dir }
-    }
-}
-impl Display for RunningPlaceError {
-    fn fmt(&self, f: &mut Formatter) -> FmtResult {
-        write!(f, "Cannot run in \"{}\" directory", self.dir)
-    }
-}
-impl Error for RunningPlaceError {
-    fn description(&self) -> &str { "cannot run in banned directories" }
 }
