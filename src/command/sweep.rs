@@ -48,7 +48,7 @@ fn move_files_to_dust_box(target_files: Vec<String>, path_to_dust_box: &PathBuf)
         print_with_tag(0, Tag::Execution, "Analyze the path to file");
 
         let target_path = path_buf![&target];
-        let target_name = try!(extract_file_name(&target_path).ok_or(CannotHappenError));
+        let target_file = try!(target_path.file_name().ok_or(CannotHappenError));
         let target_base = try!(target_path.parent().ok_or(CannotHappenError));
         let to = path_buf![&path_to_dust_box, target_base];
 
@@ -56,10 +56,11 @@ fn move_files_to_dust_box(target_files: Vec<String>, path_to_dust_box: &PathBuf)
 
         try!(create_essential_dir_all(&to));
 
+        let target_name = extract_file_name(&target_path).unwrap_or("<Unknown File Name>");
         print_with_tag(0, Tag::Execution, format!("Move \"{}\" to dust box", target_name));
 
         // forcedly overwrite if the file exists with same name.
-        try!(fs::rename(target, path_buf![to, target_name]));
+        try!(fs::rename(target, path_buf![to, target_file]));
         print_with_okay(1);
     }
 
