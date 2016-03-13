@@ -16,8 +16,7 @@ macro_rules! path_buf {
     };
 }
 
-pub fn append_prefix_if_need<S: AsRef<str>>(path: S) -> String {
-    let path         = path.as_ref();
+pub fn append_prefix_if_need(path: &String) -> String {
     let prefix       = format!(".{}", MAIN_SEPARATOR);
     let prefix: &str = prefix.as_ref();
     format!("{}{}", if path.starts_with(prefix) { "" } else { prefix }, path)
