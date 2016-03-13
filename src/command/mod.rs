@@ -80,7 +80,7 @@ pub fn execute() -> Result<(), CliError> {
     let command: Box<Command> = match args.next() {
         Some(first) => match first.as_ref() {
             "init"    => Box::new(Init                                    ),
-            "config"  => Box::new(Config                                  ),
+            "config"  => Box::new(Config::new(args.next(), args.next()   )),
             "ignore"  => Box::new(Ignore::new(args.next(), args.collect())),
             "sweep"   => Box::new(Sweep                                   ),
             "burn"    => Box::new(Burn                                    ),
