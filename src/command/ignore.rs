@@ -25,8 +25,8 @@ impl Command for Ignore {
             Some(ref c) => match c.as_ref() {
                 "add"     => self.add(),
                 "remove"  => self.remove(),
-                "current" => self.ignore_current_files(),
-                "clear"   => self.clear_ignore_file(),
+                "current" => Self::ignore_current_files(),
+                "clear"   => Self::clear_ignore_file(),
                 _         => Err(From::from(self.usage())),
             },
             None => Err(From::from(self.usage())),
@@ -96,13 +96,13 @@ impl Ignore {
         Ok(())
     }
 
-    fn ignore_current_files(&self) -> Result<(), CliError> {
+    fn ignore_current_files() -> Result<(), CliError> {
         println!("do current command");
 
         Ok(())
     }
 
-    fn clear_ignore_file(&self) -> Result<(), CliError> {
+    fn clear_ignore_file() -> Result<(), CliError> {
         println!("do clear command");
 
         Ok(())
