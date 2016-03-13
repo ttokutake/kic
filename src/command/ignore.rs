@@ -105,7 +105,8 @@ impl Ignore {
     }
 
     fn clear_ignore_file() -> Result<(), CliError> {
-        println!("do clear command");
+        print_with_tag(0, Tag::Execution, format!("Clear contents of \"{}\"", IGNORE_FILE_NAME));
+        try!(create_ignore_file("\n"));
 
         Ok(())
     }
