@@ -23,8 +23,6 @@ impl Command for Burn {
     }
 
     fn main(&self) -> Result<(), CliError> {
-        println!("Burn ...\n");
-
         let moratorium  = try!(Self::read_param_for_burn());
         let target_dirs = try!(Self::search_target_storages(moratorium));
         for dir in &target_dirs {

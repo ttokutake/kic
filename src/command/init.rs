@@ -14,8 +14,6 @@ impl Command for Init {
     }
 
     fn main(&self) -> Result<(), CliError> {
-        println!("Initialize ...\n");
-
         try!(create_working_dir());
 
         try!(create_storage_dir());

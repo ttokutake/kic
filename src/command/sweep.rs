@@ -21,8 +21,6 @@ impl Command for Sweep {
     }
 
     fn main(&self) -> Result<(), CliError> {
-        println!("Sweep ...\n");
-
         let now  = Local::now();
         let date = now.format("%Y-%m-%d").to_string();
 

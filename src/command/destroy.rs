@@ -15,8 +15,6 @@ impl Command for Destroy {
     }
 
     fn main(&self) -> Result<(), CliError> {
-        println!("Destroy ...\n");
-
         let message = format!("Do you want to clear all files related to \"{}\"? [yes/no]: ", ME);
         echo(format_with_tag(0, Tag::Caution, message));
 
