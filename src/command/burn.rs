@@ -40,6 +40,7 @@ impl Burn {
 
         print_with_tag(0, Tag::Execution, format!("Extract \"{}\" parameter", key));
 
+        // This to_string() is not documented.
         let after = try!(config.lookup(key).ok_or(ConfigError::new(ConfigErrorKind::NotFoundBurnAfter))).to_string();
 
         let re = try!(Regex::new(r"(?P<num>\d+)\s*(?P<unit>days?|weeks?)"));
