@@ -127,10 +127,12 @@ impl Error for CannotHappenError {
 
 #[derive(Debug)]
 pub enum ConfigErrorKind {
+    Something,
+    InvalidParam,
     NotFoundBurnAfter,
     BurnAfter,
-    NumOfBurnAfter,
-    UnitOfBurnAfter,
+    SweepPeriod,
+    SweepTime,
 }
 #[derive(Debug)]
 pub struct ConfigError {
@@ -144,10 +146,12 @@ impl ConfigError {
 impl Display for ConfigError {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         write!(f, "{}", match self.kind {
+            ConfigErrorKind::Something         => r#"Something went to wrong"#,
+            ConfigErrorKind::InvalidParam      => r#"Cannot set this param"#,
             ConfigErrorKind::NotFoundBurnAfter => r#"Please set [burn]after param"#,
-            ConfigErrorKind::BurnAfter         => r#"Invalid "[burn]after" param"#,
-            ConfigErrorKind::NumOfBurnAfter    => r#"Please set positive number as "[burn]after""#,
-            ConfigErrorKind::UnitOfBurnAfter   => r#"Please set "day" or "week" as "[burn]after""#,
+            ConfigErrorKind::BurnAfter         => r#"Please set value like "3 days" or "1 week" as "[burn]after""#,
+            ConfigErrorKind::SweepPeriod       => r#"Please set "daily" or "weekly" as "[sweep]period""#,
+            ConfigErrorKind::SweepTime         => r#"Please set value from "00:00" to "23:59" as "[sweep]time""#,
         })
     }
 }

@@ -46,8 +46,6 @@ impl Burn {
         let re = try!(Regex::new(r"(?P<num>\d+)\s*(?P<unit>days?|weeks?)"));
         let (num, unit) = match re.captures(after.as_ref()).map(|caps| (caps.name("num"), caps.name("unit"))) {
             Some((Some(num), Some(unit))) => (num, unit),
-            Some((None     , Some(_)   )) => return Err(From::from(ConfigError::new(ConfigErrorKind::NumOfBurnAfter))),
-            Some((Some(_)  , None      )) => return Err(From::from(ConfigError::new(ConfigErrorKind::UnitOfBurnAfter))),
             _                             => return Err(From::from(ConfigError::new(ConfigErrorKind::BurnAfter))),
         };
         let num = try!(num.parse::<u32>());
