@@ -1,13 +1,14 @@
-use error::*;
+use error::{CliError, Usage, UsageKind};
 use super::Command;
 
 extern crate chrono;
 
 use self::chrono::Local;
 
+use error::CannotHappenError;
 use lib::fs::*;
 use lib::io::*;
-use lib::setting::*;
+use lib::setting;
 use std::fs;
 use std::io::Error as IoError;
 use std::path::PathBuf;
@@ -25,10 +26,10 @@ impl Command for Sweep {
         let now  = Local::now();
         let date = now.format("%Y-%m-%d").to_string();
 
-        let path_to_dust_box = path_buf![storage_dir(), date, "dusts"];
-        try!(create_essential_dir_all(&path_to_dust_box));
+        let path_to_dust_box = path_buf![setting::storage_dir(), date, "dusts"];
+        try!(setting::create_essential_dir_all(&path_to_dust_box));
 
-        let ignore = try!(read_ignore_file());
+        let ignore = try!(setting::read_ignore_file());
 
         let target_files = walk_dir(".")
             .difference(&ignore)
@@ -54,7 +55,7 @@ impl Sweep {
 
             print_with_okay(1);
 
-            try!(create_essential_dir_all(&to));
+            try!(setting::create_essential_dir_all(&to));
 
             let target_name = extract_file_name(&target_path).unwrap_or("<Unknown File Name>");
             print_with_tag(0, Tag::Execution, format!("Move \"{}\" to dust box", target_name));
@@ -75,7 +76,7 @@ impl Sweep {
             match fs::remove_dir(dir) {
                 Ok(_) => {
                     print_with_okay(1);
-                    try!(create_essential_dir_all(&path_buf![&path_to_dust_box, dir]));
+                    try!(setting::create_essential_dir_all(&path_buf![&path_to_dust_box, dir]));
                 },
                 Err(why) => match why.raw_os_error() {
                     Some(39) => print_with_tag(1, Tag::Notice, "The directory is not empty. Cancelled to remove it"),

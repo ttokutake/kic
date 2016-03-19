@@ -1,4 +1,4 @@
-use error::*;
+use error::{CliError, Usage, UsageKind};
 use super::Command;
 
 extern crate chrono;
@@ -8,9 +8,10 @@ use self::chrono::offset::TimeZone;
 use self::chrono::{Duration, Local};
 use self::regex::Regex;
 
+use error::{CannotHappenError, ConfigError, ConfigErrorKind};
 use lib::fs::*;
 use lib::io::*;
-use lib::setting::*;
+use lib::setting;
 use std::io::Error as IoError;
 use std::path::PathBuf;
 
@@ -27,7 +28,7 @@ impl Command for Burn {
         let moratorium  = try!(Self::read_param_for_burn());
         let target_dirs = try!(Self::search_target_storages(moratorium));
         for dir in &target_dirs {
-            try!(delete_dir_all(dir));
+            try!(setting::delete_dir_all(dir));
         };
 
         Ok(())
@@ -36,7 +37,7 @@ impl Command for Burn {
 
 impl Burn {
     fn read_param_for_burn() -> Result<Duration, CliError> {
-        let config = try!(read_config_file());
+        let config = try!(setting::read_config_file());
         let key    = "burn.after";
 
         print_with_tag(0, Tag::Execution, format!("Extract \"{}\" parameter", key));
@@ -64,7 +65,7 @@ impl Burn {
     fn search_target_storages(moratorium: Duration) -> Result<Vec<PathBuf>, IoError> {
         print_with_tag(0, Tag::Execution, "Search target dusts");
 
-        let path_to_storage = storage_dir();
+        let path_to_storage = setting::storage_dir();
         let dirs            = try!(ls(&path_to_storage));
         let today           = Local::now();
 

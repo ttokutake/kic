@@ -1,10 +1,10 @@
-use error::*;
+use error::{CliError, Usage, UsageKind};
 use super::Command;
 
-use constant::*;
+use constant::IGNORE_FILE_NAME;
 use lib::fs::*;
 use lib::io::*;
-use lib::setting::*;
+use lib::setting;
 use std::collections::BTreeSet;
 use std::path::Path;
 
@@ -58,7 +58,7 @@ impl Ignore {
             print_with_tag(1, Tag::Info, format!("\"{}\" will be ignored", file));
         }
 
-        let original_ignores = try!(read_ignore_file());
+        let original_ignores = try!(setting::read_ignore_file());
 
         let new_ignores = original_ignores
             .union(&ignores_to_be_added)
@@ -66,7 +66,7 @@ impl Ignore {
 
         print_with_tag(0, Tag::Execution, format!("Recreate \"{}\" file", IGNORE_FILE_NAME));
 
-        try!(create_ignore_file(new_ignores));
+        try!(setting::create_ignore_file(new_ignores));
 
         Ok(())
     }
@@ -89,7 +89,7 @@ impl Ignore {
             print_with_tag(1, Tag::Info, format!("\"{}\" will not be ignored", file));
         }
 
-        let original_ignores = try!(read_ignore_file());
+        let original_ignores = try!(setting::read_ignore_file());
 
         let new_ignores = original_ignores
             .difference(&ignores_to_be_removed)
@@ -97,7 +97,7 @@ impl Ignore {
 
         print_with_tag(0, Tag::Execution, format!("Recreate \"{}\" file", IGNORE_FILE_NAME));
 
-        try!(create_ignore_file(new_ignores));
+        try!(setting::create_ignore_file(new_ignores));
 
         Ok(())
     }
@@ -105,7 +105,7 @@ impl Ignore {
     fn ignore_current_files() -> Result<(), CliError> {
         print_with_tag(0, Tag::Execution, "Ignore all current files");
 
-        try!(create_initial_ignore_file());
+        try!(setting::create_initial_ignore_file());
 
         Ok(())
     }
@@ -113,7 +113,7 @@ impl Ignore {
     fn clear_ignore_file() -> Result<(), CliError> {
         print_with_tag(0, Tag::Execution, format!("Clear contents of \"{}\"", IGNORE_FILE_NAME));
 
-        try!(create_ignore_file("\n"));
+        try!(setting::create_ignore_file("\n"));
 
         Ok(())
     }

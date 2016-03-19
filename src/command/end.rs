@@ -1,4 +1,4 @@
-use error::*;
+use error::{CliError, Usage, UsageKind};
 use super::Command;
 
 pub struct End;

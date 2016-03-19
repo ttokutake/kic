@@ -1,4 +1,4 @@
-use error::*;
+use error::{CliError, Usage, UsageKind};
 use super::Command;
 
 extern crate chrono;
@@ -8,7 +8,8 @@ extern crate toml;
 use self::chrono::NaiveTime;
 use self::regex::Regex;
 
-use lib::setting::*;
+use error::{CannotHappenError, ConfigError, ConfigErrorKind};
+use lib::setting;
 use std::collections::BTreeMap;
 use std::str::FromStr;
 
@@ -68,7 +69,7 @@ impl Command for Config {
             _ => return Err(From::from(CannotHappenError)),
         };
 
-        let config     = try!(read_config_file());
+        let config     = try!(setting::read_config_file());
         let mut config = match toml::decode::<BTreeMap<String, BTreeMap<String, String>>>(config) {
             Some(decoded) => decoded,
             None          => return Err(From::from(ConfigError::new(ConfigErrorKind::Something))),

@@ -16,24 +16,24 @@ use self::start::Start;
 use self::end::End;
 use self::destroy::Destroy;
 
-use constant::*;
-use error::*;
-use lib::setting::*;
+use constant::BANNED_DIRS;
+use error::{CliError, EssentialLack, EssentialKind, RunningPlaceError, Usage, UsageKind};
+use lib::setting;
 use std::env;
 
 trait Command {
     fn validation(&self) -> bool;
     fn validate(&self) -> Result<(), EssentialLack> {
-        if !working_dir_exists() {
+        if !setting::working_dir_exists() {
             return Err(EssentialLack::new(EssentialKind::WorkingDir));
         }
-        if !storage_dir_exists() {
+        if !setting::storage_dir_exists() {
             return Err(EssentialLack::new(EssentialKind::StorageDir));
         }
-        if !config_file_exists() {
+        if !setting::config_file_exists() {
             return Err(EssentialLack::new(EssentialKind::ConfigFile));
         }
-        if !ignore_file_exists() {
+        if !setting::ignore_file_exists() {
             return Err(EssentialLack::new(EssentialKind::IgnoreFile));
         }
 

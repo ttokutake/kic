@@ -2,8 +2,8 @@ extern crate toml;
 
 use self::toml::Value as TomlValue;
 
-use constant::*;
-use error::*;
+use constant;
+use error::{CannotHappenError, CliError};
 use lib::fs::*;
 use lib::io::*;
 use std::collections::BTreeSet;
@@ -14,19 +14,19 @@ use std::path::{Path, PathBuf};
 
 
 pub fn working_dir() -> PathBuf {
-    path_buf![WORKING_DIR_NAME]
+    path_buf![constant::WORKING_DIR_NAME]
 }
 
 pub fn storage_dir() -> PathBuf {
-    path_buf![working_dir(), STORAGE_DIR_NAME]
+    path_buf![working_dir(), constant::STORAGE_DIR_NAME]
 }
 
 pub fn config_file() -> PathBuf {
-    path_buf![working_dir(), CONFIG_FILE_NAME]
+    path_buf![working_dir(), constant::CONFIG_FILE_NAME]
 }
 
 pub fn ignore_file() -> PathBuf {
-    path_buf![working_dir(), IGNORE_FILE_NAME]
+    path_buf![working_dir(), constant::IGNORE_FILE_NAME]
 }
 
 
@@ -110,7 +110,7 @@ fn create_setting_file<S: AsRef<str>>(path_to_file: PathBuf, contents: S) -> Res
 
 
 pub fn read_config_file() -> Result<TomlValue, CliError> {
-    print_with_tag(0, Tag::Execution, format!("Read \"{}\" file as TOML", CONFIG_FILE_NAME));
+    print_with_tag(0, Tag::Execution, format!("Read \"{}\" file as TOML", constant::CONFIG_FILE_NAME));
 
     let mut f = try!(File::open(config_file()));
 
@@ -133,7 +133,7 @@ pub fn read_config_file() -> Result<TomlValue, CliError> {
 }
 
 pub fn read_ignore_file() -> Result<BTreeSet<String>, IoError> {
-    print_with_tag(0, Tag::Execution, format!("Read \"{}\" file", IGNORE_FILE_NAME));
+    print_with_tag(0, Tag::Execution, format!("Read \"{}\" file", constant::IGNORE_FILE_NAME));
 
     let mut f = try!(File::open(ignore_file()));
 
@@ -151,7 +151,7 @@ pub fn read_ignore_file() -> Result<BTreeSet<String>, IoError> {
 
 
 pub fn delete_all_setting_files() -> Result<(), IoError> {
-    delete_dir_all(WORKING_DIR_NAME)
+    delete_dir_all(constant::WORKING_DIR_NAME)
 }
 
 pub fn delete_dir_all<P: AsRef<Path> + Debug>(path: P) -> Result<(), IoError> {

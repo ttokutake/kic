@@ -2,7 +2,7 @@ extern crate walkdir;
 
 use self::walkdir::{DirEntry as WalkDirEntry, WalkDir, WalkDirIterator};
 
-use constant::*;
+use constant::{WORKING_DIR_NAME, KEEPED_FILE_NAME};
 use std::collections::BTreeSet;
 use std::ffi::{OsStr, OsString};
 use std::fs;
