@@ -2,12 +2,16 @@ extern crate toml;
 
 use self::toml::Value as Toml;
 
-use error::{CannotHappenError, CliError};
+use error::{CannotHappenError, CliError, ConfigError, ConfigErrorKind};
 use constant::CONFIG_FILE_NAME;
 use lib::io::*;
 use lib::setting;
 use std::fs::File;
 use std::io::Read;
+
+pub enum ParamKind {
+    BurnAfter,
+}
 
 pub struct Config;
 
@@ -23,6 +27,7 @@ impl Config {
 "#
             .to_string()
     }
+
     pub fn read() -> Result<Toml, CliError> {
         print_with_tag(0, Tag::Execution, format!("Read \"{}\" file as TOML", CONFIG_FILE_NAME));
 
@@ -41,8 +46,26 @@ impl Config {
                 None    => return Err(From::from(CannotHappenError)),
             },
         };
-        print_with_okay(1);
 
+        print_with_okay(1);
         Ok(toml)
+    }
+
+    pub fn extract(kind: ParamKind) -> Result<String, CliError> {
+        let key = match kind {
+            ParamKind::BurnAfter => "burn.after",
+        };
+        print_with_tag(0, Tag::Execution, format!("Extract \"{}\" parameter", key));
+
+        let config = try!(Self::read());
+        let result = config
+            .lookup(key)
+            .ok_or(ConfigError::new(match kind {
+                ParamKind::BurnAfter => ConfigErrorKind::NotFoundBurnAfter,
+            }));
+        let value = try!(result).to_string(); // This to_string() is not documented.
+
+        print_with_okay(1);
+        Ok(value)
     }
 }

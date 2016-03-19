@@ -9,7 +9,7 @@ use self::chrono::{Duration, Local};
 use self::regex::Regex;
 
 use error::{CannotHappenError, ConfigError, ConfigErrorKind};
-use lib::config::Config;
+use lib::config::{Config, ParamKind};
 use lib::fs::*;
 use lib::io::*;
 use lib::setting;
@@ -38,13 +38,7 @@ impl Command for Burn {
 
 impl Burn {
     fn read_param_for_burn() -> Result<Duration, CliError> {
-        let config = try!(Config::read());
-        let key    = "burn.after";
-
-        print_with_tag(0, Tag::Execution, format!("Extract \"{}\" parameter", key));
-
-        // This to_string() is not documented.
-        let after = try!(config.lookup(key).ok_or(ConfigError::new(ConfigErrorKind::NotFoundBurnAfter))).to_string();
+        let after = try!(Config::extract(ParamKind::BurnAfter));
 
         let re = try!(Regex::new(r"(?P<num>\d+)\s*(?P<unit>days?|weeks?)"));
         let (num, unit) = match re.captures(after.as_ref()).map(|caps| (caps.name("num"), caps.name("unit"))) {
