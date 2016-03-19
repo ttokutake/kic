@@ -1,9 +1,10 @@
 extern crate regex;
 extern crate toml;
 
-use constant::*;
 use self::regex::Error as RegexError;
 use self::toml::ParserError as ParseTomlError;
+
+use constant::*;
 use std::num::ParseIntError;
 use std::error::Error;
 use std::fmt::{Display, Formatter, Result as FmtResult};

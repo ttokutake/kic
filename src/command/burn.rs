@@ -4,12 +4,13 @@ use super::Command;
 extern crate chrono;
 extern crate regex;
 
-use lib::fs::*;
-use lib::io::*;
-use lib::setting::*;
 use self::chrono::offset::TimeZone;
 use self::chrono::{Duration, Local};
 use self::regex::Regex;
+
+use lib::fs::*;
+use lib::io::*;
+use lib::setting::*;
 use std::io::Error as IoError;
 use std::path::PathBuf;
 

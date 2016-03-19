@@ -5,9 +5,10 @@ extern crate chrono;
 extern crate regex;
 extern crate toml;
 
-use lib::setting::*;
 use self::chrono::NaiveTime;
 use self::regex::Regex;
+
+use lib::setting::*;
 use std::collections::BTreeMap;
 use std::str::FromStr;
 

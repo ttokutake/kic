@@ -1,10 +1,11 @@
 extern crate toml;
 
+use self::toml::Value as TomlValue;
+
 use constant::*;
 use error::*;
 use lib::fs::*;
 use lib::io::*;
-use self::toml::Value as TomlValue;
 use std::collections::BTreeSet;
 use std::fmt::Debug;
 use std::fs::{self, File};

@@ -1,7 +1,8 @@
 extern crate walkdir;
 
-use constant::*;
 use self::walkdir::{DirEntry as WalkDirEntry, WalkDir, WalkDirIterator};
+
+use constant::*;
 use std::collections::BTreeSet;
 use std::ffi::{OsStr, OsString};
 use std::fs;
@@ -9,12 +10,14 @@ use std::io::Error as IoError;
 use std::path::{MAIN_SEPARATOR, Path, PathBuf};
 use std::result::Result;
 
+
 macro_rules! path_buf {
     ($($x: expr),*) => {
         PathBuf::new()
             $(.join($x))*
     };
 }
+
 
 pub fn append_prefix_if_need(path: &String) -> String {
     let prefix       = format!(".{}", MAIN_SEPARATOR);

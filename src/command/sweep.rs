@@ -3,10 +3,11 @@ use super::Command;
 
 extern crate chrono;
 
+use self::chrono::Local;
+
 use lib::fs::*;
 use lib::io::*;
 use lib::setting::*;
-use self::chrono::Local;
 use std::fs;
 use std::io::Error as IoError;
 use std::path::PathBuf;
