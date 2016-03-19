@@ -9,7 +9,7 @@ use self::chrono::NaiveTime;
 use self::regex::Regex;
 
 use error::{CannotHappenError, ConfigError, ConfigErrorKind};
-use lib::setting;
+use lib::config;
 use std::collections::BTreeMap;
 use std::str::FromStr;
 
@@ -69,7 +69,7 @@ impl Command for Config {
             _ => return Err(From::from(CannotHappenError)),
         };
 
-        let config     = try!(setting::read_config_file());
+        let config     = try!(config::Config::read());
         let mut config = match toml::decode::<BTreeMap<String, BTreeMap<String, String>>>(config) {
             Some(decoded) => decoded,
             None          => return Err(From::from(ConfigError::new(ConfigErrorKind::Something))),

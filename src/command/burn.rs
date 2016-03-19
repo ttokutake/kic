@@ -9,6 +9,7 @@ use self::chrono::{Duration, Local};
 use self::regex::Regex;
 
 use error::{CannotHappenError, ConfigError, ConfigErrorKind};
+use lib::config::Config;
 use lib::fs::*;
 use lib::io::*;
 use lib::setting;
@@ -37,7 +38,7 @@ impl Command for Burn {
 
 impl Burn {
     fn read_param_for_burn() -> Result<Duration, CliError> {
-        let config = try!(setting::read_config_file());
+        let config = try!(Config::read());
         let key    = "burn.after";
 
         print_with_tag(0, Tag::Execution, format!("Extract \"{}\" parameter", key));
