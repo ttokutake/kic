@@ -10,6 +10,7 @@ use self::regex::Regex;
 
 use error::{CannotHappenError, ConfigError, ConfigErrorKind};
 use lib::config;
+use lib::setting;
 use std::collections::BTreeMap;
 use std::str::FromStr;
 
@@ -80,9 +81,8 @@ impl Command for Config {
             .map(|c| c.insert(second.to_string(), value));
 
         let new_config = toml::encode_str(&config);
-        println!("{}", new_config);
 
-        //try!(create_config_file(new_config));
+        try!(setting::create_config_file(new_config));
 
         Ok(())
     }
