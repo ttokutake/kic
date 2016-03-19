@@ -29,12 +29,3 @@ pub const CONFIG_FILE_NAME: &'static str = "config.toml";
 pub const IGNORE_FILE_NAME: &'static str = "ignore";
 
 pub const KEEPED_FILE_NAME: &'static str = ".kickeep";
-
-pub const DEFAULT_CONFIG: &'static str =
-r#"[sweep]
-  period = "daily"
-  time   = "00:00"
-
-[burn]
-  after = "2 weeks"
-"#;
