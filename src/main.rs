@@ -6,15 +6,25 @@ mod constant;
 mod error;
 
 use error::CliError;
-use lib::io;
+use lib::io::{self, Tag};
+use std::process;
 
 fn main() {
     if let Err(why) = command::execute() {
-        match why {
-            CliError::Essential(_)    => io::print_with_warning(0, why),
-            CliError::RunningPlace(_) => io::print_with_warning(0, why),
-            CliError::Usage(u)        => io::print_with_usage(u),
-            _                         => io::print_with_error(1, why),
+        let error_code = match why {
+            CliError::Essential(_) | CliError::RunningPlace(_) => {
+                io::print_with_tag(0, Tag::Warning, why);
+                1
+            },
+            CliError::Usage(u) => {
+                println!("{}", u);
+                1
+            },
+            _ => {
+                io::print_with_tag(1, Tag::Error, why);
+                1
+            },
         };
+        process::exit(error_code);
     };
 }
