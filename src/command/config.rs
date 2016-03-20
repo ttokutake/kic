@@ -25,7 +25,6 @@ impl Command for Config {
             (Some(k), Some(v)) => (k, v),
             _                  => return Err(From::from(self.usage())),
         };
-        let (key, value) = (key.trim(), value.trim());
 
         let key             = try!(config::KeyKind::from(key));
         let (first, second) = key.to_pair();

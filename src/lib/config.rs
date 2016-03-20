@@ -19,7 +19,7 @@ pub enum KeyKind {
 }
 impl KeyKind {
     pub fn from<S: AsRef<str>>(key: S) -> Result<KeyKind, ConfigError> {
-        match key.as_ref() {
+        match key.as_ref().trim() {
             "burn.after"   => Ok(KeyKind::BurnAfter),
             "sweep.period" => Ok(KeyKind::SweepPeriod),
             "sweep.time"   => Ok(KeyKind::SweepTime),
@@ -94,7 +94,9 @@ impl Config {
         Ok(value)
     }
 
-    pub fn validate(key: &KeyKind, value: &str) -> Result<String, CliError> {
+    pub fn validate<S: AsRef<str>>(key: &KeyKind, value: S) -> Result<String, CliError> {
+        let value = value.as_ref().trim();
+
         match *key {
             KeyKind::BurnAfter => {
                 let pair = try!(Regex::new(r"^(?P<num>\d+)\s?(?P<unit>days?|weeks?)$"))
@@ -123,7 +125,7 @@ impl Config {
     }
 
     pub fn interpret(key: &KeyKind, value: String) -> Result<(u32, String), CliError> {
-        let value       = try!(Self::validate(key, value.as_ref()));
+        let value       = try!(Self::validate(key, value));
         let value       = value.split(' ').collect::<Vec<_>>();
         let (num, unit) = (value[0], value[1]); // unsafe!
 
