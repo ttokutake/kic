@@ -7,8 +7,8 @@ extern crate toml;
 
 use self::chrono::NaiveTime;
 
-use error::{CannotHappenError, ConfigError, ConfigErrorKind};
-use lib::config;
+use error::{ConfigError, ConfigErrorKind};
+use lib::config::{self, ParamKind};
 use lib::setting;
 use std::collections::BTreeMap;
 use std::str::FromStr;
@@ -32,34 +32,28 @@ impl Command for Config {
         };
         let (param, value) = (param.trim(), value.trim());
 
-        let (first, second) = match param {
-            p @ "sweep.period" | p @ "sweep.time" | p @ "burn.after" => {
-                let params = p.split('.').collect::<Vec<_>>();
-                (params[0], params[1])
-            },
-            _ => return Err(From::from(ConfigError::new(ConfigErrorKind::InvalidParam))),
-        };
+        let param           = try!(config::ParamKind::from(param));
+        let (first, second) = param.to_pair();
 
         // validate value
         let value = match param {
-            "sweep.period" => {
+            ParamKind::SweepPeriod => {
                 match value {
                     "daily" | "weekly" => value.to_string(),
                     _                  => return Err(From::from(ConfigError::new(ConfigErrorKind::SweepPeriod))),
                 }
             },
-            "sweep.time" => {
+            ParamKind::SweepTime => {
                 match NaiveTime::from_str(format!("{}:00", value).as_ref()) {
                     Ok(_)  => value.to_string(),
                     // should set Err(e) to Error::cause()
                     Err(_) => return Err(From::from(ConfigError::new(ConfigErrorKind::SweepTime))),
                 }
             },
-            "burn.after" => {
+            ParamKind::BurnAfter => {
                 let (num, unit) = try!(config::Config::interpret(value));
                 format!("{} {}", num, unit)
             },
-            _ => return Err(From::from(CannotHappenError)),
         };
 
         let config     = try!(config::Config::read());

@@ -13,12 +13,33 @@ use std::io::Read;
 
 pub enum ParamKind {
     BurnAfter,
+    SweepPeriod,
+    SweepTime,
 }
 impl ParamKind {
+    pub fn from<S: AsRef<str>>(key: S) -> Result<ParamKind, ConfigError> {
+        match key.as_ref() {
+            "burn.after"   => Ok(ParamKind::BurnAfter),
+            "sweep.period" => Ok(ParamKind::SweepPeriod),
+            "sweep.time"   => Ok(ParamKind::SweepTime),
+            _              => Err(ConfigError::new(ConfigErrorKind::InvalidParam)),
+        }
+    }
+
     fn to_str(&self) -> &str {
         match *self {
-            ParamKind::BurnAfter => "burn.after",
+            ParamKind::BurnAfter   => "burn.after",
+            ParamKind::SweepPeriod => "sweep.period",
+            ParamKind::SweepTime   => "sweep.time",
         }
+    }
+
+    pub fn to_pair(&self) -> (&str, &str) {
+        let key = self
+            .to_str()
+            .split('.')
+            .collect::<Vec<&str>>();
+        (key[0], key[1]) // unsafe!
     }
 }
 
@@ -68,7 +89,9 @@ impl Config {
         let result = config
             .lookup(key)
             .ok_or(ConfigError::new(match kind {
-                ParamKind::BurnAfter => ConfigErrorKind::NotFoundBurnAfter,
+                ParamKind::BurnAfter   => ConfigErrorKind::NotFoundBurnAfter,
+                ParamKind::SweepPeriod => unimplemented!(),
+                ParamKind::SweepTime   => unimplemented!(),
             }));
         let value = try!(result).to_string(); // This to_string() is not documented.
 
