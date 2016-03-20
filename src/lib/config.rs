@@ -1,6 +1,8 @@
+extern crate chrono;
 extern crate regex;
 extern crate toml;
 
+use self::chrono::NaiveTime;
 use self::regex::Regex;
 use self::toml::Value as Toml;
 
@@ -10,6 +12,7 @@ use lib::io::*;
 use lib::setting;
 use std::fs::File;
 use std::io::Read;
+use std::str::FromStr;
 
 pub enum KeyKind {
     BurnAfter,
@@ -40,6 +43,34 @@ impl KeyKind {
             .split('.')
             .collect::<Vec<&str>>();
         (key[0], key[1]) // unsafe!
+    }
+
+    pub fn validate(&self, value: &str) -> Result<String, CliError> {
+        match *self {
+            KeyKind::BurnAfter => {
+                let pair = try!(Regex::new(r"^(?P<num>\d+)\s?(?P<unit>days?|weeks?)$"))
+                    .captures(value)
+                    .map_or((None, None), |caps| (caps.name("num"), caps.name("unit")));
+                let (num, unit) = match pair {
+                    (Some(num), Some(unit)) => (num, unit),
+                    _                       => return Err(From::from(ConfigError::new(ConfigErrorKind::BurnAfter))),
+                };
+                Ok(format!("{} {}", num, unit))
+            },
+            KeyKind::SweepPeriod => {
+                match value {
+                    "daily" | "weekly" => Ok(value.to_string()),
+                    _                  => return Err(From::from(ConfigError::new(ConfigErrorKind::SweepPeriod))),
+                }
+            },
+            KeyKind::SweepTime => {
+                match NaiveTime::from_str(format!("{}:00", value).as_ref()) {
+                    Ok(_)  => Ok(value.to_string()),
+                    // should set Err(e) to Error::cause()
+                    Err(_) => return Err(From::from(ConfigError::new(ConfigErrorKind::SweepTime))),
+                }
+            },
+        }
     }
 }
 
@@ -81,14 +112,14 @@ impl Config {
         Ok(toml)
     }
 
-    pub fn extract(kind: KeyKind) -> Result<String, CliError> {
+    pub fn extract(kind: &KeyKind) -> Result<String, CliError> {
         let key = kind.to_str();
         print_with_tag(0, Tag::Execution, format!("Extract \"{}\" parameter", key));
 
         let config = try!(Self::read());
         let result = config
             .lookup(key)
-            .ok_or(ConfigError::new(match kind {
+            .ok_or(ConfigError::new(match *kind {
                 KeyKind::BurnAfter   => ConfigErrorKind::NotFoundBurnAfter,
                 KeyKind::SweepPeriod => unimplemented!(),
                 KeyKind::SweepTime   => unimplemented!(),
@@ -99,12 +130,11 @@ impl Config {
         Ok(value)
     }
 
-    pub fn interpret<S: AsRef<str>>(value: S) -> Result<(u32, String), CliError> {
-        let re = try!(Regex::new(r"(?P<num>\d+)\s*(?P<unit>days?|weeks?)"));
-        let (num, unit) = match re.captures(value.as_ref()).map(|caps| (caps.name("num"), caps.name("unit"))) {
-            Some((Some(num), Some(unit))) => (num, unit),
-            _                             => return Err(From::from(ConfigError::new(ConfigErrorKind::BurnAfter))),
-        };
+    pub fn interpret(key: &KeyKind, value: String) -> Result<(u32, String), CliError> {
+        let value       = try!(key.validate(value.as_ref()));
+        let value       = value.split(' ').collect::<Vec<_>>();
+        let (num, unit) = (value[0], value[1]); // unsafe!
+
         let num = try!(num.parse::<u32>());
 
         Ok((num, unit.to_string()))

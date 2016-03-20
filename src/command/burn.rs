@@ -36,8 +36,9 @@ impl Command for Burn {
 
 impl Burn {
     fn read_param() -> Result<Duration, CliError> {
-        let after       = try!(Config::extract(KeyKind::BurnAfter));
-        let (num, unit) = try!(Config::interpret(after));
+        let key         = KeyKind::BurnAfter;
+        let after       = try!(Config::extract(&key));
+        let (num, unit) = try!(Config::interpret(&key, after));
 
         let duration = match unit.as_ref() {
             "day"  | "days"  => Duration::days(num as i64),

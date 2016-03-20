@@ -1,17 +1,12 @@
 use error::{CliError, Usage, UsageKind};
 use super::Command;
 
-extern crate chrono;
-extern crate regex;
 extern crate toml;
-
-use self::chrono::NaiveTime;
 
 use error::{ConfigError, ConfigErrorKind};
 use lib::config::{self, KeyKind};
 use lib::setting;
 use std::collections::BTreeMap;
-use std::str::FromStr;
 
 pub struct Config {
     key  : Option<String>,
@@ -35,26 +30,7 @@ impl Command for Config {
         let key             = try!(config::KeyKind::from(key));
         let (first, second) = key.to_pair();
 
-        // validate value
-        let value = match key {
-            KeyKind::SweepPeriod => {
-                match value {
-                    "daily" | "weekly" => value.to_string(),
-                    _                  => return Err(From::from(ConfigError::new(ConfigErrorKind::SweepPeriod))),
-                }
-            },
-            KeyKind::SweepTime => {
-                match NaiveTime::from_str(format!("{}:00", value).as_ref()) {
-                    Ok(_)  => value.to_string(),
-                    // should set Err(e) to Error::cause()
-                    Err(_) => return Err(From::from(ConfigError::new(ConfigErrorKind::SweepTime))),
-                }
-            },
-            KeyKind::BurnAfter => {
-                let (num, unit) = try!(config::Config::interpret(value));
-                format!("{} {}", num, unit)
-            },
-        };
+        let value = try!(key.validate(value));
 
         let config     = try!(config::Config::read());
         let mut config = match toml::decode::<BTreeMap<String, BTreeMap<String, String>>>(config) {
