@@ -28,8 +28,7 @@ impl Command for Config {
 
         let key             = try!(config::KeyKind::from(key));
         let (first, second) = key.to_pair();
-
-        let value = try!(config::Config::validate(&key, value));
+        let value           = try!(config::Config::validate(&key, value));
 
         let config     = try!(config::Config::read());
         let mut config = match toml::decode::<BTreeMap<String, BTreeMap<String, String>>>(config) {

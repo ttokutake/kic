@@ -2,7 +2,7 @@ extern crate chrono;
 extern crate regex;
 extern crate toml;
 
-use self::chrono::NaiveTime;
+use self::chrono::{Duration, NaiveTime};
 use self::regex::Regex;
 use self::toml::Value as Toml;
 
@@ -12,11 +12,13 @@ use std::fs::File;
 use std::io::Read;
 use std::str::FromStr;
 
+
 pub enum KeyKind {
     BurnAfter,
     SweepPeriod,
     SweepTime,
 }
+
 impl KeyKind {
     pub fn from<S: AsRef<str>>(key: S) -> Result<KeyKind, ConfigError> {
         match key.as_ref().trim() {
@@ -43,6 +45,7 @@ impl KeyKind {
         (key[0], key[1]) // unsafe!
     }
 }
+
 
 pub struct Config;
 
@@ -79,7 +82,7 @@ impl Config {
         Ok(toml)
     }
 
-    pub fn extract(key: &KeyKind) -> Result<String, CliError> {
+    fn extract(key: &KeyKind) -> Result<String, CliError> {
         let config = try!(Self::read());
 
         let result = config
@@ -124,13 +127,21 @@ impl Config {
         }
     }
 
-    pub fn interpret(key: &KeyKind, value: String) -> Result<(u32, String), CliError> {
-        let value       = try!(Self::validate(key, value));
-        let value       = value.split(' ').collect::<Vec<_>>();
-        let (num, unit) = (value[0], value[1]); // unsafe!
+    pub fn extract_burn_after() -> Result<Duration, CliError> {
+        let key = KeyKind::BurnAfter;
 
-        let num = try!(num.parse::<u32>());
+        let after       = try!(Config::extract(&key));
+        let after       = try!(Self::validate(&key, after));
+        let after       = after.split(' ').collect::<Vec<&str>>();
+        let (num, unit) = (after[0], after[1]);                    // unsafe!
+        let num         = try!(num.parse::<u32>()) as i64;
 
-        Ok((num, unit.to_string()))
+        let duration = match unit {
+            "day"  | "days"  => Duration::days(num),
+            "week" | "weeks" => Duration::weeks(num),
+            _                => return Err(From::from(CannotHappenError)),
+        };
+
+        Ok(duration)
     }
 }
