@@ -12,6 +12,13 @@ use std::io::Read;
 pub enum ParamKind {
     BurnAfter,
 }
+impl ParamKind {
+    fn to_str(&self) -> &str {
+        match *self {
+            ParamKind::BurnAfter => "burn.after",
+        }
+    }
+}
 
 pub struct Config;
 
@@ -52,9 +59,7 @@ impl Config {
     }
 
     pub fn extract(kind: ParamKind) -> Result<String, CliError> {
-        let key = match kind {
-            ParamKind::BurnAfter => "burn.after",
-        };
+        let key = kind.to_str();
         print_with_tag(0, Tag::Execution, format!("Extract \"{}\" parameter", key));
 
         let config = try!(Self::read());
