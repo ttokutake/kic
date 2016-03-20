@@ -7,7 +7,7 @@ use self::chrono::offset::TimeZone;
 use self::chrono::{Duration, Local};
 
 use error::CannotHappenError;
-use lib::config::{Config, ParamKind};
+use lib::config::{Config, KeyKind};
 use lib::fs::*;
 use lib::io::*;
 use lib::setting;
@@ -36,7 +36,7 @@ impl Command for Burn {
 
 impl Burn {
     fn read_param() -> Result<Duration, CliError> {
-        let after       = try!(Config::extract(ParamKind::BurnAfter));
+        let after       = try!(Config::extract(KeyKind::BurnAfter));
         let (num, unit) = try!(Config::interpret(after));
 
         let duration = match unit.as_ref() {

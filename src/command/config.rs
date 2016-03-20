@@ -8,13 +8,13 @@ extern crate toml;
 use self::chrono::NaiveTime;
 
 use error::{ConfigError, ConfigErrorKind};
-use lib::config::{self, ParamKind};
+use lib::config::{self, KeyKind};
 use lib::setting;
 use std::collections::BTreeMap;
 use std::str::FromStr;
 
 pub struct Config {
-    param: Option<String>,
+    key  : Option<String>,
     value: Option<String>,
 }
 
@@ -26,31 +26,31 @@ impl Command for Config {
     }
 
     fn main(&self) -> Result<(), CliError> {
-        let (param, value) = match (self.param.clone(), self.value.clone()) {
-            (Some(p), Some(v)) => (p, v),
+        let (key, value) = match (self.key.clone(), self.value.clone()) {
+            (Some(k), Some(v)) => (k, v),
             _                  => return Err(From::from(self.usage())),
         };
-        let (param, value) = (param.trim(), value.trim());
+        let (key, value) = (key.trim(), value.trim());
 
-        let param           = try!(config::ParamKind::from(param));
-        let (first, second) = param.to_pair();
+        let key             = try!(config::KeyKind::from(key));
+        let (first, second) = key.to_pair();
 
         // validate value
-        let value = match param {
-            ParamKind::SweepPeriod => {
+        let value = match key {
+            KeyKind::SweepPeriod => {
                 match value {
                     "daily" | "weekly" => value.to_string(),
                     _                  => return Err(From::from(ConfigError::new(ConfigErrorKind::SweepPeriod))),
                 }
             },
-            ParamKind::SweepTime => {
+            KeyKind::SweepTime => {
                 match NaiveTime::from_str(format!("{}:00", value).as_ref()) {
                     Ok(_)  => value.to_string(),
                     // should set Err(e) to Error::cause()
                     Err(_) => return Err(From::from(ConfigError::new(ConfigErrorKind::SweepTime))),
                 }
             },
-            ParamKind::BurnAfter => {
+            KeyKind::BurnAfter => {
                 let (num, unit) = try!(config::Config::interpret(value));
                 format!("{} {}", num, unit)
             },
@@ -75,7 +75,7 @@ impl Command for Config {
 }
 
 impl Config {
-    pub fn new(param: Option<String>, value: Option<String>) -> Config {
-        Config { param: param, value: value }
+    pub fn new(key: Option<String>, value: Option<String>) -> Config {
+        Config { key: key, value: value }
     }
 }

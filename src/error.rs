@@ -129,7 +129,7 @@ impl Error for CannotHappenError {
 #[derive(Debug)]
 pub enum ConfigErrorKind {
     Something,
-    InvalidParam,
+    InvalidKey,
     NotFoundBurnAfter,
     BurnAfter,
     SweepPeriod,
@@ -148,7 +148,7 @@ impl Display for ConfigError {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         write!(f, "{}", match self.kind {
             ConfigErrorKind::Something         => r#"Something went to wrong"#,
-            ConfigErrorKind::InvalidParam      => r#"Cannot set this param"#,
+            ConfigErrorKind::InvalidKey        => r#"Cannot set this key"#,
             ConfigErrorKind::NotFoundBurnAfter => r#"Please set [burn]after param"#,
             ConfigErrorKind::BurnAfter         => r#"Please set value like "3 days" or "1 week" as "[burn]after""#,
             ConfigErrorKind::SweepPeriod       => r#"Please set "daily" or "weekly" as "[sweep]period""#,
@@ -157,7 +157,7 @@ impl Display for ConfigError {
     }
 }
 impl Error for ConfigError {
-    fn description(&self) -> &str { "invalid params" }
+    fn description(&self) -> &str { "invalid parameters" }
 }
 
 

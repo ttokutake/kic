@@ -11,26 +11,26 @@ use lib::setting;
 use std::fs::File;
 use std::io::Read;
 
-pub enum ParamKind {
+pub enum KeyKind {
     BurnAfter,
     SweepPeriod,
     SweepTime,
 }
-impl ParamKind {
-    pub fn from<S: AsRef<str>>(key: S) -> Result<ParamKind, ConfigError> {
+impl KeyKind {
+    pub fn from<S: AsRef<str>>(key: S) -> Result<KeyKind, ConfigError> {
         match key.as_ref() {
-            "burn.after"   => Ok(ParamKind::BurnAfter),
-            "sweep.period" => Ok(ParamKind::SweepPeriod),
-            "sweep.time"   => Ok(ParamKind::SweepTime),
-            _              => Err(ConfigError::new(ConfigErrorKind::InvalidParam)),
+            "burn.after"   => Ok(KeyKind::BurnAfter),
+            "sweep.period" => Ok(KeyKind::SweepPeriod),
+            "sweep.time"   => Ok(KeyKind::SweepTime),
+            _              => Err(ConfigError::new(ConfigErrorKind::InvalidKey)),
         }
     }
 
     fn to_str(&self) -> &str {
         match *self {
-            ParamKind::BurnAfter   => "burn.after",
-            ParamKind::SweepPeriod => "sweep.period",
-            ParamKind::SweepTime   => "sweep.time",
+            KeyKind::BurnAfter   => "burn.after",
+            KeyKind::SweepPeriod => "sweep.period",
+            KeyKind::SweepTime   => "sweep.time",
         }
     }
 
@@ -81,7 +81,7 @@ impl Config {
         Ok(toml)
     }
 
-    pub fn extract(kind: ParamKind) -> Result<String, CliError> {
+    pub fn extract(kind: KeyKind) -> Result<String, CliError> {
         let key = kind.to_str();
         print_with_tag(0, Tag::Execution, format!("Extract \"{}\" parameter", key));
 
@@ -89,9 +89,9 @@ impl Config {
         let result = config
             .lookup(key)
             .ok_or(ConfigError::new(match kind {
-                ParamKind::BurnAfter   => ConfigErrorKind::NotFoundBurnAfter,
-                ParamKind::SweepPeriod => unimplemented!(),
-                ParamKind::SweepTime   => unimplemented!(),
+                KeyKind::BurnAfter   => ConfigErrorKind::NotFoundBurnAfter,
+                KeyKind::SweepPeriod => unimplemented!(),
+                KeyKind::SweepTime   => unimplemented!(),
             }));
         let value = try!(result).to_string(); // This to_string() is not documented.
 
