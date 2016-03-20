@@ -118,7 +118,7 @@ impl Config {
         toml::encode_str(&self.toml)
     }
 
-    fn extract(key: &KeyKind) -> Result<String, CliError> {
+    fn get(key: &KeyKind) -> Result<String, CliError> {
         let config = try!(Self::read()).toml;
 
         let result = config
@@ -166,7 +166,7 @@ impl Config {
     pub fn extract_burn_after() -> Result<Duration, CliError> {
         let key = KeyKind::BurnAfter;
 
-        let after       = try!(Self::extract(&key));
+        let after       = try!(Self::get(&key));
         let after       = try!(Self::validate(&key, after));
         let after       = after.split(' ').collect::<Vec<&str>>();
         let (num, unit) = (after[0], after[1]);                    // unsafe!
