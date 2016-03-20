@@ -7,8 +7,6 @@ use self::regex::Regex;
 use self::toml::Value as Toml;
 
 use error::{CannotHappenError, CliError, ConfigError, ConfigErrorKind};
-use constant::CONFIG_FILE_NAME;
-use lib::io::*;
 use lib::setting;
 use std::fs::File;
 use std::io::Read;
@@ -62,8 +60,6 @@ impl Config {
     }
 
     pub fn read() -> Result<Toml, CliError> {
-        print_with_tag(0, Tag::Execution, format!("Read \"{}\" file as TOML", CONFIG_FILE_NAME));
-
         let mut f = try!(File::open(setting::config_file()));
 
         let mut contents = String::new();
@@ -80,17 +76,14 @@ impl Config {
             },
         };
 
-        print_with_okay(1);
         Ok(toml)
     }
 
     pub fn extract(key: &KeyKind) -> Result<String, CliError> {
-        let key_str = key.to_str();
-        print_with_tag(0, Tag::Execution, format!("Extract \"{}\" parameter", key_str));
-
         let config = try!(Self::read());
+
         let result = config
-            .lookup(key_str)
+            .lookup(key.to_str())
             .ok_or(ConfigError::new(match *key {
                 KeyKind::BurnAfter   => ConfigErrorKind::NotFoundBurnAfter,
                 KeyKind::SweepPeriod => unimplemented!(),
@@ -98,7 +91,6 @@ impl Config {
             }));
         let value = try!(result).to_string(); // This to_string() is not documented.
 
-        print_with_okay(1);
         Ok(value)
     }
 
