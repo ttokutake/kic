@@ -38,7 +38,7 @@ impl KeyKind {
         }
     }
 
-    pub fn to_pair(&self) -> (&str, &str) {
+    fn to_pair(&self) -> (&str, &str) {
         let key = self
             .to_str()
             .split('.')
@@ -53,23 +53,35 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn default() -> String {
-        r#"
-[burn]
-  after = "2 weeks"
+    fn insert_deeply(table: &mut BTreeMap<String, BTreeMap<String, String>>, key: &KeyKind, value: String) {
+        let (first, second) = key.to_pair();
 
-[sweep]
-  period = "daily"
-  time   = "00:00"
-"#
-            .to_string()
+        let second = second.to_string();
+
+        if table.contains_key(first) {
+            table.get_mut(first).map(|e| e.insert(second, value));
+        } else {
+            let mut entry = BTreeMap::new();
+            entry.insert(second, value);
+
+            table.insert(first.to_string(), entry);
+        }
     }
 
-    fn new(toml: Toml) -> Config {
+    fn new(toml: Toml) -> Self {
         Config { toml: toml }
     }
 
-    pub fn read() -> Result<Config, CliError> {
+    pub fn default() -> Self {
+        let mut config = BTreeMap::new();
+        Self::insert_deeply(&mut config, &KeyKind::BurnAfter  , "2 weeks".to_string());
+        Self::insert_deeply(&mut config, &KeyKind::SweepPeriod, "daily"  .to_string());
+        Self::insert_deeply(&mut config, &KeyKind::SweepTime  , "00:00"  .to_string());
+
+        Self::new(toml::encode(&config))
+    }
+
+    pub fn read() -> Result<Self, CliError> {
         let mut f = try!(File::open(setting::config_file()));
 
         let mut contents = String::new();
@@ -95,13 +107,9 @@ impl Config {
             None          => return Err(ConfigError::new(ConfigErrorKind::Something)),
         };
 
-        let (first, second) = key.to_pair();
+        Self::insert_deeply(&mut config, key, value);
 
-        config
-            .get_mut(first)
-            .map(|c| c.insert(second.to_string(), value));
-
-        self.toml = toml::encode::<BTreeMap<String, BTreeMap<String, String>>>(&config);
+        self.toml = toml::encode(&config);
 
         Ok(self)
     }
@@ -158,7 +166,7 @@ impl Config {
     pub fn extract_burn_after() -> Result<Duration, CliError> {
         let key = KeyKind::BurnAfter;
 
-        let after       = try!(Config::extract(&key));
+        let after       = try!(Self::extract(&key));
         let after       = try!(Self::validate(&key, after));
         let after       = after.split(' ').collect::<Vec<&str>>();
         let (num, unit) = (after[0], after[1]);                    // unsafe!

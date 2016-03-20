@@ -18,7 +18,7 @@ impl Command for Init {
 
         try!(setting::create_storage_dir());
 
-        try!(setting::create_config_file(Config::default()));
+        try!(setting::create_config_file(Config::default().to_string()));
 
         try!(setting::create_initial_ignore_file());
 
