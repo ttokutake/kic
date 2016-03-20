@@ -1,5 +1,7 @@
+extern crate regex;
 extern crate toml;
 
+use self::regex::Regex;
 use self::toml::Value as Toml;
 
 use error::{CannotHappenError, CliError, ConfigError, ConfigErrorKind};
@@ -72,5 +74,16 @@ impl Config {
 
         print_with_okay(1);
         Ok(value)
+    }
+
+    pub fn interpret<S: AsRef<str>>(value: S) -> Result<(u32, String), CliError> {
+        let re = try!(Regex::new(r"(?P<num>\d+)\s*(?P<unit>days?|weeks?)"));
+        let (num, unit) = match re.captures(value.as_ref()).map(|caps| (caps.name("num"), caps.name("unit"))) {
+            Some((Some(num), Some(unit))) => (num, unit),
+            _                             => return Err(From::from(ConfigError::new(ConfigErrorKind::BurnAfter))),
+        };
+        let num = try!(num.parse::<u32>());
+
+        Ok((num, unit.to_string()))
     }
 }

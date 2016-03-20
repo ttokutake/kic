@@ -6,7 +6,6 @@ extern crate regex;
 extern crate toml;
 
 use self::chrono::NaiveTime;
-use self::regex::Regex;
 
 use error::{CannotHappenError, ConfigError, ConfigErrorKind};
 use lib::config;
@@ -57,15 +56,8 @@ impl Command for Config {
                 }
             },
             "burn.after" => {
-                let re = try!(Regex::new(r"(?P<num>\d+)\s*(?P<unit>days?|weeks?)"));
-                let (num, value) = match re.captures(value.as_ref()).map(|caps| (caps.name("num"), caps.name("unit"))) {
-                    Some((Some(num), Some(unit))) => (num, format!("{} {}", num, unit)),
-                    _                             => return Err(From::from(ConfigError::new(ConfigErrorKind::BurnAfter)))
-                };
-                // should set Err(e) to Error::cause()
-                try!(num.parse::<u32>());
-
-                value
+                let (num, unit) = try!(config::Config::interpret(value));
+                format!("{} {}", num, unit)
             },
             _ => return Err(From::from(CannotHappenError)),
         };

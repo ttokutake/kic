@@ -2,13 +2,11 @@ use error::{CliError, Usage, UsageKind};
 use super::Command;
 
 extern crate chrono;
-extern crate regex;
 
 use self::chrono::offset::TimeZone;
 use self::chrono::{Duration, Local};
-use self::regex::Regex;
 
-use error::{CannotHappenError, ConfigError, ConfigErrorKind};
+use error::CannotHappenError;
 use lib::config::{Config, ParamKind};
 use lib::fs::*;
 use lib::io::*;
@@ -26,7 +24,7 @@ impl Command for Burn {
     }
 
     fn main(&self) -> Result<(), CliError> {
-        let moratorium  = try!(Self::read_param_for_burn());
+        let moratorium  = try!(Self::read_param());
         let target_dirs = try!(Self::search_target_storages(moratorium));
         for dir in &target_dirs {
             try!(setting::delete_dir_all(dir));
@@ -37,17 +35,11 @@ impl Command for Burn {
 }
 
 impl Burn {
-    fn read_param_for_burn() -> Result<Duration, CliError> {
-        let after = try!(Config::extract(ParamKind::BurnAfter));
+    fn read_param() -> Result<Duration, CliError> {
+        let after       = try!(Config::extract(ParamKind::BurnAfter));
+        let (num, unit) = try!(Config::interpret(after));
 
-        let re = try!(Regex::new(r"(?P<num>\d+)\s*(?P<unit>days?|weeks?)"));
-        let (num, unit) = match re.captures(after.as_ref()).map(|caps| (caps.name("num"), caps.name("unit"))) {
-            Some((Some(num), Some(unit))) => (num, unit),
-            _                             => return Err(From::from(ConfigError::new(ConfigErrorKind::BurnAfter))),
-        };
-        let num = try!(num.parse::<u32>());
-
-        let duration = match unit {
+        let duration = match unit.as_ref() {
             "day"  | "days"  => Duration::days(num as i64),
             "week" | "weeks" => Duration::weeks(num as i64),
             _                => return Err(From::from(CannotHappenError)),
