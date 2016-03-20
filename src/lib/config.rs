@@ -8,6 +8,7 @@ use self::toml::Value as Toml;
 
 use error::{CannotHappenError, CliError, ConfigError, ConfigErrorKind};
 use lib::setting;
+use std::collections::BTreeMap;
 use std::fs::File;
 use std::io::Read;
 use std::str::FromStr;
@@ -47,7 +48,9 @@ impl KeyKind {
 }
 
 
-pub struct Config;
+pub struct Config {
+    toml: Toml,
+}
 
 impl Config {
     pub fn default() -> String {
@@ -62,7 +65,11 @@ impl Config {
             .to_string()
     }
 
-    pub fn read() -> Result<Toml, CliError> {
+    fn new(toml: Toml) -> Config {
+        Config { toml: toml }
+    }
+
+    pub fn read() -> Result<Config, CliError> {
         let mut f = try!(File::open(setting::config_file()));
 
         let mut contents = String::new();
@@ -79,11 +86,32 @@ impl Config {
             },
         };
 
-        Ok(toml)
+        Ok(Self::new(toml))
+    }
+
+    pub fn set(mut self, key: &KeyKind, value: String) -> Result<Self, ConfigError> {
+        let mut config = match toml::decode::<BTreeMap<String, BTreeMap<String, String>>>(self.toml) {
+            Some(decoded) => decoded,
+            None          => return Err(ConfigError::new(ConfigErrorKind::Something)),
+        };
+
+        let (first, second) = key.to_pair();
+
+        config
+            .get_mut(first)
+            .map(|c| c.insert(second.to_string(), value));
+
+        self.toml = toml::encode::<BTreeMap<String, BTreeMap<String, String>>>(&config);
+
+        Ok(self)
+    }
+
+    pub fn to_string(&self) -> String {
+        toml::encode_str(&self.toml)
     }
 
     fn extract(key: &KeyKind) -> Result<String, CliError> {
-        let config = try!(Self::read());
+        let config = try!(Self::read()).toml;
 
         let result = config
             .lookup(key.to_str())

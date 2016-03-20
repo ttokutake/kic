@@ -3,10 +3,8 @@ use super::Command;
 
 extern crate toml;
 
-use error::{ConfigError, ConfigErrorKind};
 use lib::config::{self, KeyKind};
 use lib::setting;
-use std::collections::BTreeMap;
 
 pub struct Config {
     key  : Option<String>,
@@ -26,23 +24,13 @@ impl Command for Config {
             _                  => return Err(From::from(self.usage())),
         };
 
-        let key             = try!(config::KeyKind::from(key));
-        let (first, second) = key.to_pair();
-        let value           = try!(config::Config::validate(&key, value));
+        let key   = try!(config::KeyKind::from(key));
+        let value = try!(config::Config::validate(&key, value));
 
-        let config     = try!(config::Config::read());
-        let mut config = match toml::decode::<BTreeMap<String, BTreeMap<String, String>>>(config) {
-            Some(decoded) => decoded,
-            None          => return Err(From::from(ConfigError::new(ConfigErrorKind::Something))),
-        };
+        let config = try!(config::Config::read());
+        let config = try!(config.set(&key, value));
 
-        config
-            .get_mut(first)
-            .map(|c| c.insert(second.to_string(), value));
-
-        let new_config = toml::encode_str(&config);
-
-        try!(setting::create_config_file(new_config));
+        try!(setting::create_config_file(config.to_string()));
 
         Ok(())
     }
