@@ -8,7 +8,6 @@ use self::chrono::{Duration, Local};
 
 use lib::config::Config;
 use lib::fs::*;
-use lib::io::*;
 use lib::setting;
 use std::io::Error as IoError;
 use std::path::PathBuf;
@@ -35,8 +34,6 @@ impl Command for Burn {
 
 impl Burn {
     fn search_target_storages(moratorium: Duration) -> Result<Vec<PathBuf>, IoError> {
-        print_with_tag(0, Tag::Execution, "Search target dusts");
-
         let path_to_storage = setting::storage_dir();
         let dirs            = try!(ls(&path_to_storage));
         let today           = Local::now();
@@ -50,7 +47,6 @@ impl Burn {
             .map(|dir| path_to_storage.join(dir))
             .collect::<Vec<PathBuf>>();
 
-        print_with_okay(1);
         Ok(targets)
     }
 }

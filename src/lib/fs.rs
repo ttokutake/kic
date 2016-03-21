@@ -4,10 +4,10 @@ use self::walkdir::{DirEntry as WalkDirEntry, WalkDir, WalkDirIterator};
 
 use constant::{WORKING_DIR_NAME, KEEPED_FILE_NAME};
 use std::collections::BTreeSet;
-use std::ffi::{OsStr, OsString};
+use std::ffi::OsString;
 use std::fs;
 use std::io::Error as IoError;
-use std::path::{MAIN_SEPARATOR, Path, PathBuf};
+use std::path::{MAIN_SEPARATOR, Path};
 use std::result::Result;
 
 
@@ -23,12 +23,6 @@ pub fn append_prefix_if_need(path: &String) -> String {
     let prefix       = format!(".{}", MAIN_SEPARATOR);
     let prefix: &str = prefix.as_ref();
     format!("{}{}", if path.starts_with(prefix) { "" } else { prefix }, path)
-}
-
-pub fn extract_file_name(full_path: &PathBuf) -> Option<&str> {
-    full_path
-        .file_name()
-        .and_then(OsStr::to_str)
 }
 
 pub fn ls<P: AsRef<Path>>(path: &P) -> Result<BTreeSet<String>, IoError> {

@@ -12,6 +12,5 @@ impl Command for Start {
 
     fn main(&self) -> Result<(), CliError> {
         unimplemented!();
-        Ok(())
     }
 }

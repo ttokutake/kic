@@ -12,6 +12,5 @@ impl Command for End {
 
     fn main(&self) -> Result<(), CliError> {
         unimplemented!();
-        Ok(())
     }
 }

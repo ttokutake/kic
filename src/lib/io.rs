@@ -17,8 +17,6 @@ pub fn read_line_from_stdin() -> Result<String, IoError>  {
 
 
 pub enum Tag {
-    Execution,
-    Okay,
     Info,
     Notice,
     Warning,
@@ -26,17 +24,8 @@ pub enum Tag {
     Caution,
 }
 
-pub fn format_with_tag<S: Display>(indent_level: usize, tag: Tag, message: S) -> String {
-    let indent = (0 .. indent_level).map(|_| "  ").collect::<String>();
-
-    let extra = match tag {
-        Tag::Okay | Tag::Notice => "\n",
-        _                       => "",
-    };
-
+pub fn format_with_tag<S: Display>(tag: Tag, message: S) -> String {
     let tag = match tag {
-        Tag::Execution => "EXECUTION",
-        Tag::Okay      => "OK",
         Tag::Info      => "INFO",
         Tag::Notice    => "NOTICE",
         Tag::Warning   => "WARNING",
@@ -44,13 +33,9 @@ pub fn format_with_tag<S: Display>(indent_level: usize, tag: Tag, message: S) ->
         Tag::Caution   => "CAUTION",
     };
 
-    format!("{}{}: {}{}", indent, tag, message, extra)
+    format!("{}: {}", tag, message)
 }
 
-pub fn print_with_tag<S: Display>(indent_level: usize, tag: Tag, message: S) {
-    println!("{}", format_with_tag(indent_level, tag, message));
-}
-
-pub fn print_with_okay(indent_level: usize) {
-    print_with_tag(indent_level, Tag::Okay, "Done");
+pub fn print_with_tag<S: Display>(tag: Tag, message: S) {
+    println!("{}", format_with_tag(tag, message));
 }

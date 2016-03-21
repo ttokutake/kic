@@ -1,6 +1,5 @@
 use constant;
 use lib::fs::*;
-use lib::io::*;
 use std::collections::BTreeSet;
 use std::fmt::Debug;
 use std::fs::{self, File};
@@ -51,25 +50,15 @@ pub fn create_storage_dir() -> Result<(), IoError> {
 }
 
 fn create_essential_dir(path_to_dir: PathBuf) -> Result<(), IoError> {
-    let file_name = extract_file_name(&path_to_dir).unwrap_or("<UnknownFileName>");
-    print_with_tag(0, Tag::Execution, format!("Create \"{}\" directory", file_name));
-
-    if path_to_dir.is_dir() {
-        print_with_tag(1, Tag::Notice, "The directory has already exist");
-    } else {
+    if !path_to_dir.is_dir() {
         try!(fs::create_dir(&path_to_dir));
-        print_with_okay(1);
     }
 
     Ok(())
 }
 
 pub fn create_essential_dir_all(path_to_dir: &PathBuf) -> Result<(), IoError> {
-    let file_name = extract_file_name(path_to_dir).unwrap_or("<UnknownDirectoryName>");
-    print_with_tag(0, Tag::Execution, format!("Create \"{}\" directory with its parents", file_name));
-
     try!(fs::create_dir_all(path_to_dir));
-    print_with_okay(1);
 
     Ok(())
 }
@@ -90,28 +79,18 @@ pub fn create_ignore_file<S: AsRef<str>>(contents: S) -> Result<(), IoError> {
 }
 
 fn create_setting_file<S: AsRef<str>>(path_to_file: PathBuf, contents: S) -> Result<(), IoError> {
-    let file_name = extract_file_name(&path_to_file).unwrap_or("<UnknownFileName>");
-
-    print_with_tag(0, Tag::Execution, format!("Create \"{}\" file", file_name));
     let mut f = try!(File::create(&path_to_file));
-    print_with_okay(1);
-
-    print_with_tag(0, Tag::Execution, "Write contents into the file");
     try!(f.write(contents.as_ref().as_bytes()));
-    print_with_okay(1);
 
     Ok(())
 }
 
 
 pub fn read_ignore_file() -> Result<BTreeSet<String>, IoError> {
-    print_with_tag(0, Tag::Execution, format!("Read \"{}\" file", constant::IGNORE_FILE_NAME));
-
     let mut f = try!(File::open(ignore_file()));
 
     let mut contents = String::new();
     try!(f.read_to_string(&mut contents));
-    print_with_okay(1);
 
     let files = contents
         .lines()
@@ -127,10 +106,7 @@ pub fn delete_all_setting_files() -> Result<(), IoError> {
 }
 
 pub fn delete_dir_all<P: AsRef<Path> + Debug>(path: P) -> Result<(), IoError> {
-    print_with_tag(0, Tag::Execution, format!("Remove all files and directories under {:?}", path));
-
     try!(fs::remove_dir_all(path));
-    print_with_okay(1);
 
     Ok(())
 }
