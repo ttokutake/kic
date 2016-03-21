@@ -138,7 +138,7 @@ impl Config {
 
         match *key {
             KeyKind::BurnAfter => {
-                let pair = try!(Regex::new(r"^(?P<num>\d+)\s?(?P<unit>days?|weeks?)$"))
+                let pair = try!(Regex::new(r"(?P<num>\d+)\s?(?P<unit>days?|weeks?)"))
                     .captures(value)
                     .map_or((None, None), |caps| (caps.name("num"), caps.name("unit")));
                 let (num, unit) = match pair {
