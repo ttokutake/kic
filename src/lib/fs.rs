@@ -36,6 +36,13 @@ pub fn ls<P: AsRef<Path>>(path: &P) -> Result<BTreeSet<String>, IoError> {
     Ok(dirs)
 }
 
+pub fn is_empty_dir<P: AsRef<Path>>(path: P) -> bool {
+    match fs::read_dir(path) {
+        Ok(rd) => rd.count() == 0,
+        Err(_) => false,
+    }
+}
+
 fn is_hidden(entry: &WalkDirEntry) -> bool {
     entry
         .file_name()

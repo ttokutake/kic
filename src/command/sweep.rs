@@ -62,15 +62,10 @@ impl Sweep {
     fn move_empty_dir_to_dust_box(path_to_dust_box: &PathBuf) -> Result<(), IoError> {
         let all_dirs = dirs_ordered_by_descending_depth(".");
         for dir in all_dirs.iter().filter(|d| *d != ".") {
-            match fs::remove_dir(dir) {
-                Ok(_) => {
-                    try!(setting::create_essential_dir_all(&path_buf![&path_to_dust_box, dir]));
-                },
-                Err(why) => match why.raw_os_error() {
-                    Some(39) => unimplemented!(),
-                    _        => return Err(why),
-                },
-            };
+            if is_empty_dir(dir) {
+                try!(fs::remove_dir(dir));
+                try!(setting::create_essential_dir_all(&path_buf![&path_to_dust_box, dir]));
+            }
         }
 
         Ok(())
