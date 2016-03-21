@@ -23,17 +23,20 @@ pub enum Tag {
     Error,
     Caution,
 }
+impl Tag {
+    fn to_str(&self) -> &str {
+        match *self {
+            Tag::Info    => "INFO",
+            Tag::Notice  => "NOTICE",
+            Tag::Warning => "WARNING",
+            Tag::Error   => "ERROR",
+            Tag::Caution => "CAUTION",
+        }
+    }
+}
 
 pub fn format_with_tag<S: Display>(tag: Tag, message: S) -> String {
-    let tag = match tag {
-        Tag::Info      => "INFO",
-        Tag::Notice    => "NOTICE",
-        Tag::Warning   => "WARNING",
-        Tag::Error     => "ERROR",
-        Tag::Caution   => "CAUTION",
-    };
-
-    format!("{}: {}", tag, message)
+    format!("{}: {}", tag.to_str(), message)
 }
 
 pub fn print_with_tag<S: Display>(tag: Tag, message: S) {
