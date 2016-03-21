@@ -128,9 +128,12 @@ impl Config {
                 KeyKind::SweepPeriod => unimplemented!(),
                 KeyKind::SweepTime   => unimplemented!(),
             }));
-        let value = try!(result).to_string(); // This to_string() is not documented.
+        let value = try!(result);
 
-        Ok(value)
+        value
+            .as_str()
+            .map(|v| v.to_string())
+            .ok_or(From::from(ConfigError::new(ConfigErrorKind::NonStringValue)))
     }
 
     pub fn validate<S: AsRef<str>>(key: &KeyKind, value: S) -> Result<String, CliError> {
