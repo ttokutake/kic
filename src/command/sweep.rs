@@ -64,7 +64,7 @@ impl Sweep {
         for dir in all_dirs.iter().filter(|d| *d != ".") {
             if is_empty_dir(dir) {
                 try!(fs::remove_dir(dir));
-                try!(setting::create_essential_dir_all(&path_buf![&path_to_dust_box, dir]));
+                try!(setting::create_essential_dir_all(&path_buf![path_to_dust_box, dir]));
             }
         }
 
