@@ -3,7 +3,7 @@ use super::Command;
 
 extern crate toml;
 
-use lib::config::{self, KeyKind};
+use lib::config;
 use lib::setting;
 
 pub struct Config {

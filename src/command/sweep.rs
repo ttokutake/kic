@@ -35,44 +35,40 @@ impl Command for Sweep {
             .difference(&ignore)
             .cloned()
             .collect::<Vec<String>>();
-        try!(Self::move_files_to_dust_box(target_files, &path_to_dust_box));
+        for target in &target_files {
+            try!(Self::move_file_to_dust_box(target, &path_to_dust_box));
+        }
 
-        try!(Self::move_empty_dir_to_dust_box(&path_to_dust_box));
+        let dirs = dirs_ordered_by_descending_depth(".");
+        for target in dirs.iter().filter(|d| *d != "." && is_empty_dir(d)) {
+            try!(Self::move_dir_to_dust_box(target, &path_to_dust_box));
+        }
 
         Ok(())
     }
 }
 
 impl Sweep {
-    fn move_files_to_dust_box(target_files: Vec<String>, path_to_dust_box: &PathBuf) -> Result<(), CliError> {
-        let dust_box_name = path_to_dust_box.display();
+    fn move_file_to_dust_box(target: &String, path_to_dust_box: &PathBuf) -> Result<(), CliError> {
+        let target_path = path_buf![target];
+        let target_file = try!(target_path.file_name().ok_or(CannotHappenError));
+        let target_base = try!(target_path.parent().ok_or(CannotHappenError));
+        let to = path_buf![&path_to_dust_box, target_base];
 
-        for target in &target_files {
-            let target_path = path_buf![&target];
-            let target_file = try!(target_path.file_name().ok_or(CannotHappenError));
-            let target_base = try!(target_path.parent().ok_or(CannotHappenError));
-            let to = path_buf![&path_to_dust_box, target_base];
+        let message = format!("Move \"{}\" file to \"{}\" directory", target_path.display(), path_to_dust_box.display());
+        print_with_tag(Tag::Info, message);
 
-            let message = format!("Move \"{}\" file to \"{}\" directory", target_path.display(), dust_box_name);
-            print_with_tag(Tag::Info, message);
+        try!(setting::create_essential_dir_all(&to));
 
-            try!(setting::create_essential_dir_all(&to));
-
-            // forcedly overwrite if the file exists with same name.
-            try!(fs::rename(target, path_buf![to, target_file]));
-        }
+        // forcedly overwrite if the file exists with same name.
+        try!(fs::rename(target, path_buf![to, target_file]));
 
         Ok(())
     }
 
-    fn move_empty_dir_to_dust_box(path_to_dust_box: &PathBuf) -> Result<(), IoError> {
-        let all_dirs = dirs_ordered_by_descending_depth(".");
-        for dir in all_dirs.iter().filter(|d| *d != ".") {
-            if is_empty_dir(dir) {
-                try!(fs::remove_dir(dir));
-                try!(setting::create_essential_dir_all(&path_buf![path_to_dust_box, dir]));
-            }
-        }
+    fn move_dir_to_dust_box(target: &String, path_to_dust_box: &PathBuf) -> Result<(), IoError> {
+        try!(fs::remove_dir(target));
+        try!(setting::create_essential_dir_all(&path_buf![path_to_dust_box, target]));
 
         Ok(())
     }
