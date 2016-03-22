@@ -18,8 +18,10 @@ use self::destroy::Destroy;
 
 use constant::BANNED_DIRS;
 use error::{CliError, EssentialLack, EssentialKind, RunningPlaceError, Usage, UsageKind};
+use lib::io::*;
 use lib::setting;
 use std::env;
+use std::io::Error as IoError;
 
 trait Command {
     fn validation(&self) -> bool;
@@ -54,6 +56,15 @@ trait Command {
         } else {
             self.main()
         }
+    }
+
+    fn inquiry() -> Result<bool, IoError> where Self: Sized {
+        read_line_from_stdin()
+            .map(|input| input.to_lowercase())
+            .map(|input| match input.as_ref() {
+                "y" | "yes" => true,
+                _           => false,
+            })
     }
 }
 
