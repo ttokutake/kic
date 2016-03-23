@@ -1,6 +1,7 @@
 use error::{CliError, Usage, UsageKind};
 use super::Command;
 
+use constant::IGNORE_FILE_NAME;
 use lib::fs::*;
 use lib::io::*;
 use lib::setting;
@@ -94,13 +95,27 @@ impl Ignore {
     }
 
     fn ignore_current_files() -> Result<(), CliError> {
-        try!(setting::create_initial_ignore_file());
+        let message = format!("Do you want to initialize \"{}\"? [yes/no]", IGNORE_FILE_NAME);
+        echo(format_with_tag(Tag::Caution, message));
+
+        if try!(Self::inquiry()) {
+            try!(setting::create_initial_ignore_file());
+        } else {
+            print_with_tag(Tag::Notice, "Interrupted by user");
+        }
 
         Ok(())
     }
 
     fn clear_ignore_file() -> Result<(), CliError> {
-        try!(setting::create_ignore_file("\n"));
+        let message = format!("Do you want to clear \"{}\"? [yes/no]", IGNORE_FILE_NAME);
+        echo(format_with_tag(Tag::Caution, message));
+
+        if try!(Self::inquiry()) {
+            try!(setting::create_ignore_file("\n"));
+        } else {
+            print_with_tag(Tag::Notice, "Interrupted by user");
+        }
 
         Ok(())
     }
