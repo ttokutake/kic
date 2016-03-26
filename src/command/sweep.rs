@@ -10,7 +10,7 @@ use lib::fs::*;
 use lib::io::*;
 use lib::setting;
 use std::fs;
-use std::io::Error as IoError;
+use std::io::{Error as IoError, ErrorKind as IoErrorKind};
 use std::path::PathBuf;
 
 pub struct Sweep;
@@ -39,11 +39,9 @@ impl Command for Sweep {
             try!(Self::move_file_to_dust_box(target, &path_to_dust_box));
         }
 
-        let dirs = dirs_ordered_by_descending_depth(".");
-        for target in &dirs {
-            if is_empty_dir(target) {
-                try!(Self::move_dir_to_dust_box(target, &path_to_dust_box));
-            }
+        let all_dirs = dirs_ordered_by_descending_depth(".");
+        for target in &all_dirs {
+            try!(Self::move_empty_dir_to_dust_box(target, &path_to_dust_box));
         }
 
         Ok(())
@@ -57,20 +55,36 @@ impl Sweep {
         let target_base = try!(target_path.parent().ok_or(CannotHappenError));
         let to = path_buf![&path_to_dust_box, target_base];
 
-        let message = format!("Move \"{}\" file to \"{}\" directory", target_path.display(), path_to_dust_box.display());
+        let message = format!("Move file \"{}\" to \"{}\" directory", target_path.display(), path_to_dust_box.display());
         print_with_tag(Tag::Info, message);
 
         try!(setting::create_essential_dir_all(&to));
 
         // forcedly overwrite if the file exists with same name.
-        try!(fs::rename(target, path_buf![to, target_file]));
+        match fs::rename(target, path_buf![to, target_file]) {
+            Ok(_)  => (),
+            Err(e) => match e.kind() {
+                IoErrorKind::PermissionDenied => print_with_tag(Tag::Info, "Interrupted this moving file for permission"),
+                _                             => return Err(From::from(e)),
+            },
+        };
 
         Ok(())
     }
 
-    fn move_dir_to_dust_box(target: &String, path_to_dust_box: &PathBuf) -> Result<(), IoError> {
-        try!(fs::remove_dir(target));
-        try!(setting::create_essential_dir_all(&path_buf![path_to_dust_box, target]));
+    fn move_empty_dir_to_dust_box(target: &String, path_to_dust_box: &PathBuf) -> Result<(), IoError> {
+        if is_empty_dir(target) {
+            let message = format!("Move empty directory \"{}\" to \"{}\" directory", target, path_to_dust_box.display());
+            print_with_tag(Tag::Info, message);
+
+            match fs::remove_dir(target) {
+                Ok(_)  => try!(setting::create_essential_dir_all(&path_buf![path_to_dust_box, target])),
+                Err(e) => match e.kind() {
+                    IoErrorKind::PermissionDenied => print_with_tag(Tag::Info, "Interrupted this moving directory for permission"),
+                    _                             => return Err(From::from(e)),
+                },
+            };
+        }
 
         Ok(())
     }
