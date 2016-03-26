@@ -1,4 +1,5 @@
 use constant;
+use lib::config::Config;
 use lib::fs::*;
 use std::collections::BTreeSet;
 use std::fmt::Debug;
@@ -64,6 +65,9 @@ pub fn create_essential_dir_all(path_to_dir: &PathBuf) -> Result<(), IoError> {
 }
 
 
+pub fn create_initial_config_file() -> Result<(), IoError> {
+    create_config_file(Config::default().to_string())
+}
 pub fn create_config_file<S: AsRef<str>>(contents: S) -> Result<(), IoError> {
     create_setting_file(config_file(), contents)
 }
