@@ -7,8 +7,9 @@ use lib::config;
 use lib::setting;
 
 pub struct Config {
-    key  : Option<String>,
-    value: Option<String>,
+    command: Option<String>,
+    key    : Option<String>,
+    value  : Option<String>,
 }
 
 impl Command for Config {
@@ -19,6 +20,23 @@ impl Command for Config {
     }
 
     fn main(&self) -> Result<(), CliError> {
+        match self.command {
+            Some(ref c) => match c.as_ref() {
+                "set"  => self.set(),
+                "init" => self.init(),
+                _      => Err(From::from(self.usage())),
+            },
+            None => Err(From::from(self.usage())),
+        }
+    }
+}
+
+impl Config {
+    pub fn new(command: Option<String>, key: Option<String>, value: Option<String>) -> Config {
+        Config { command: command, key: key, value: value }
+    }
+
+    fn set(&self) -> Result<(), CliError> {
         let (key, value) = match (self.key.clone(), self.value.clone()) {
             (Some(k), Some(v)) => (k, v),
             _                  => return Err(From::from(self.usage())),
@@ -34,10 +52,8 @@ impl Command for Config {
 
         Ok(())
     }
-}
 
-impl Config {
-    pub fn new(key: Option<String>, value: Option<String>) -> Config {
-        Config { key: key, value: value }
+    fn init(&self) -> Result<(), CliError> {
+        unimplemented!();
     }
 }
