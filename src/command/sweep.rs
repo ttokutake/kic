@@ -40,8 +40,10 @@ impl Command for Sweep {
         }
 
         let dirs = dirs_ordered_by_descending_depth(".");
-        for target in dirs.iter().filter(|d| is_empty_dir(d)) {
-            try!(Self::move_dir_to_dust_box(target, &path_to_dust_box));
+        for target in &dirs {
+            if is_empty_dir(target) {
+                try!(Self::move_dir_to_dust_box(target, &path_to_dust_box));
+            }
         }
 
         Ok(())
