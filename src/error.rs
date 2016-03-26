@@ -225,6 +225,93 @@ pub enum UsageKind {
     End,
     Destroy,
 }
+impl UsageKind {
+    fn command(&self) -> &str {
+        match *self {
+            UsageKind::Nothing => "<Command>",
+            UsageKind::Init    => "init",
+            UsageKind::Config  => "config",
+            UsageKind::Ignore  => "ignore",
+            UsageKind::Sweep   => "sweep",
+            UsageKind::Burn    => "burn",
+            UsageKind::Start   => "start",
+            UsageKind::End     => "end",
+            UsageKind::Destroy => "destroy",
+        }
+    }
+
+    fn common_usage(&self) -> String {
+        format!("{} {} [Option]", ME, self.command())
+    }
+
+    fn usages(&self) -> Vec<String> {
+        match *self {
+            UsageKind::Config => {
+                vec![
+                    format!("{} set <Key> <Value>", self.common_usage()),
+                    format!("{} init"             , self.common_usage()),
+                ]
+            },
+            UsageKind::Ignore => {
+                vec![
+                    format!("{} add <File> ..."   , self.common_usage()),
+                    format!("{} remove <File> ...", self.common_usage()),
+                    format!("{} current"          , self.common_usage()),
+                    format!("{} clear"            , self.common_usage()),
+                ]
+            },
+            _ => vec![self.common_usage()],
+        }
+    }
+
+    fn description(&self) -> &str {
+        match *self {
+            UsageKind::Nothing => "Keep your directories clean!",
+            UsageKind::Init    => "Register current directory.",
+            UsageKind::Config  => "Change parameter.",
+            UsageKind::Ignore  => "Change \"non-dust\" file's list.",
+            UsageKind::Sweep   => "Sweep \"dust\" files and empty directories in current directory.",
+            UsageKind::Burn    => "Burn \"sweeped\" files.",
+            UsageKind::Start   => "Register with \"cron\" for autonomous operation.",
+            UsageKind::End     => "Unregister from \"cron\".",
+            UsageKind::Destroy => "Unregister current directory.",
+        }
+    }
+
+    fn sub_descriptions(&self) -> Vec<String> {
+        match *self {
+            UsageKind::Nothing => {
+                vec![
+                    format!("{}{}", "init    # ", UsageKind::Init   .description()),
+                    format!("{}{}", "config  # ", UsageKind::Config .description()),
+                    format!("{}{}", "ignore  # ", UsageKind::Ignore .description()),
+                    format!("{}{}", "sweep   # ", UsageKind::Sweep  .description()),
+                    format!("{}{}", "burn    # ", UsageKind::Burn   .description()),
+                    format!("{}{}", "start   # ", UsageKind::Start  .description()),
+                    format!("{}{}", "end     # ", UsageKind::End    .description()),
+                    format!("{}{}", "destroy # ", UsageKind::Destroy.description()),
+                ]
+            },
+            UsageKind::Config => {
+                vec![
+                    "set  # Set parameter"       .to_string(),
+                    "init # Initialize configure".to_string(),
+                ]
+            },
+            UsageKind::Ignore => {
+                let file_expression = "\"non-dust\" file's list";
+                vec![
+                    format!("add     # Add specified files to {}"        , file_expression),
+                    format!("remove  # Remove specified files from {}"   , file_expression),
+                    format!("current # Replace {} with current all files", file_expression),
+                    format!("clear   # Clear {}"                         , file_expression),
+                ]
+            },
+            _ => Vec::new(),
+        }
+    }
+}
+
 #[derive(Debug)]
 pub struct Usage {
     kind: UsageKind,
@@ -233,37 +320,45 @@ impl Usage {
     pub fn new(kind: UsageKind) -> Usage {
         Usage { kind: kind }
     }
+
+    fn message(&self) -> String {
+        let common = format!(
+"Option:
+    -h|--help    # Display help message.
+    -v|--version # Display software version.
+
+Description:
+    {}
+",
+            self.kind.description(),
+        );
+
+        let usage = self.kind
+            .usages()
+            .iter()
+            .fold(String::new(), |message, line| {
+                message + "    " + line + "\n"
+            });
+
+        let main = format!("Usage:\n{}\n{}", usage, common);
+
+        let sub_description = self.kind
+            .sub_descriptions()
+            .iter()
+            .fold(String::new(), |message, line| {
+                message + "    " + line + "\n"
+            });
+
+        if sub_description.is_empty() {
+            main
+        } else {
+            format!("{}{}{}", main, "\nCommand:\n", sub_description)
+        }
+    }
 }
 impl Display for Usage {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
-        write!(f, "{}", match self.kind {
-            UsageKind::Nothing => format!(
-r#"Usage:
-    {} <command> [--help|-h]
-
-Command:
-    init    # Register current directory.
-    config  # Set config's parameters.
-    ignore  # Set ignored files.
-    sweep   # Sweep files in current directory.
-    burn    # Burn sweeped files.
-    start   # Start "{}".
-    end     # End "{}".
-    destroy # Destroy "{}"."#,
-                ME,
-                ME,
-                ME,
-                ME,
-            ),
-            UsageKind::Init    => "init!"   .to_string(),
-            UsageKind::Config  => "config!" .to_string(),
-            UsageKind::Ignore  => "ignore!" .to_string(),
-            UsageKind::Sweep   => "sweep!"  .to_string(),
-            UsageKind::Burn    => "burn!"   .to_string(),
-            UsageKind::Start   => "start!"  .to_string(),
-            UsageKind::End     => "end!"    .to_string(),
-            UsageKind::Destroy => "destroy!".to_string(),
-        })
+        write!(f, "{}", self.message())
     }
 }
 impl Error for Usage {
