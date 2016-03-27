@@ -19,7 +19,7 @@ macro_rules! path_buf {
 }
 
 
-pub fn append_prefix_if_need(path: &String) -> String {
+pub fn append_current_dir_prefix_if_need(path: &String) -> String {
     let prefix       = format!(".{}", MAIN_SEPARATOR);
     let prefix: &str = prefix.as_ref();
     format!("{}{}", if path.starts_with(prefix) { "" } else { prefix }, path)
@@ -103,4 +103,39 @@ pub fn dirs_ordered_by_descending_depth<P: AsRef<Path>>(root: P) -> Vec<String> 
         .map(to_string)
         .filter_map(Result::ok)
         .collect::<Vec<String>>()
+}
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::path::{MAIN_SEPARATOR, PathBuf};
+
+    fn to_string_forcedly(path: PathBuf) -> String {
+        path
+            .to_str()
+            .unwrap()
+            .to_string()
+    }
+
+    #[test]
+    fn create_path_buf() {
+        use std::path::PathBuf;
+        let collect = PathBuf::new()
+            .join("path")
+            .join("to")
+            .join("file");
+        assert_eq!(collect, path_buf!["path", "to", "file"]);
+    }
+
+    #[test]
+    fn append_current_dir_prefix() {
+        let path = to_string_forcedly(path_buf!["path", "to", "file"]);
+        assert_eq!(format!(".{}{}", MAIN_SEPARATOR, path), append_current_dir_prefix_if_need(&path));
+    }
+    #[test]
+    fn not_append_current_dir_prefix() {
+        let path = to_string_forcedly(path_buf![".", "path", "to", "file"]);
+        assert_eq!(path, append_current_dir_prefix_if_need(&path))
+    }
 }

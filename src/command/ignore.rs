@@ -48,7 +48,7 @@ impl Ignore {
 
         let ignores_to_be_added = paths
             .iter()
-            .map(append_prefix_if_need)
+            .map(append_current_dir_prefix_if_need)
             .filter(|p| Path::new(p).is_file())
             .collect::<BTreeSet<String>>();
 
@@ -76,7 +76,7 @@ impl Ignore {
 
         let ignores_to_be_removed = paths
             .iter()
-            .map(append_prefix_if_need)
+            .map(append_current_dir_prefix_if_need)
             .collect::<BTreeSet<String>>();
 
         for file in &ignores_to_be_removed {
