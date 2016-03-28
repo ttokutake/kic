@@ -43,11 +43,43 @@ pub fn is_empty_dir<P: AsRef<Path>>(path: P) -> bool {
     }
 }
 
+fn is_hidden_name(file_name: &str) -> bool {
+    file_name.starts_with(".") && file_name.len() > 1 && file_name != ".."
+}
+#[test]
+fn hidden_name() {
+    let file_names = [
+        ".a",
+        ".ab",
+        ".abc",
+        "..a",
+        "...",
+    ];
+    for file_name in &file_names {
+        assert!(is_hidden_name(file_name));
+    }
+}
+#[test]
+fn non_hidden_name() {
+    let file_names = [
+        "",
+
+        ".",
+        "..",
+        "a",
+        "ab",
+        "abc",
+    ];
+    for file_name in &file_names {
+        assert!(!is_hidden_name(file_name));
+    }
+}
+
 fn is_hidden(entry: &WalkDirEntry) -> bool {
     entry
         .file_name()
         .to_str()
-        .map_or(false, |s| s.starts_with(".") && s.len() > 1 && s != "..")
+        .map_or(false, is_hidden_name)
 }
 
 fn is_pinned(entry: &WalkDirEntry) -> bool {
@@ -109,9 +141,9 @@ pub fn dirs_ordered_by_descending_depth<P: AsRef<Path>>(root: P) -> Vec<String> 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::path::{MAIN_SEPARATOR, PathBuf};
+    use std::path::{MAIN_SEPARATOR, Path, PathBuf};
 
-    fn to_string_forcedly(path: PathBuf) -> String {
+    fn to_string_unsafely(path: &PathBuf) -> String {
         path
             .to_str()
             .unwrap()
@@ -121,21 +153,47 @@ mod tests {
     #[test]
     fn create_path_buf() {
         use std::path::PathBuf;
-        let collect = PathBuf::new()
-            .join("path")
-            .join("to")
-            .join("file");
-        assert_eq!(collect, path_buf!["path", "to", "file"]);
+        let paths = [
+            (PathBuf::new()                           , path_buf![                    ]),
+            (Path::new("path").to_path_buf()          , path_buf!["path"              ]),
+            (Path::new("path").join("to")             , path_buf!["path", "to"        ]),
+            (Path::new("path").join("to").join("file"), path_buf!["path", "to", "file"]),
+        ];
+        for &(ref correct, ref calculated) in &paths {
+            assert_eq!(correct, calculated);
+        }
     }
 
     #[test]
     fn append_current_dir_prefix() {
-        let path = to_string_forcedly(path_buf!["path", "to", "file"]);
-        assert_eq!(format!(".{}{}", MAIN_SEPARATOR, path), append_current_dir_prefix_if_need(&path));
+        let paths = [
+            path_buf!["."                 ],
+            path_buf![".."                ],
+            path_buf!["..", "path"        ],
+            path_buf!["path"              ],
+            path_buf!["path", "to"        ],
+            path_buf!["path", "to", "file"],
+        ];
+        for path in &paths {
+            let path    = to_string_unsafely(path);
+            let correct = format!(".{}{}", MAIN_SEPARATOR, path);
+            assert_eq!(correct, append_current_dir_prefix_if_need(&path));
+        }
     }
     #[test]
     fn not_append_current_dir_prefix() {
-        let path = to_string_forcedly(path_buf![".", "path", "to", "file"]);
-        assert_eq!(path, append_current_dir_prefix_if_need(&path))
+        let paths = [
+            path_buf![".", "."                 ],
+            path_buf![".", ".."                ],
+            path_buf![".", "..", "path"        ],
+            path_buf![".", "path"              ],
+            path_buf![".", "path", "to"        ],
+            path_buf![".", "path", "to", "file"],
+        ];
+        for path in &paths {
+            let path    = to_string_unsafely(path);
+            let correct = path.clone();
+            assert_eq!(correct, append_current_dir_prefix_if_need(&path));
+        }
     }
 }
