@@ -93,12 +93,11 @@ fn is_target(entry: &WalkDirEntry) -> bool {
     !is_hidden(entry) && !is_pinned(entry)
 }
 
-fn to_string(entry: WalkDirEntry) -> Result<String, OsString> {
+fn to_string(entry: WalkDirEntry) -> Option<String> {
     entry
         .path()
-        .as_os_str()
-        .to_os_string()
-        .into_string()
+        .to_str()
+        .map(|p| p.to_string())
 }
 
 pub fn walk_dir<P: AsRef<Path>>(root: P) -> BTreeSet<String> {
@@ -111,8 +110,7 @@ pub fn walk_dir<P: AsRef<Path>>(root: P) -> BTreeSet<String> {
 
     walker
         .into_iter()
-        .map(to_string)
-        .filter_map(Result::ok)
+        .filter_map(to_string)
         .collect::<BTreeSet<String>>()
 }
 
@@ -132,8 +130,7 @@ pub fn dirs_ordered_by_descending_depth<P: AsRef<Path>>(root: P) -> Vec<String> 
 
     walker
         .into_iter()
-        .map(to_string)
-        .filter_map(Result::ok)
+        .filter_map(to_string)
         .collect::<Vec<String>>()
 }
 
