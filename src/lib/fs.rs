@@ -12,9 +12,9 @@ use std::result::Result;
 
 
 macro_rules! path_buf {
-    ($($x: expr),*) => {
+    ($($x: expr),+) => {
         PathBuf::new()
-            $(.join($x))*
+            $(.join($x))+
     };
 }
 
@@ -151,7 +151,6 @@ mod tests {
     fn create_path_buf() {
         use std::path::PathBuf;
         let paths = [
-            (PathBuf::new()                           , path_buf![                    ]),
             (Path::new("path").to_path_buf()          , path_buf!["path"              ]),
             (Path::new("path").join("to")             , path_buf!["path", "to"        ]),
             (Path::new("path").join("to").join("file"), path_buf!["path", "to", "file"]),
