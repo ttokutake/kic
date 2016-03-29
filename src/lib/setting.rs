@@ -1,6 +1,6 @@
 use constant;
 use lib::config::Config;
-use lib::fs::*;
+use lib::ignore::Ignore;
 use std::fs::{self, File};
 use std::io::{Error as IoError, Write};
 use std::path::{Path, PathBuf};
@@ -71,10 +71,7 @@ pub fn create_config_file<S: AsRef<str>>(contents: S) -> Result<(), IoError> {
 }
 
 pub fn create_initial_ignore_file() -> Result<(), IoError> {
-    let ignore_contents = walk_dir(".")
-        .iter()
-        .fold(String::new(), |c, f| c + f + "\n");
-    create_ignore_file(ignore_contents)
+    create_ignore_file(Ignore::default().to_string())
 }
 pub fn create_ignore_file<S: AsRef<str>>(contents: S) -> Result<(), IoError> {
     create_setting_file(ignore_file(), contents)

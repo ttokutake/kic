@@ -53,6 +53,14 @@ pub struct Config {
 }
 
 impl Config {
+    pub fn to_string(&self) -> String {
+        toml::encode_str(&self.toml)
+    }
+
+    fn new(toml: Toml) -> Self {
+        Config { toml: toml }
+    }
+
     fn insert_deeply(table: &mut BTreeMap<String, BTreeMap<String, String>>, key: &KeyKind, value: String) {
         let (first, second) = key.to_pair();
 
@@ -66,10 +74,6 @@ impl Config {
 
             table.insert(first.to_string(), entry);
         }
-    }
-
-    fn new(toml: Toml) -> Self {
-        Config { toml: toml }
     }
 
     pub fn default() -> Self {
@@ -112,10 +116,6 @@ impl Config {
         self.toml = toml::encode(&config);
 
         Ok(self)
-    }
-
-    pub fn to_string(&self) -> String {
-        toml::encode_str(&self.toml)
     }
 
     fn get(key: &KeyKind) -> Result<String, CliError> {

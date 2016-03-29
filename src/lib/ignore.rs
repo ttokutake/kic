@@ -1,12 +1,31 @@
+use lib::fs::*;
 use lib::setting;
 use std::collections::BTreeSet;
 use std::fs::File;
 use std::io::{Error as IoError, Read};
 
 
-pub struct Ignore;
+pub struct Ignore {
+    files: BTreeSet<String>,
+}
 
 impl Ignore {
+    pub fn to_string(&self) -> String {
+        self.files
+            .iter()
+            .fold(String::new(), |contents, file| contents + file + "\n")
+    }
+
+    fn new(files: BTreeSet<String>) -> Self {
+        Ignore { files: files }
+    }
+
+    pub fn default() -> Self {
+        let current_files = walk_dir(".");
+
+        Self::new(current_files)
+    }
+
     pub fn read() -> Result<BTreeSet<String>, IoError> {
         let mut f = try!(File::open(setting::ignore_file()));
 
