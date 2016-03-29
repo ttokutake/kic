@@ -1,9 +1,8 @@
 use constant;
 use lib::config::Config;
 use lib::fs::*;
-use std::collections::BTreeSet;
 use std::fs::{self, File};
-use std::io::{Error as IoError, Read, Write};
+use std::io::{Error as IoError, Write};
 use std::path::{Path, PathBuf};
 
 
@@ -86,21 +85,6 @@ fn create_setting_file<S: AsRef<str>>(path_to_file: PathBuf, contents: S) -> Res
     try!(f.write(contents.as_ref().as_bytes()));
 
     Ok(())
-}
-
-
-pub fn read_ignore_file() -> Result<BTreeSet<String>, IoError> {
-    let mut f = try!(File::open(ignore_file()));
-
-    let mut contents = String::new();
-    try!(f.read_to_string(&mut contents));
-
-    let files = contents
-        .lines()
-        .map(|l| l.trim().to_string())
-        .collect::<BTreeSet<String>>();
-
-    Ok(files)
 }
 
 

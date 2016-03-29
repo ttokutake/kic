@@ -7,6 +7,7 @@ use self::chrono::Local;
 
 use error::CannotHappenError;
 use lib::fs::*;
+use lib::ignore::Ignore;
 use lib::io::*;
 use lib::setting;
 use std::fs;
@@ -29,7 +30,7 @@ impl Command for Sweep {
         let path_to_dust_box = path_buf![setting::storage_dir(), date, "dusts"];
         try!(setting::create_essential_dir_all(&path_to_dust_box));
 
-        let ignore = try!(setting::read_ignore_file());
+        let ignore = try!(Ignore::read());
 
         let target_files = walk_dir(".")
             .difference(&ignore)

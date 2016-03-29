@@ -3,6 +3,7 @@ use super::Command;
 
 use constant::IGNORE_FILE_NAME;
 use lib::fs::*;
+use lib::ignore;
 use lib::io::*;
 use lib::setting;
 use std::collections::BTreeSet;
@@ -56,7 +57,7 @@ impl Ignore {
             print_with_tag(Tag::Info, format!("\"{}\" will be ignored", file));
         }
 
-        let original_ignores = try!(setting::read_ignore_file());
+        let original_ignores = try!(ignore::Ignore::read());
 
         let new_ignores = original_ignores
             .union(&ignores_to_be_added)
@@ -83,7 +84,7 @@ impl Ignore {
             print_with_tag(Tag::Info, format!("\"{}\" will not be ignored", file));
         }
 
-        let original_ignores = try!(setting::read_ignore_file());
+        let original_ignores = try!(ignore::Ignore::read());
 
         let new_ignores = original_ignores
             .difference(&ignores_to_be_removed)
