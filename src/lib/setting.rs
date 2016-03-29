@@ -2,7 +2,6 @@ use constant;
 use lib::config::Config;
 use lib::fs::*;
 use std::collections::BTreeSet;
-use std::fmt::Debug;
 use std::fs::{self, File};
 use std::io::{Error as IoError, Read, Write};
 use std::path::{Path, PathBuf};
@@ -109,7 +108,7 @@ pub fn delete_all_setting_files() -> Result<(), IoError> {
     delete_dir_all(constant::WORKING_DIR_NAME)
 }
 
-pub fn delete_dir_all<P: AsRef<Path> + Debug>(path: P) -> Result<(), IoError> {
+pub fn delete_dir_all<P: AsRef<Path>>(path: P) -> Result<(), IoError> {
     try!(fs::remove_dir_all(path));
 
     Ok(())
