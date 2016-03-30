@@ -1,5 +1,4 @@
 use lib::fs::*;
-use lib::setting;
 use std::collections::BTreeSet;
 use std::fs::File;
 use std::io::{Error as IoError, Read};
@@ -28,7 +27,7 @@ impl Ignore {
     }
 
     pub fn read() -> Result<Self, IoError> {
-        let mut f = try!(File::open(setting::ignore_file()));
+        let mut f = try!(File::open(super::ignore_file()));
 
         let mut contents = String::new();
         try!(f.read_to_string(&mut contents));

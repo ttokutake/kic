@@ -1,9 +1,13 @@
+pub mod config;
+pub mod ignore;
+
 use constant;
-use lib::config::Config;
-use lib::ignore::Ignore;
 use std::fs::{self, File};
 use std::io::{Error as IoError, Write};
 use std::path::{Path, PathBuf};
+
+pub use self::config::{Config, ConfigKey};
+pub use self::ignore::Ignore;
 
 
 pub fn working_dir() -> PathBuf {

@@ -2,7 +2,6 @@ use error::{CliError, Usage, UsageKind};
 use super::Command;
 
 use constant::IGNORE_FILE_NAME;
-use lib::ignore;
 use lib::io::*;
 use lib::setting;
 
@@ -44,7 +43,7 @@ impl Ignore {
             return Err(From::from(self.usage()));
         }
 
-        let ignore = try!(ignore::Ignore::read()).add(paths);
+        let ignore = try!(setting::Ignore::read()).add(paths);
 
         try!(setting::create_ignore_file(ignore.to_string()));
 
@@ -58,7 +57,7 @@ impl Ignore {
             return Err(From::from(self.usage()));
         }
 
-        let ignore = try!(ignore::Ignore::read()).remove(paths);
+        let ignore = try!(setting::Ignore::read()).remove(paths);
 
         try!(setting::create_ignore_file(ignore.to_string()));
 

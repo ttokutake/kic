@@ -7,34 +7,33 @@ use self::regex::Regex;
 use self::toml::Value as Toml;
 
 use error::{CannotHappenError, CliError, ConfigError, ConfigErrorKind};
-use lib::setting;
 use std::collections::BTreeMap;
 use std::fs::File;
 use std::io::Read;
 use std::str::FromStr;
 
 
-pub enum KeyKind {
+pub enum ConfigKey {
     BurnAfter,
     SweepPeriod,
     SweepTime,
 }
 
-impl KeyKind {
-    pub fn from<S: AsRef<str>>(key: S) -> Result<KeyKind, ConfigError> {
+impl ConfigKey {
+    pub fn from<S: AsRef<str>>(key: S) -> Result<ConfigKey, ConfigError> {
         match key.as_ref().trim() {
-            "burn.after"   => Ok(KeyKind::BurnAfter),
-            "sweep.period" => Ok(KeyKind::SweepPeriod),
-            "sweep.time"   => Ok(KeyKind::SweepTime),
+            "burn.after"   => Ok(ConfigKey::BurnAfter),
+            "sweep.period" => Ok(ConfigKey::SweepPeriod),
+            "sweep.time"   => Ok(ConfigKey::SweepTime),
             _              => Err(ConfigError::new(ConfigErrorKind::InvalidKey)),
         }
     }
 
     fn to_str(&self) -> &str {
         match *self {
-            KeyKind::BurnAfter   => "burn.after",
-            KeyKind::SweepPeriod => "sweep.period",
-            KeyKind::SweepTime   => "sweep.time",
+            ConfigKey::BurnAfter   => "burn.after",
+            ConfigKey::SweepPeriod => "sweep.period",
+            ConfigKey::SweepTime   => "sweep.time",
         }
     }
 
@@ -61,7 +60,7 @@ impl Config {
         Config { toml: toml }
     }
 
-    fn insert_deeply(table: &mut BTreeMap<String, BTreeMap<String, String>>, key: &KeyKind, value: String) {
+    fn insert_deeply(table: &mut BTreeMap<String, BTreeMap<String, String>>, key: &ConfigKey, value: String) {
         let (first, second) = key.to_pair();
 
         let second = second.to_string();
@@ -78,15 +77,15 @@ impl Config {
 
     pub fn default() -> Self {
         let mut config = BTreeMap::new();
-        Self::insert_deeply(&mut config, &KeyKind::BurnAfter  , "2 weeks".to_string());
-        Self::insert_deeply(&mut config, &KeyKind::SweepPeriod, "daily"  .to_string());
-        Self::insert_deeply(&mut config, &KeyKind::SweepTime  , "00:00"  .to_string());
+        Self::insert_deeply(&mut config, &ConfigKey::BurnAfter  , "2 weeks".to_string());
+        Self::insert_deeply(&mut config, &ConfigKey::SweepPeriod, "daily"  .to_string());
+        Self::insert_deeply(&mut config, &ConfigKey::SweepTime  , "00:00"  .to_string());
 
         Self::new(toml::encode(&config))
     }
 
     pub fn read() -> Result<Self, CliError> {
-        let mut f = try!(File::open(setting::config_file()));
+        let mut f = try!(File::open(super::config_file()));
 
         let mut contents = String::new();
         try!(f.read_to_string(&mut contents));
@@ -105,7 +104,7 @@ impl Config {
         Ok(Self::new(toml))
     }
 
-    pub fn set(mut self, key: &KeyKind, value: String) -> Result<Self, ConfigError> {
+    pub fn set(mut self, key: &ConfigKey, value: String) -> Result<Self, ConfigError> {
         let mut config = match toml::decode::<BTreeMap<String, BTreeMap<String, String>>>(self.toml) {
             Some(decoded) => decoded,
             None          => return Err(ConfigError::new(ConfigErrorKind::Something)),
@@ -118,15 +117,15 @@ impl Config {
         Ok(self)
     }
 
-    fn get(key: &KeyKind) -> Result<String, CliError> {
+    fn get(key: &ConfigKey) -> Result<String, CliError> {
         let config = try!(Self::read()).toml;
 
         let result = config
             .lookup(key.to_str())
             .ok_or(ConfigError::new(match *key {
-                KeyKind::BurnAfter   => ConfigErrorKind::NotFoundBurnAfter,
-                KeyKind::SweepPeriod => unimplemented!(),
-                KeyKind::SweepTime   => unimplemented!(),
+                ConfigKey::BurnAfter   => ConfigErrorKind::NotFoundBurnAfter,
+                ConfigKey::SweepPeriod => unimplemented!(),
+                ConfigKey::SweepTime   => unimplemented!(),
             }));
         let value = try!(result);
 
@@ -136,11 +135,11 @@ impl Config {
             .ok_or(From::from(ConfigError::new(ConfigErrorKind::NonStringValue)))
     }
 
-    pub fn validate<S: AsRef<str>>(key: &KeyKind, value: S) -> Result<String, CliError> {
+    pub fn validate<S: AsRef<str>>(key: &ConfigKey, value: S) -> Result<String, CliError> {
         let value = value.as_ref().trim();
 
         match *key {
-            KeyKind::BurnAfter => {
+            ConfigKey::BurnAfter => {
                 let pair = try!(Regex::new(r"^(?P<num>\d+)\s?(?P<unit>days?|weeks?)$"))
                     .captures(value)
                     .map_or((None, None), |caps| (caps.name("num"), caps.name("unit")));
@@ -150,13 +149,13 @@ impl Config {
                 };
                 Ok(format!("{} {}", num, unit))
             },
-            KeyKind::SweepPeriod => {
+            ConfigKey::SweepPeriod => {
                 match value {
                     "daily" | "weekly" => Ok(value.to_string()),
                     _                  => return Err(From::from(ConfigError::new(ConfigErrorKind::SweepPeriod))),
                 }
             },
-            KeyKind::SweepTime => {
+            ConfigKey::SweepTime => {
                 match NaiveTime::from_str(format!("{}:00", value).as_ref()) {
                     Ok(_)  => Ok(value.to_string()),
                     // should set Err(e) to Error::cause()
@@ -167,7 +166,7 @@ impl Config {
     }
 
     pub fn extract_burn_after() -> Result<Duration, CliError> {
-        let key = KeyKind::BurnAfter;
+        let key = ConfigKey::BurnAfter;
 
         let after       = try!(Self::get(&key));
         let after       = try!(Self::validate(&key, after));

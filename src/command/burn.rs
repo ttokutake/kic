@@ -6,10 +6,9 @@ extern crate chrono;
 use self::chrono::offset::TimeZone;
 use self::chrono::{Duration, Local};
 
-use lib::config::Config;
 use lib::fs::*;
 use lib::io::*;
-use lib::setting;
+use lib::setting::{self, Config};
 use std::io::Error as IoError;
 use std::path::PathBuf;
 

@@ -4,7 +4,6 @@ use super::Command;
 extern crate toml;
 
 use constant::CONFIG_FILE_NAME;
-use lib::config;
 use lib::io::*;
 use lib::setting;
 
@@ -44,10 +43,10 @@ impl Config {
             _                  => return Err(From::from(self.usage())),
         };
 
-        let key   = try!(config::KeyKind::from(key));
-        let value = try!(config::Config::validate(&key, value));
+        let key   = try!(setting::ConfigKey::from(key));
+        let value = try!(setting::Config::validate(&key, value));
 
-        let config = try!(config::Config::read());
+        let config = try!(setting::Config::read());
         let config = try!(config.set(&key, value));
 
         try!(setting::create_config_file(config.to_string()));

@@ -7,9 +7,8 @@ use self::chrono::Local;
 
 use error::CannotHappenError;
 use lib::fs::*;
-use lib::ignore::Ignore;
 use lib::io::*;
-use lib::setting;
+use lib::setting::{self, Ignore};
 use std::fs;
 use std::io::{Error as IoError, ErrorKind as IoErrorKind};
 use std::path::PathBuf;
