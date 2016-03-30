@@ -40,7 +40,7 @@ impl Ignore {
         Ok(Self::new(files))
     }
 
-    pub fn get(&self) -> &BTreeSet<String> {
+    pub fn files(&self) -> &BTreeSet<String> {
         &self.files
     }
 }

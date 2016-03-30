@@ -57,10 +57,10 @@ impl Ignore {
             print_with_tag(Tag::Info, format!("\"{}\" will be ignored", file));
         }
 
-        let original_ignores = try!(ignore::Ignore::read());
+        let ignore = try!(ignore::Ignore::read());
 
-        let new_ignores = original_ignores
-            .get()
+        let new_ignores = ignore
+            .files()
             .union(&ignores_to_be_added)
             .fold(String::new(), |c, ref f| c + f + "\n");
 
@@ -85,10 +85,10 @@ impl Ignore {
             print_with_tag(Tag::Info, format!("\"{}\" will not be ignored", file));
         }
 
-        let original_ignores = try!(ignore::Ignore::read());
+        let ignore = try!(ignore::Ignore::read());
 
-        let new_ignores = original_ignores
-            .get()
+        let new_ignores = ignore
+            .files()
             .difference(&ignores_to_be_removed)
             .fold(String::new(), |c, ref f| c + f + "\n");
 
