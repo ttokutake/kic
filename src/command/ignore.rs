@@ -60,6 +60,7 @@ impl Ignore {
         let original_ignores = try!(ignore::Ignore::read());
 
         let new_ignores = original_ignores
+            .get()
             .union(&ignores_to_be_added)
             .fold(String::new(), |c, ref f| c + f + "\n");
 
@@ -87,6 +88,7 @@ impl Ignore {
         let original_ignores = try!(ignore::Ignore::read());
 
         let new_ignores = original_ignores
+            .get()
             .difference(&ignores_to_be_removed)
             .fold(String::new(), |c, ref f| c + f + "\n");
 

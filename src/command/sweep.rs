@@ -33,7 +33,7 @@ impl Command for Sweep {
         let ignore = try!(Ignore::read());
 
         let target_files = walk_dir(".")
-            .difference(&ignore)
+            .difference(ignore.get())
             .cloned()
             .collect::<Vec<String>>();
         for target in &target_files {

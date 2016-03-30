@@ -26,7 +26,7 @@ impl Ignore {
         Self::new(current_files)
     }
 
-    pub fn read() -> Result<BTreeSet<String>, IoError> {
+    pub fn read() -> Result<Self, IoError> {
         let mut f = try!(File::open(setting::ignore_file()));
 
         let mut contents = String::new();
@@ -37,6 +37,10 @@ impl Ignore {
             .map(|l| l.trim().to_string())
             .collect::<BTreeSet<String>>();
 
-        Ok(files)
+        Ok(Self::new(files))
+    }
+
+    pub fn get(&self) -> &BTreeSet<String> {
+        &self.files
     }
 }
