@@ -7,7 +7,7 @@ use std::collections::BTreeSet;
 use std::ffi::OsString;
 use std::fs;
 use std::io::Error as IoError;
-use std::path::{MAIN_SEPARATOR, Path};
+use std::path::Path;
 use std::result::Result;
 
 
@@ -18,12 +18,6 @@ macro_rules! path_buf {
     };
 }
 
-
-pub fn append_current_dir_prefix_if_need(path: &String) -> String {
-    let prefix       = format!(".{}", MAIN_SEPARATOR);
-    let prefix: &str = prefix.as_ref();
-    format!("{}{}", if path.starts_with(prefix) { "" } else { prefix }, path)
-}
 
 pub fn ls<P: AsRef<Path>>(path: &P) -> Result<BTreeSet<String>, IoError> {
     let dirs = try!(fs::read_dir(path));
@@ -137,19 +131,10 @@ pub fn dirs_ordered_by_descending_depth<P: AsRef<Path>>(root: P) -> Vec<String> 
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use std::path::{MAIN_SEPARATOR, Path, PathBuf};
-
-    fn to_string_unsafely(path: &PathBuf) -> String {
-        path
-            .to_str()
-            .unwrap()
-            .to_string()
-    }
+    use std::path::{Path, PathBuf};
 
     #[test]
     fn create_path_buf() {
-        use std::path::PathBuf;
         let paths = [
             (Path::new("path").to_path_buf()          , path_buf!["path"              ]),
             (Path::new("path").join("to")             , path_buf!["path", "to"        ]),
@@ -157,39 +142,6 @@ mod tests {
         ];
         for &(ref correct, ref calculated) in &paths {
             assert_eq!(correct, calculated);
-        }
-    }
-
-    #[test]
-    fn append_current_dir_prefix() {
-        let paths = [
-            path_buf!["."                 ],
-            path_buf![".."                ],
-            path_buf!["..", "path"        ],
-            path_buf!["path"              ],
-            path_buf!["path", "to"        ],
-            path_buf!["path", "to", "file"],
-        ];
-        for path in &paths {
-            let path    = to_string_unsafely(path);
-            let correct = format!(".{}{}", MAIN_SEPARATOR, path);
-            assert_eq!(correct, append_current_dir_prefix_if_need(&path));
-        }
-    }
-    #[test]
-    fn not_append_current_dir_prefix() {
-        let paths = [
-            path_buf![".", "."                 ],
-            path_buf![".", ".."                ],
-            path_buf![".", "..", "path"        ],
-            path_buf![".", "path"              ],
-            path_buf![".", "path", "to"        ],
-            path_buf![".", "path", "to", "file"],
-        ];
-        for path in &paths {
-            let path    = to_string_unsafely(path);
-            let correct = path.clone();
-            assert_eq!(correct, append_current_dir_prefix_if_need(&path));
         }
     }
 }
