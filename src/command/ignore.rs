@@ -2,12 +2,9 @@ use error::{CliError, Usage, UsageKind};
 use super::Command;
 
 use constant::IGNORE_FILE_NAME;
-use lib::fs::*;
 use lib::ignore;
 use lib::io::*;
 use lib::setting;
-use std::collections::BTreeSet;
-use std::path::Path;
 
 pub struct Ignore {
     command: Option<String>,
@@ -47,24 +44,9 @@ impl Ignore {
             return Err(From::from(self.usage()));
         }
 
-        let ignores_to_be_added = paths
-            .iter()
-            .map(append_current_dir_prefix_if_need)
-            .filter(|p| Path::new(p).is_file())
-            .collect::<BTreeSet<String>>();
+        let ignore = try!(ignore::Ignore::read()).add(paths);
 
-        for file in &ignores_to_be_added {
-            print_with_tag(Tag::Info, format!("\"{}\" will be ignored", file));
-        }
-
-        let ignore = try!(ignore::Ignore::read());
-
-        let new_ignores = ignore
-            .files()
-            .union(&ignores_to_be_added)
-            .fold(String::new(), |c, ref f| c + f + "\n");
-
-        try!(setting::create_ignore_file(new_ignores));
+        try!(setting::create_ignore_file(ignore.to_string()));
 
         Ok(())
     }
@@ -76,23 +58,9 @@ impl Ignore {
             return Err(From::from(self.usage()));
         }
 
-        let ignores_to_be_removed = paths
-            .iter()
-            .map(append_current_dir_prefix_if_need)
-            .collect::<BTreeSet<String>>();
+        let ignore = try!(ignore::Ignore::read()).remove(paths);
 
-        for file in &ignores_to_be_removed {
-            print_with_tag(Tag::Info, format!("\"{}\" will not be ignored", file));
-        }
-
-        let ignore = try!(ignore::Ignore::read());
-
-        let new_ignores = ignore
-            .files()
-            .difference(&ignores_to_be_removed)
-            .fold(String::new(), |c, ref f| c + f + "\n");
-
-        try!(setting::create_ignore_file(new_ignores));
+        try!(setting::create_ignore_file(ignore.to_string()));
 
         Ok(())
     }
