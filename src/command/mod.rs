@@ -32,7 +32,7 @@ trait Command {
         if !setting::storage_dir_exists() {
             return Err(EssentialLack::new(EssentialKind::StorageDir));
         }
-        if !setting::config_file_exists() {
+        if !setting::Config::exist() {
             return Err(EssentialLack::new(EssentialKind::ConfigFile));
         }
         if !setting::Ignore::exist() {

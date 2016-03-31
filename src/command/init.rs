@@ -1,7 +1,7 @@
 use error::{CliError, Usage, UsageKind};
 use super::Command;
 
-use lib::setting::{self, Ignore};
+use lib::setting::{self, Config, Ignore};
 
 pub struct Init;
 
@@ -17,7 +17,7 @@ impl Command for Init {
 
         try!(setting::create_storage_dir());
 
-        try!(setting::create_initial_config_file());
+        try!(Config::default().create());
 
         try!(Ignore::default().create());
 

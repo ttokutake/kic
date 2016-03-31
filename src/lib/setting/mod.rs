@@ -1,7 +1,7 @@
 pub mod config;
 pub mod ignore;
 
-use constant;
+use constant::{WORKING_DIR_NAME, STORAGE_DIR_NAME};
 use std::fs::{self, File};
 use std::io::{Error as IoError, Write};
 use std::path::{Path, PathBuf};
@@ -11,15 +11,11 @@ pub use self::ignore::Ignore;
 
 
 pub fn working_dir() -> PathBuf {
-    path_buf![constant::WORKING_DIR_NAME]
+    path_buf![WORKING_DIR_NAME]
 }
 
 pub fn storage_dir() -> PathBuf {
-    path_buf![working_dir(), constant::STORAGE_DIR_NAME]
-}
-
-pub fn config_file() -> PathBuf {
-    path_buf![working_dir(), constant::CONFIG_FILE_NAME]
+    path_buf![working_dir(), STORAGE_DIR_NAME]
 }
 
 
@@ -29,10 +25,6 @@ pub fn working_dir_exists() -> bool {
 
 pub fn storage_dir_exists() -> bool {
     storage_dir().is_dir()
-}
-
-pub fn config_file_exists() -> bool {
-    config_file().is_file()
 }
 
 
@@ -59,13 +51,6 @@ pub fn create_essential_dir_all(path_to_dir: &PathBuf) -> Result<(), IoError> {
 }
 
 
-pub fn create_initial_config_file() -> Result<(), IoError> {
-    create_config_file(Config::default().to_string())
-}
-pub fn create_config_file<S: AsRef<str>>(contents: S) -> Result<(), IoError> {
-    create_setting_file(config_file(), contents)
-}
-
 fn create_setting_file<S: AsRef<str>>(path_to_file: PathBuf, contents: S) -> Result<(), IoError> {
     let mut f = try!(File::create(&path_to_file));
     try!(f.write(contents.as_ref().as_bytes()));
@@ -75,7 +60,7 @@ fn create_setting_file<S: AsRef<str>>(path_to_file: PathBuf, contents: S) -> Res
 
 
 pub fn delete_all_setting_files() -> Result<(), IoError> {
-    delete_dir_all(constant::WORKING_DIR_NAME)
+    delete_dir_all(working_dir())
 }
 
 pub fn delete_dir_all<P: AsRef<Path>>(path: P) -> Result<(), IoError> {

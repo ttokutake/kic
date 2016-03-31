@@ -11,7 +11,7 @@ pub struct Ignore {
 }
 
 impl Ignore {
-    pub fn path() -> PathBuf {
+    fn path() -> PathBuf {
         path_buf![super::working_dir(), IGNORE_FILE_NAME]
     }
 

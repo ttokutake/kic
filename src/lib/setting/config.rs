@@ -6,10 +6,12 @@ use self::chrono::{Duration, NaiveTime};
 use self::regex::Regex;
 use self::toml::Value as Toml;
 
+use constant::CONFIG_FILE_NAME;
 use error::{CannotHappenError, CliError, ConfigError, ConfigErrorKind};
 use std::collections::BTreeMap;
 use std::fs::File;
-use std::io::Read;
+use std::io::{Error as IoError, Read};
+use std::path::PathBuf;
 use std::str::FromStr;
 
 
@@ -52,27 +54,26 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn to_string(&self) -> String {
+    fn path() -> PathBuf {
+        path_buf![super::working_dir(), CONFIG_FILE_NAME]
+    }
+
+    pub fn exist() -> bool {
+        Self::path().is_file()
+    }
+
+
+    fn to_string(&self) -> String {
         toml::encode_str(&self.toml)
     }
 
-    fn new(toml: Toml) -> Self {
-        Config { toml: toml }
+    pub fn create(&self) -> Result<(), IoError> {
+        super::create_setting_file(Self::path(), self.to_string())
     }
 
-    fn insert_deeply(table: &mut BTreeMap<String, BTreeMap<String, String>>, key: &ConfigKey, value: String) {
-        let (first, second) = key.to_pair();
 
-        let second = second.to_string();
-
-        if table.contains_key(first) {
-            table.get_mut(first).map(|e| e.insert(second, value));
-        } else {
-            let mut entry = BTreeMap::new();
-            entry.insert(second, value);
-
-            table.insert(first.to_string(), entry);
-        }
+    fn _new(toml: Toml) -> Self {
+        Config { toml: toml }
     }
 
     pub fn default() -> Self {
@@ -81,11 +82,11 @@ impl Config {
         Self::insert_deeply(&mut config, &ConfigKey::SweepPeriod, "daily"  .to_string());
         Self::insert_deeply(&mut config, &ConfigKey::SweepTime  , "00:00"  .to_string());
 
-        Self::new(toml::encode(&config))
+        Self::_new(toml::encode(&config))
     }
 
     pub fn read() -> Result<Self, CliError> {
-        let mut f = try!(File::open(super::config_file()));
+        let mut f = try!(File::open(Self::path()));
 
         let mut contents = String::new();
         try!(f.read_to_string(&mut contents));
@@ -101,21 +102,9 @@ impl Config {
             },
         };
 
-        Ok(Self::new(toml))
+        Ok(Self::_new(toml))
     }
 
-    pub fn set(mut self, key: &ConfigKey, value: String) -> Result<Self, ConfigError> {
-        let mut config = match toml::decode::<BTreeMap<String, BTreeMap<String, String>>>(self.toml) {
-            Some(decoded) => decoded,
-            None          => return Err(ConfigError::new(ConfigErrorKind::Something)),
-        };
-
-        Self::insert_deeply(&mut config, key, value);
-
-        self.toml = toml::encode(&config);
-
-        Ok(self)
-    }
 
     fn get(key: &ConfigKey) -> Result<String, CliError> {
         let config = try!(Self::read()).toml;
@@ -135,6 +124,54 @@ impl Config {
             .ok_or(From::from(ConfigError::new(ConfigErrorKind::NonStringValue)))
     }
 
+    pub fn extract_burn_after() -> Result<Duration, CliError> {
+        let key = ConfigKey::BurnAfter;
+
+        let after       = try!(Self::get(&key));
+        let after       = try!(Self::validate(&key, after));
+        let after       = after.split(' ').collect::<Vec<&str>>();
+        let (num, unit) = (after[0], after[1]);                    // unsafe!
+        let num         = try!(num.parse::<u32>()) as i64;
+
+        let duration = match unit {
+            "day"  | "days"  => Duration::days(num),
+            "week" | "weeks" => Duration::weeks(num),
+            _                => return Err(From::from(CannotHappenError)),
+        };
+
+        Ok(duration)
+    }
+
+
+    pub fn set(mut self, key: &ConfigKey, value: String) -> Result<Self, ConfigError> {
+        let mut config = match toml::decode::<BTreeMap<String, BTreeMap<String, String>>>(self.toml) {
+            Some(decoded) => decoded,
+            None          => return Err(ConfigError::new(ConfigErrorKind::Something)),
+        };
+
+        Self::insert_deeply(&mut config, key, value);
+
+        self.toml = toml::encode(&config);
+
+        Ok(self)
+    }
+
+
+    fn insert_deeply(table: &mut BTreeMap<String, BTreeMap<String, String>>, key: &ConfigKey, value: String) {
+        let (first, second) = key.to_pair();
+
+        let second = second.to_string();
+
+        if table.contains_key(first) {
+            table.get_mut(first).map(|e| e.insert(second, value));
+        } else {
+            let mut entry = BTreeMap::new();
+            entry.insert(second, value);
+
+            table.insert(first.to_string(), entry);
+        }
+    }
+
     pub fn validate<S: AsRef<str>>(key: &ConfigKey, value: S) -> Result<String, CliError> {
         let value = value.as_ref().trim();
 
@@ -152,34 +189,16 @@ impl Config {
             ConfigKey::SweepPeriod => {
                 match value {
                     "daily" | "weekly" => Ok(value.to_string()),
-                    _                  => return Err(From::from(ConfigError::new(ConfigErrorKind::SweepPeriod))),
+                    _                  => Err(From::from(ConfigError::new(ConfigErrorKind::SweepPeriod))),
                 }
             },
             ConfigKey::SweepTime => {
                 match NaiveTime::from_str(format!("{}:00", value).as_ref()) {
                     Ok(_)  => Ok(value.to_string()),
                     // should set Err(e) to Error::cause()
-                    Err(_) => return Err(From::from(ConfigError::new(ConfigErrorKind::SweepTime))),
+                    Err(_) => Err(From::from(ConfigError::new(ConfigErrorKind::SweepTime))),
                 }
             },
         }
-    }
-
-    pub fn extract_burn_after() -> Result<Duration, CliError> {
-        let key = ConfigKey::BurnAfter;
-
-        let after       = try!(Self::get(&key));
-        let after       = try!(Self::validate(&key, after));
-        let after       = after.split(' ').collect::<Vec<&str>>();
-        let (num, unit) = (after[0], after[1]);                    // unsafe!
-        let num         = try!(num.parse::<u32>()) as i64;
-
-        let duration = match unit {
-            "day"  | "days"  => Duration::days(num),
-            "week" | "weeks" => Duration::weeks(num),
-            _                => return Err(From::from(CannotHappenError)),
-        };
-
-        Ok(duration)
     }
 }

@@ -49,7 +49,7 @@ impl Config {
         let config = try!(setting::Config::read());
         let config = try!(config.set(&key, value));
 
-        try!(setting::create_config_file(config.to_string()));
+        try!(config.create());
 
         Ok(())
     }
@@ -59,7 +59,7 @@ impl Config {
         echo(format_with_tag(Tag::Caution, message));
 
         if try!(Self::inquiry()) {
-            try!(setting::create_initial_config_file())
+            try!(setting::Config::default().create())
         } else {
             print_with_tag(Tag::Notice, "Interrupted by user");
         }
