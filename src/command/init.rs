@@ -1,7 +1,7 @@
 use error::{CliError, Usage, UsageKind};
 use super::Command;
 
-use lib::setting;
+use lib::setting::{self, Ignore};
 
 pub struct Init;
 
@@ -19,7 +19,7 @@ impl Command for Init {
 
         try!(setting::create_initial_config_file());
 
-        try!(setting::create_initial_ignore_file());
+        try!(Ignore::default().create());
 
         Ok(())
     }

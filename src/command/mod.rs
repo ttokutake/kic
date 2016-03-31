@@ -35,7 +35,7 @@ trait Command {
         if !setting::config_file_exists() {
             return Err(EssentialLack::new(EssentialKind::ConfigFile));
         }
-        if !setting::ignore_file_exists() {
+        if !setting::Ignore::exist() {
             return Err(EssentialLack::new(EssentialKind::IgnoreFile));
         }
 

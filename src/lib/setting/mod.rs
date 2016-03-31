@@ -22,10 +22,6 @@ pub fn config_file() -> PathBuf {
     path_buf![working_dir(), constant::CONFIG_FILE_NAME]
 }
 
-pub fn ignore_file() -> PathBuf {
-    path_buf![working_dir(), constant::IGNORE_FILE_NAME]
-}
-
 
 pub fn working_dir_exists() -> bool {
     working_dir().is_dir()
@@ -37,10 +33,6 @@ pub fn storage_dir_exists() -> bool {
 
 pub fn config_file_exists() -> bool {
     config_file().is_file()
-}
-
-pub fn ignore_file_exists() -> bool {
-    ignore_file().is_file()
 }
 
 
@@ -72,13 +64,6 @@ pub fn create_initial_config_file() -> Result<(), IoError> {
 }
 pub fn create_config_file<S: AsRef<str>>(contents: S) -> Result<(), IoError> {
     create_setting_file(config_file(), contents)
-}
-
-pub fn create_initial_ignore_file() -> Result<(), IoError> {
-    create_ignore_file(Ignore::default().to_string())
-}
-pub fn create_ignore_file<S: AsRef<str>>(contents: S) -> Result<(), IoError> {
-    create_setting_file(ignore_file(), contents)
 }
 
 fn create_setting_file<S: AsRef<str>>(path_to_file: PathBuf, contents: S) -> Result<(), IoError> {

@@ -45,7 +45,7 @@ impl Ignore {
 
         let ignore = try!(setting::Ignore::read()).add(paths);
 
-        try!(setting::create_ignore_file(ignore.to_string()));
+        try!(ignore.create());
 
         Ok(())
     }
@@ -59,7 +59,7 @@ impl Ignore {
 
         let ignore = try!(setting::Ignore::read()).remove(paths);
 
-        try!(setting::create_ignore_file(ignore.to_string()));
+        try!(ignore.create());
 
         Ok(())
     }
@@ -69,7 +69,7 @@ impl Ignore {
         echo(format_with_tag(Tag::Caution, message));
 
         if try!(Self::inquiry()) {
-            try!(setting::create_initial_ignore_file());
+            try!(setting::Ignore::default().create());
         } else {
             print_with_tag(Tag::Notice, "Interrupted by user");
         }
@@ -82,7 +82,7 @@ impl Ignore {
         echo(format_with_tag(Tag::Caution, message));
 
         if try!(Self::inquiry()) {
-            try!(setting::create_ignore_file("\n"));
+            try!(setting::Ignore::new().create());
         } else {
             print_with_tag(Tag::Notice, "Interrupted by user");
         }
