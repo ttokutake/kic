@@ -8,7 +8,7 @@ use self::chrono::{Duration, Local};
 
 use lib::fs::*;
 use lib::io::*;
-use lib::setting::{self, Config, ConfigKey};
+use lib::setting::{self, Config, ConfigKey, Storage};
 use std::io::Error as IoError;
 use std::path::PathBuf;
 
@@ -38,7 +38,7 @@ impl Command for Burn {
 
 impl Burn {
     fn search_target_storages(moratorium: Duration) -> Result<Vec<PathBuf>, IoError> {
-        let path_to_storage = setting::storage_dir();
+        let path_to_storage = Storage::path();
         let dirs            = try!(ls(&path_to_storage));
         let today           = Local::now();
 

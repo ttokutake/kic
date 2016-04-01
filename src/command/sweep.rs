@@ -8,7 +8,7 @@ use self::chrono::Local;
 use error::CannotHappenError;
 use lib::fs::*;
 use lib::io::*;
-use lib::setting::{self, Ignore};
+use lib::setting::{self, Ignore, Storage};
 use std::fs;
 use std::io::{Error as IoError, ErrorKind as IoErrorKind};
 use std::path::{Path, PathBuf};
@@ -26,7 +26,7 @@ impl Command for Sweep {
         let now  = Local::now();
         let date = now.format("%Y-%m-%d").to_string();
 
-        let path_to_dust_box = path_buf![setting::storage_dir(), date, "dusts"];
+        let path_to_dust_box = path_buf![Storage::path(), date, "dusts"];
         try!(setting::create_essential_dir_all(&path_to_dust_box));
 
         let ignore = try!(Ignore::read());

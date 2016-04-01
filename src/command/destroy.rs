@@ -19,7 +19,7 @@ impl Command for Destroy {
         echo(format_with_tag(Tag::Caution, message));
 
         if try!(Self::inquiry()) {
-            try!(setting::delete_all_setting_files());
+            try!(setting::delete_working_dir());
         } else {
             print_with_tag(Tag::Notice, "Interrupted by user");
         }
