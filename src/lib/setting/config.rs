@@ -62,18 +62,18 @@ impl EditableToml {
     }
 
     fn overwrite<CK: Borrow<ConfigKey>>(&mut self, key: CK, value: String) {
-        let &mut EditableToml(ref mut toml) = self;
+        let &mut EditableToml(ref mut core) = self;
 
         let (first, second) = key.borrow().to_pair();
         let second          = second.to_string();
 
-        if toml.contains_key(first) {
-            toml.get_mut(first).map(|e| e.insert(second, value));
+        if core.contains_key(first) {
+            core.get_mut(first).map(|e| e.insert(second, value));
         } else {
             let mut entry = BTreeMap::new();
             entry.insert(second, value);
 
-            toml.insert(first.to_string(), entry);
+            core.insert(first.to_string(), entry);
         }
     }
 
