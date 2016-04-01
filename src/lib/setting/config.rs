@@ -50,6 +50,40 @@ impl ConfigKey {
 }
 
 
+type EditableTomlCore = BTreeMap<String, BTreeMap<String, String>>;
+
+struct EditableToml(EditableTomlCore);
+
+impl EditableToml {
+    fn from(toml: Toml) -> Result<Self, ConfigError> {
+        toml::decode::<EditableTomlCore>(toml)
+            .map(|c| EditableToml(c))
+            .ok_or(ConfigError::new(ConfigErrorKind::Something))
+    }
+
+    fn overwrite<CK: Borrow<ConfigKey>>(&mut self, key: CK, value: String) {
+        let &mut EditableToml(ref mut toml) = self;
+
+        let (first, second) = key.borrow().to_pair();
+        let second          = second.to_string();
+
+        if toml.contains_key(first) {
+            toml.get_mut(first).map(|e| e.insert(second, value));
+        } else {
+            let mut entry = BTreeMap::new();
+            entry.insert(second, value);
+
+            toml.insert(first.to_string(), entry);
+        }
+    }
+
+    fn to_toml(self) -> Toml {
+        let EditableToml(core) = self;
+        toml::encode(&core)
+    }
+}
+
+
 pub struct Config {
     toml: Toml,
 }
@@ -78,12 +112,12 @@ impl Config {
     }
 
     pub fn default() -> Self {
-        let mut config = BTreeMap::new();
-        Self::insert_deeply(&mut config, &ConfigKey::BurnAfter  , "2 weeks".to_string());
-        Self::insert_deeply(&mut config, &ConfigKey::SweepPeriod, "daily"  .to_string());
-        Self::insert_deeply(&mut config, &ConfigKey::SweepTime  , "00:00"  .to_string());
+        let mut editable = EditableToml(BTreeMap::new());
+        editable.overwrite(ConfigKey::BurnAfter  , "2 weeks".to_string());
+        editable.overwrite(ConfigKey::SweepPeriod, "daily"  .to_string());
+        editable.overwrite(ConfigKey::SweepTime  , "00:00"  .to_string());
 
-        Self::_new(toml::encode(&config))
+        Self::_new(editable.to_toml())
     }
 
     pub fn read() -> Result<Self, CliError> {
@@ -146,33 +180,15 @@ impl Config {
 
 
     pub fn set<CK: Borrow<ConfigKey>>(mut self, key: CK, value: String) -> Result<Self, ConfigError> {
-        let mut config = match toml::decode::<BTreeMap<String, BTreeMap<String, String>>>(self.toml) {
-            Some(decoded) => decoded,
-            None          => return Err(ConfigError::new(ConfigErrorKind::Something)),
-        };
+        let mut editable = try!(EditableToml::from(self.toml));
 
-        Self::insert_deeply(&mut config, key.borrow(), value);
+        editable.overwrite(key.borrow(), value);
 
-        self.toml = toml::encode(&config);
+        self.toml = editable.to_toml();
 
         Ok(self)
     }
 
-
-    fn insert_deeply<CK: Borrow<ConfigKey>>(table: &mut BTreeMap<String, BTreeMap<String, String>>, key: CK, value: String) {
-        let (first, second) = key.borrow().to_pair();
-
-        let second = second.to_string();
-
-        if table.contains_key(first) {
-            table.get_mut(first).map(|e| e.insert(second, value));
-        } else {
-            let mut entry = BTreeMap::new();
-            entry.insert(second, value);
-
-            table.insert(first.to_string(), entry);
-        }
-    }
 
     pub fn validate<CK: Borrow<ConfigKey>, S: AsRef<str>>(key: CK, value: S) -> Result<String, CliError> {
         let value = value.as_ref().trim();
