@@ -8,6 +8,7 @@ use self::toml::Value as Toml;
 
 use constant::CONFIG_FILE_NAME;
 use error::{CannotHappenError, CliError, ConfigError, ConfigErrorKind};
+use std::borrow::Borrow;
 use std::collections::BTreeMap;
 use std::fs::File;
 use std::io::{Error as IoError, Read};
@@ -106,7 +107,8 @@ impl Config {
     }
 
 
-    fn get(key: &ConfigKey) -> Result<String, CliError> {
+    fn get<CK: Borrow<ConfigKey>>(key: CK) -> Result<String, CliError> {
+        let key    = key.borrow();
         let config = try!(Self::read()).toml;
 
         let result = config
@@ -128,7 +130,7 @@ impl Config {
         let key = ConfigKey::BurnAfter;
 
         let after       = try!(Self::get(&key));
-        let after       = try!(Self::validate(&key, after));
+        let after       = try!(Self::validate(key, after));
         let after       = after.split(' ').collect::<Vec<&str>>();
         let (num, unit) = (after[0], after[1]);                    // unsafe!
         let num         = try!(num.parse::<u32>()) as i64;
@@ -143,13 +145,13 @@ impl Config {
     }
 
 
-    pub fn set(mut self, key: &ConfigKey, value: String) -> Result<Self, ConfigError> {
+    pub fn set<CK: Borrow<ConfigKey>>(mut self, key: CK, value: String) -> Result<Self, ConfigError> {
         let mut config = match toml::decode::<BTreeMap<String, BTreeMap<String, String>>>(self.toml) {
             Some(decoded) => decoded,
             None          => return Err(ConfigError::new(ConfigErrorKind::Something)),
         };
 
-        Self::insert_deeply(&mut config, key, value);
+        Self::insert_deeply(&mut config, key.borrow(), value);
 
         self.toml = toml::encode(&config);
 
@@ -157,8 +159,8 @@ impl Config {
     }
 
 
-    fn insert_deeply(table: &mut BTreeMap<String, BTreeMap<String, String>>, key: &ConfigKey, value: String) {
-        let (first, second) = key.to_pair();
+    fn insert_deeply<CK: Borrow<ConfigKey>>(table: &mut BTreeMap<String, BTreeMap<String, String>>, key: CK, value: String) {
+        let (first, second) = key.borrow().to_pair();
 
         let second = second.to_string();
 
@@ -172,10 +174,10 @@ impl Config {
         }
     }
 
-    pub fn validate<S: AsRef<str>>(key: &ConfigKey, value: S) -> Result<String, CliError> {
+    pub fn validate<CK: Borrow<ConfigKey>, S: AsRef<str>>(key: CK, value: S) -> Result<String, CliError> {
         let value = value.as_ref().trim();
 
-        match *key {
+        match *key.borrow() {
             ConfigKey::BurnAfter => {
                 let pair = try!(Regex::new(r"^(?P<num>\d+)\s?(?P<unit>days?|weeks?)$"))
                     .captures(value)

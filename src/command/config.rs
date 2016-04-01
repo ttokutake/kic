@@ -47,7 +47,7 @@ impl Config {
         let value = try!(setting::Config::validate(&key, value));
 
         let config = try!(setting::Config::read());
-        let config = try!(config.set(&key, value));
+        let config = try!(config.set(key, value));
 
         try!(config.create());
 

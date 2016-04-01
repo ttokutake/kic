@@ -11,7 +11,7 @@ use lib::io::*;
 use lib::setting::{self, Ignore};
 use std::fs;
 use std::io::{Error as IoError, ErrorKind as IoErrorKind};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 pub struct Sweep;
 
@@ -49,11 +49,14 @@ impl Command for Sweep {
 }
 
 impl Sweep {
-    fn move_file_to_dust_box(target: &String, path_to_dust_box: &PathBuf) -> Result<(), CliError> {
+    fn move_file_to_dust_box<P1: AsRef<Path>, P2: AsRef<Path>>(target: P1, path_to_dust_box: P2) -> Result<(), CliError> {
+        let target           = target.as_ref();
+        let path_to_dust_box = path_to_dust_box.as_ref();
+
         let target_path = path_buf![target];
         let target_file = try!(target_path.file_name().ok_or(CannotHappenError));
         let target_base = try!(target_path.parent().ok_or(CannotHappenError));
-        let to = path_buf![&path_to_dust_box, target_base];
+        let to = path_buf![path_to_dust_box, target_base];
 
         let message = format!("Move file \"{}\" to \"{}\" directory", target_path.display(), path_to_dust_box.display());
         print_with_tag(Tag::Info, message);
@@ -72,9 +75,12 @@ impl Sweep {
         Ok(())
     }
 
-    fn move_empty_dir_to_dust_box(target: &String, path_to_dust_box: &PathBuf) -> Result<(), IoError> {
+    fn move_empty_dir_to_dust_box<P1: AsRef<Path>, P2: AsRef<Path>>(target: P1, path_to_dust_box: P2) -> Result<(), IoError> {
+        let target           = target.as_ref();
+        let path_to_dust_box = path_to_dust_box.as_ref();
+
         if is_empty_dir(target) {
-            let message = format!("Move empty directory \"{}\" to \"{}\" directory", target, path_to_dust_box.display());
+            let message = format!("Move empty directory \"{}\" to \"{}\" directory", target.display(), path_to_dust_box.display());
             print_with_tag(Tag::Info, message);
 
             match fs::remove_dir(target) {

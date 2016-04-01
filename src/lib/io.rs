@@ -2,7 +2,7 @@ use std::fmt::Display;
 use std::io::{self, Error as IoError, Write};
 
 
-pub fn echo<S: Display>(message: S) {
+pub fn echo<D: Display>(message: D) {
     print!("{}", message);
     if let Err(why) = io::stdout().flush() {
         panic!("{}", why);
@@ -35,10 +35,10 @@ impl Tag {
     }
 }
 
-pub fn format_with_tag<S: Display>(tag: Tag, message: S) -> String {
+pub fn format_with_tag<D: Display>(tag: Tag, message: D) -> String {
     format!("{}: {}", tag.to_str(), message)
 }
 
-pub fn print_with_tag<S: Display>(tag: Tag, message: S) {
+pub fn print_with_tag<D: Display>(tag: Tag, message: D) {
     println!("{}", format_with_tag(tag, message));
 }

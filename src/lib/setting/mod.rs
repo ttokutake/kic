@@ -36,24 +36,24 @@ pub fn create_storage_dir() -> Result<(), IoError> {
     create_essential_dir(storage_dir())
 }
 
-fn create_essential_dir(path_to_dir: PathBuf) -> Result<(), IoError> {
-    if !path_to_dir.is_dir() {
-        try!(fs::create_dir(&path_to_dir));
+fn create_essential_dir<P: AsRef<Path>>(path_to_dir: P) -> Result<(), IoError> {
+    if !path_to_dir.as_ref().is_dir() {
+        try!(fs::create_dir(path_to_dir));
     }
 
     Ok(())
 }
 
-pub fn create_essential_dir_all(path_to_dir: &PathBuf) -> Result<(), IoError> {
+pub fn create_essential_dir_all<P: AsRef<Path>>(path_to_dir: P) -> Result<(), IoError> {
     try!(fs::create_dir_all(path_to_dir));
 
     Ok(())
 }
 
 
-fn create_setting_file<S: AsRef<str>>(path_to_file: PathBuf, contents: S) -> Result<(), IoError> {
-    let mut f = try!(File::create(&path_to_file));
-    try!(f.write(contents.as_ref().as_bytes()));
+fn create_setting_file<P: AsRef<Path>, U: AsRef<[u8]>>(path_to_file: P, contents: U) -> Result<(), IoError> {
+    let mut f = try!(File::create(path_to_file));
+    try!(f.write(contents.as_ref()));
 
     Ok(())
 }
