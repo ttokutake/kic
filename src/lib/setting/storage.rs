@@ -1,4 +1,5 @@
 use constant::STORAGE_DIR_NAME;
+use lib::fs::*;
 use std::io::Error as IoError;
 use std::path::PathBuf;
 
@@ -16,5 +17,9 @@ impl Storage {
 
     pub fn create() -> Result<(), IoError> {
         super::create_essential_dir(Self::path())
+    }
+
+    pub fn get_boxes() -> Result<Vec<String>, IoError> {
+        ls(Self::path())
     }
 }

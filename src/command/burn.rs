@@ -6,7 +6,6 @@ extern crate chrono;
 use self::chrono::offset::TimeZone;
 use self::chrono::{Duration, Local};
 
-use lib::fs::*;
 use lib::io::*;
 use lib::setting::{self, Config, ConfigKey, Storage};
 use std::io::Error as IoError;
@@ -38,17 +37,15 @@ impl Command for Burn {
 
 impl Burn {
     fn search_target_storages(moratorium: Duration) -> Result<Vec<PathBuf>, IoError> {
-        let path_to_storage = Storage::path();
-        let dirs            = try!(ls(&path_to_storage));
-        let today           = Local::now();
+        let today = Local::now();
 
-        let targets = dirs
+        let targets = try!(Storage::get_boxes())
             .into_iter()
             .filter(|date| match Local.datetime_from_str(format!("{} 00:00:00", date).as_ref(), "%Y-%m-%d %H:%M:%S") {
                 Ok(created_date) => created_date + moratorium < today,
                 Err(_)           => false,
             })
-            .map(|dir| path_to_storage.join(dir))
+            .map(|dir| Storage::path().join(dir))
             .collect::<Vec<PathBuf>>();
 
         Ok(targets)

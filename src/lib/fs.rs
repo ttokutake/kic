@@ -19,14 +19,14 @@ macro_rules! path_buf {
 }
 
 
-pub fn ls<P: AsRef<Path>>(path: P) -> Result<BTreeSet<String>, IoError> {
+pub fn ls<P: AsRef<Path>>(path: P) -> Result<Vec<String>, IoError> {
     let dirs = try!(fs::read_dir(path));
     let dirs = dirs
         .filter_map(Result::ok)
         .map(|d| d.file_name())
         .map(OsString::into_string)
         .filter_map(Result::ok)
-        .collect::<BTreeSet<String>>();
+        .collect::<Vec<String>>();
     Ok(dirs)
 }
 
