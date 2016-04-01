@@ -1,10 +1,6 @@
 use error::{CliError, Usage, UsageKind};
 use super::Command;
 
-extern crate chrono;
-
-use self::chrono::Local;
-
 use error::CannotHappenError;
 use lib::fs::*;
 use lib::io::*;
@@ -23,11 +19,8 @@ impl Command for Sweep {
     }
 
     fn main(&self) -> Result<(), CliError> {
-        let now  = Local::now();
-        let date = now.format("%Y-%m-%d").to_string();
-
-        let path_to_dust_box = path_buf![Storage::path(), date, "dusts"];
-        try!(setting::create_essential_dir_all(&path_to_dust_box));
+        let storage = Storage::new();
+        try!(storage.create_box());
 
         let ignore = try!(Ignore::read());
 
@@ -36,12 +29,12 @@ impl Command for Sweep {
             .cloned()
             .collect::<Vec<String>>();
         for target in &target_files {
-            try!(Self::move_file_to_dust_box(target, &path_to_dust_box));
+            try!(Self::move_file_to_dust_box(target, storage.path_to_dust_box()));
         }
 
         let all_dirs = dirs_ordered_by_descending_depth(".");
         for target in &all_dirs {
-            try!(Self::move_empty_dir_to_dust_box(target, &path_to_dust_box));
+            try!(Self::move_empty_dir_to_dust_box(target, storage.path_to_dust_box()));
         }
 
         Ok(())
