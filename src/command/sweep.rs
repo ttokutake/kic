@@ -1,13 +1,8 @@
 use error::{CliError, Usage, UsageKind};
 use super::Command;
 
-use error::CannotHappenError;
 use lib::fs::*;
-use lib::io::*;
-use lib::setting::{self, Ignore, Storage};
-use std::fs;
-use std::io::{Error as IoError, ErrorKind as IoErrorKind};
-use std::path::{Path, PathBuf};
+use lib::setting::{Ignore, Storage};
 
 pub struct Sweep;
 
@@ -28,61 +23,12 @@ impl Command for Sweep {
             .difference(ignore.files())
             .cloned()
             .collect::<Vec<String>>();
-        for target in &target_files {
-            try!(Self::move_file_to_dust_box(target, storage.path_to_dust_box()));
-        }
+
+        try!(storage.squeeze_dusts(target_files));
 
         let all_dirs = dirs_ordered_by_descending_depth(".");
         for target in &all_dirs {
-            try!(Self::move_empty_dir_to_dust_box(target, storage.path_to_dust_box()));
-        }
-
-        Ok(())
-    }
-}
-
-impl Sweep {
-    fn move_file_to_dust_box<P1: AsRef<Path>, P2: AsRef<Path>>(target: P1, path_to_dust_box: P2) -> Result<(), CliError> {
-        let target           = target.as_ref();
-        let path_to_dust_box = path_to_dust_box.as_ref();
-
-        let target_path = path_buf![target];
-        let target_file = try!(target_path.file_name().ok_or(CannotHappenError));
-        let target_base = try!(target_path.parent().ok_or(CannotHappenError));
-        let to = path_buf![path_to_dust_box, target_base];
-
-        let message = format!("Move file \"{}\" to \"{}\" directory", target_path.display(), path_to_dust_box.display());
-        print_with_tag(Tag::Info, message);
-
-        try!(setting::create_essential_dir_all(&to));
-
-        // forcedly overwrite if the file exists with same name.
-        match fs::rename(target, path_buf![to, target_file]) {
-            Ok(_)  => (),
-            Err(e) => match e.kind() {
-                IoErrorKind::PermissionDenied => print_with_tag(Tag::Info, "Interrupted this moving file for permission"),
-                _                             => return Err(From::from(e)),
-            },
-        };
-
-        Ok(())
-    }
-
-    fn move_empty_dir_to_dust_box<P1: AsRef<Path>, P2: AsRef<Path>>(target: P1, path_to_dust_box: P2) -> Result<(), IoError> {
-        let target           = target.as_ref();
-        let path_to_dust_box = path_to_dust_box.as_ref();
-
-        if is_empty_dir(target) {
-            let message = format!("Move empty directory \"{}\" to \"{}\" directory", target.display(), path_to_dust_box.display());
-            print_with_tag(Tag::Info, message);
-
-            match fs::remove_dir(target) {
-                Ok(_)  => try!(setting::create_essential_dir_all(&path_buf![path_to_dust_box, target])),
-                Err(e) => match e.kind() {
-                    IoErrorKind::PermissionDenied => print_with_tag(Tag::Info, "Interrupted this moving directory for permission"),
-                    _                             => return Err(From::from(e)),
-                },
-            };
+            try!(storage.squeeze_only_empty_dir(target));
         }
 
         Ok(())

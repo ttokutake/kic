@@ -37,7 +37,7 @@ fn create_essential_dir<P: AsRef<Path>>(path_to_dir: P) -> Result<(), IoError> {
     Ok(())
 }
 
-pub fn create_essential_dir_all<P: AsRef<Path>>(path_to_dir: P) -> Result<(), IoError> {
+fn create_essential_dir_all<P: AsRef<Path>>(path_to_dir: P) -> Result<(), IoError> {
     try!(fs::create_dir_all(path_to_dir));
 
     Ok(())
