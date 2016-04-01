@@ -51,8 +51,7 @@ fn create_setting_file<P: AsRef<Path>, U: AsRef<[u8]>>(path_to_file: P, contents
     Ok(())
 }
 
-
-pub fn delete_dir_all<P: AsRef<Path>>(path: P) -> Result<(), IoError> {
+fn delete_dir_all<P: AsRef<Path>>(path: P) -> Result<(), IoError> {
     try!(fs::remove_dir_all(path));
 
     Ok(())

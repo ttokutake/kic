@@ -1,8 +1,10 @@
 extern crate chrono;
 
-use self::chrono::{DateTime, Local};
+use self::chrono::{DateTime, Duration, Local};
+use self::chrono::offset::TimeZone;
 
 use constant::STORAGE_DIR_NAME;
+use lib::io::*;
 use lib::fs::*;
 use std::io::Error as IoError;
 use std::path::PathBuf;
@@ -46,7 +48,24 @@ impl Storage {
         super::create_essential_dir_all(self.path_to_dust_box())
     }
 
-    pub fn get_boxes() -> Result<Vec<String>, IoError> {
-        ls(Self::path())
+
+    pub fn delete_expired_boxes(&self, moratorium: Duration) -> Result<(), IoError> {
+        let path_to_storage = Self::path();
+
+        let target_boxes = try!(ls(&path_to_storage))
+            .into_iter()
+            .filter(|date| match Local.datetime_from_str(format!("{} 00:00:00", date).as_ref(), "%Y-%m-%d %H:%M:%S") {
+                Ok(created_date) => created_date + moratorium < self.now,
+                Err(_)           => false,
+            })
+            .map(|dir| path_to_storage.join(dir))
+            .collect::<Vec<PathBuf>>();
+
+        for target_box in &target_boxes {
+            print_with_tag(Tag::Info, format!("Remove \"{}\" directory", target_box.display()));
+            try!(super::delete_dir_all(target_box));
+        };
+
+        Ok(())
     }
 }
