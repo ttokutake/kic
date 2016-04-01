@@ -1,5 +1,5 @@
-pub mod config;
-pub mod ignore;
+mod config;
+mod ignore;
 
 use constant::{WORKING_DIR_NAME, STORAGE_DIR_NAME};
 use std::fs::{self, File};
