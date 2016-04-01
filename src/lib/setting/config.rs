@@ -93,7 +93,7 @@ impl Config {
 
         let result = contents
             .parse()
-            .map_err(|e: Vec<_>| e.into_iter().find(|_| true));
+            .map_err(|e: Vec<_>| e.into_iter().next());
         let toml = match result {
             Ok(toml)    => toml,
             Err(option) => match option {
