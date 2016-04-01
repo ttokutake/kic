@@ -141,11 +141,10 @@ impl Config {
     }
 
 
-    fn get<CK: Borrow<ConfigKey>>(key: CK) -> Result<String, CliError> {
-        let key    = key.borrow();
-        let config = try!(Self::read()).toml;
+    pub fn get<CK: Borrow<ConfigKey>>(&self, key: CK) -> Result<String, CliError> {
+        let key = key.borrow();
 
-        let result = config
+        let result = self.toml
             .lookup(key.to_str())
             .ok_or(ConfigError::new(match *key {
                 ConfigKey::BurnAfter   => ConfigErrorKind::NotFoundBurnAfter,
@@ -156,18 +155,17 @@ impl Config {
 
         value
             .as_str()
-            .map(|v| v.to_string())
             .ok_or(From::from(ConfigError::new(ConfigErrorKind::NonStringValue)))
+            .and_then(|s| Self::validate(key, s))
     }
 
-    pub fn extract_burn_after() -> Result<Duration, CliError> {
-        let key = ConfigKey::BurnAfter;
-
-        let after       = try!(Self::get(&key));
-        let after       = try!(Self::validate(key, after));
-        let after       = after.split(' ').collect::<Vec<&str>>();
-        let (num, unit) = (after[0], after[1]);                    // unsafe!
-        let num         = try!(num.parse::<u32>()) as i64;
+    pub fn to_duration(value: String) -> Result<Duration, CliError> {
+        let mut value   = value.split(' ');
+        let (num, unit) = match (value.next(), value.next()) {
+            (Some(num), Some(unit)) => (num, unit),
+            _                       => return Err(From::from(CannotHappenError)),
+        };
+        let num = try!(num.parse::<u32>()) as i64;
 
         let duration = match unit {
             "day"  | "days"  => Duration::days(num),

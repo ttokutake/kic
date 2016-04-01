@@ -8,7 +8,7 @@ use self::chrono::{Duration, Local};
 
 use lib::fs::*;
 use lib::io::*;
-use lib::setting::{self, Config};
+use lib::setting::{self, Config, ConfigKey};
 use std::io::Error as IoError;
 use std::path::PathBuf;
 
@@ -22,7 +22,10 @@ impl Command for Burn {
     }
 
     fn main(&self) -> Result<(), CliError> {
-        let moratorium  = try!(Config::extract_burn_after());
+        let config         = try!(Config::read());
+        let raw_moratorium = try!(config.get(ConfigKey::BurnAfter));
+        let moratorium     = try!(Config::to_duration(raw_moratorium));
+
         let target_dirs = try!(Self::search_target_storages(moratorium));
         for dir in &target_dirs {
             print_with_tag(Tag::Info, format!("Remove \"{}\" directory", dir.display()));
