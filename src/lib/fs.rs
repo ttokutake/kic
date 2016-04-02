@@ -224,5 +224,12 @@ mod tests {
 
     #[test]
     fn dirs_ordered_by_descending_depth_should_return_vec() {
+        Helper::create_dirs_and_files();
+
+        let correct = vec![Helper::path_to_d3(), Helper::path_to_d2(), Helper::path_to_d1()];
+
+        assert_eq!(correct, dirs_ordered_by_descending_depth(Helper::path_to_d1()));
+
+        Helper::remove_dirs_and_files();
     }
 }
