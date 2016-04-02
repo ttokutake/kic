@@ -24,13 +24,10 @@ impl Command for Sweep {
             .difference(ignore.files())
             .cloned()
             .collect::<Vec<String>>();
-
         try!(storage.squeeze_dusts(target_files));
 
         let all_dirs = dirs_ordered_by_descending_depth(MAIN_DIR);
-        for target in &all_dirs {
-            try!(storage.squeeze_empty_dir_only(target));
-        }
+        try!(storage.squeeze_empty_dirs_only(all_dirs));
 
         Ok(())
     }

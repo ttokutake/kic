@@ -51,10 +51,10 @@ impl Storage {
     }
 
 
-    pub fn squeeze_dusts<P: AsRef<Path>>(&self, path_to_dusts: Vec<P>) -> Result<(), CliError> {
+    pub fn squeeze_dusts<P: AsRef<Path>>(&self, paths_to_dust: Vec<P>) -> Result<(), CliError> {
         let path_to_dust_box = self.path_to_dust_box();
 
-        for path_to_dust in &path_to_dusts {
+        for path_to_dust in &paths_to_dust {
             let path_to_dust = path_to_dust.as_ref();
             let target_file  = try!(path_to_dust.file_name().ok_or(CannotHappenError));
             let target_base  = try!(path_to_dust.parent().ok_or(CannotHappenError));
@@ -79,22 +79,24 @@ impl Storage {
         Ok(())
     }
 
-    pub fn squeeze_empty_dir_only<P: AsRef<Path>>(&self, path_to_dir: P) -> Result<(), IoError> {
-        let path_to_dir = path_to_dir.as_ref();
+    pub fn squeeze_empty_dirs_only<P: AsRef<Path>>(&self, paths_to_dir: Vec<P>) -> Result<(), IoError> {
+        let path_to_dust_box = self.path_to_dust_box();
 
-        if is_empty_dir(path_to_dir) {
-            let path_to_dust_box = self.path_to_dust_box();
+        for path_to_dir in &paths_to_dir {
+            if is_empty_dir(path_to_dir) {
+                let path_to_dir = path_to_dir.as_ref();
 
-            let message = format!("Move empty \"{}\" to \"{}\"", path_to_dir.display(), path_to_dust_box.display());
-            print_with_tag(Tag::Info, message);
+                let message = format!("Move empty \"{}\" to \"{}\"", path_to_dir.display(), path_to_dust_box.display());
+                print_with_tag(Tag::Info, message);
 
-            match fs::remove_dir(path_to_dir) {
-                Ok(_)  => try!(super::create_essential_dir_all(path_buf![path_to_dust_box, path_to_dir])),
-                Err(e) => match e.kind() {
-                    IoErrorKind::PermissionDenied => print_with_tag(Tag::Info, "Interrupted moving directory for permission"),
-                    _                             => return Err(From::from(e)),
-                },
-            };
+                match fs::remove_dir(path_to_dir) {
+                    Ok(_)  => try!(super::create_essential_dir_all(path_buf![&path_to_dust_box, path_to_dir])),
+                    Err(e) => match e.kind() {
+                        IoErrorKind::PermissionDenied => print_with_tag(Tag::Info, "Interrupted moving directory for permission"),
+                        _                             => return Err(From::from(e)),
+                    },
+                };
+            }
         }
 
         Ok(())
