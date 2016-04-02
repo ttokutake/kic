@@ -188,9 +188,20 @@ mod tests {
 
     #[test]
     fn is_empty_dir_should_return_true() {
+        Helper::create_dirs_and_files();
+
+        assert!(is_empty_dir(Helper::path_to_d3()));
+
+        Helper::remove_dirs_and_files();
     }
     #[test]
     fn is_empty_dir_should_return_false() {
+        Helper::create_dirs_and_files();
+
+        assert!(!is_empty_dir(Helper::path_to_d1()));
+        assert!(!is_empty_dir(Helper::path_to_d2()));
+
+        Helper::remove_dirs_and_files();
     }
 
     #[test]
