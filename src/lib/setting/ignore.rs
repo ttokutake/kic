@@ -1,4 +1,4 @@
-use constant::IGNORE_FILE_NAME;
+use constant::{IGNORE_FILE_NAME, MAIN_DIR};
 use lib::fs::*;
 use std::collections::BTreeSet;
 use std::fs::File;
@@ -40,7 +40,7 @@ impl Ignore {
     }
 
     pub fn default() -> Self {
-        let current_files = walk_dir(".");
+        let current_files = walk_dir(MAIN_DIR);
 
         Self::_new(current_files)
     }
@@ -68,7 +68,7 @@ impl Ignore {
     pub fn add(mut self, paths: &Vec<String>) -> Self {
         let paths_to_be_added = paths
             .iter()
-            .map(Self::append_current_dir_prefix_if_need)
+            .map(Self::append_main_dir_prefix_if_need)
             .filter(|p| Path::new(p).is_file())
             .collect::<BTreeSet<String>>();
 
@@ -84,7 +84,7 @@ impl Ignore {
     pub fn remove(mut self, paths: &Vec<String>) -> Self {
         let paths_to_be_removed = paths
             .iter()
-            .map(Self::append_current_dir_prefix_if_need)
+            .map(Self::append_main_dir_prefix_if_need)
             .collect::<BTreeSet<String>>();
 
         self.files = self
@@ -97,9 +97,9 @@ impl Ignore {
     }
 
 
-    fn append_current_dir_prefix_if_need<S: AsRef<str>>(path: S) -> String {
+    fn append_main_dir_prefix_if_need<S: AsRef<str>>(path: S) -> String {
         let path   = path.as_ref();
-        let prefix = format!(".{}", MAIN_SEPARATOR);
+        let prefix = format!("{}{}", MAIN_DIR, MAIN_SEPARATOR);
         if path.starts_with(&prefix) {
             path.to_string()
         } else {
