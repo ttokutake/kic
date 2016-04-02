@@ -112,7 +112,48 @@ pub fn dirs_ordered_by_descending_depth<P: AsRef<Path>>(root: P) -> Vec<PathBuf>
 
 #[cfg(test)]
 mod tests {
+    use super::*;
+
+    use std::fs::{self, File};
+    use std::io::Write;
     use std::path::{Path, PathBuf};
+
+
+    const D1: &'static str = "directory1";
+    const D2: &'static str = "directory2";
+    const D3: &'static str = "directory3";
+    const F1: &'static str = "file1";
+    const F2: &'static str = "file2";
+    const F3: &'static str = "file3";
+
+    fn remove_dirs_and_files() {
+        let path_to_d1 = Path::new(D1);
+        let path_to_f1 = Path::new(F1);
+
+        fs::remove_dir_all(path_to_d1).ok();
+        if path_to_f1.is_file() {
+            fs::remove_file(path_to_f1).ok();
+        }
+    }
+
+    fn create_dirs_and_files() {
+        remove_dirs_and_files();
+
+        let path_to_d1 = Path::new(D1);
+        let path_to_d2 = path_to_d1.join(D2);
+        let path_to_d3 = path_to_d2.join(D3);
+        let path_to_f1 = Path::new(F1);
+        let path_to_f2 = path_to_d1.join(F2);
+        let path_to_f3 = path_to_d2.join(F3);
+
+        fs::create_dir_all(path_to_d3).ok();
+
+        let mut f = File::create(path_to_f1).unwrap();
+        f.write("\n".as_ref()).ok();
+        fs::copy(path_to_f1, path_to_f2).ok();
+        fs::copy(path_to_f1, path_to_f3).ok();
+    }
+
 
     #[test]
     fn path_buf_macro_should_create_path_buf() {
@@ -124,5 +165,27 @@ mod tests {
         for &(ref correct, ref calculated) in &paths {
             assert_eq!(correct, calculated);
         }
+    }
+
+    #[test]
+    fn ls_should_return_ok() {
+    }
+    #[test]
+    fn ls_should_return_err() {
+    }
+
+    #[test]
+    fn is_empty_dir_should_return_true() {
+    }
+    #[test]
+    fn is_empty_dir_should_return_false() {
+    }
+
+    #[test]
+    fn walk_dir_should_return_b_tree_set() {
+    }
+
+    #[test]
+    fn dirs_ordered_by_descending_depth_should_return_vec() {
     }
 }
