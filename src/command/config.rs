@@ -55,7 +55,7 @@ impl Config {
     }
 
     fn init(&self) -> Result<(), CliError> {
-        let message = format!("Do you want to initialize \"{}\"? [yes/no]", CONFIG_FILE_NAME);
+        let message = format!("Do you want to initialize \"{}\"? [yes/no]: ", CONFIG_FILE_NAME);
         echo(format_with_tag(Tag::Caution, message));
 
         if try!(Self::inquiry()) {

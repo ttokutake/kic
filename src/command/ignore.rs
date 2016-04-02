@@ -65,7 +65,7 @@ impl Ignore {
     }
 
     fn ignore_current_files() -> Result<(), CliError> {
-        let message = format!("Do you want to initialize \"{}\"? [yes/no]", IGNORE_FILE_NAME);
+        let message = format!("Do you want to initialize \"{}\"? [yes/no]: ", IGNORE_FILE_NAME);
         echo(format_with_tag(Tag::Caution, message));
 
         if try!(Self::inquiry()) {
@@ -78,7 +78,7 @@ impl Ignore {
     }
 
     fn clear_ignore_file() -> Result<(), CliError> {
-        let message = format!("Do you want to clear \"{}\"? [yes/no]", IGNORE_FILE_NAME);
+        let message = format!("Do you want to clear \"{}\"? [yes/no]: ", IGNORE_FILE_NAME);
         echo(format_with_tag(Tag::Caution, message));
 
         if try!(Self::inquiry()) {
