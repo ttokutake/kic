@@ -119,29 +119,30 @@ mod tests {
     use std::path::{Path, PathBuf};
 
 
-    const D1: &'static str = "directory1";
-    const D2: &'static str = "directory2";
-    const D3: &'static str = "directory3";
-    const F1: &'static str = "file1";
-    const F2: &'static str = "file2";
+    struct Helper;
+    impl Helper {
+        fn d1() -> String { "directory1".to_string() }
+        fn d2() -> String { "directory2".to_string() }
+        fn d3() -> String { "directory3".to_string() }
 
-    struct TestHelper;
-    impl TestHelper {
+        fn f1() -> String { "file1".to_string() }
+        fn f2() -> String { "file2".to_string() }
+
         fn path_to_d1() -> PathBuf {
-            PathBuf::new().join(D1)
+            PathBuf::new().join(Self::d1())
         }
         fn path_to_d2() -> PathBuf {
-            Self::path_to_d1().join(D2)
+            Self::path_to_d1().join(Self::d2())
         }
         fn path_to_d3() -> PathBuf {
-            Self::path_to_d2().join(D3)
+            Self::path_to_d2().join(Self::d3())
         }
 
         fn path_to_f1() -> PathBuf {
-            Self::path_to_d1().join(F1)
+            Self::path_to_d1().join(Self::f1())
         }
         fn path_to_f2() -> PathBuf {
-            Self::path_to_d2().join(F2)
+            Self::path_to_d2().join(Self::f2())
         }
 
         fn remove_dirs_and_files() {
@@ -174,19 +175,15 @@ mod tests {
 
     #[test]
     fn ls_should_return_ok() {
-        TestHelper::create_dirs_and_files();
+        Helper::create_dirs_and_files();
 
         let empty_vec: Vec<String> = Vec::new();
 
-        assert_eq!(vec![D2.to_string(), F1.to_string()], ls(TestHelper::path_to_d1()).unwrap());
-        assert_eq!(vec![D3.to_string(), F2.to_string()], ls(TestHelper::path_to_d2()).unwrap());
-        assert_eq!(empty_vec                           , ls(TestHelper::path_to_d3()).unwrap());
+        assert_eq!(vec![Helper::d2(), Helper::f1()], ls(Helper::path_to_d1()).unwrap());
+        assert_eq!(vec![Helper::d3(), Helper::f2()], ls(Helper::path_to_d2()).unwrap());
+        assert_eq!(empty_vec                       , ls(Helper::path_to_d3()).unwrap());
 
-        TestHelper::remove_dirs_and_files();
-    }
-    #[test]
-    fn ls_should_return_err() {
-        // need to cause permission error
+        Helper::remove_dirs_and_files();
     }
 
     #[test]
