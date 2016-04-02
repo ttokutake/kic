@@ -7,7 +7,7 @@ use std::collections::BTreeSet;
 use std::ffi::OsString;
 use std::fs;
 use std::io::Error as IoError;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::result::Result;
 
 
@@ -87,13 +87,6 @@ fn is_target(entry: &WalkDirEntry) -> bool {
     !is_hidden(entry) && !is_pinned(entry)
 }
 
-fn to_string(entry: WalkDirEntry) -> Option<String> {
-    entry
-        .path()
-        .to_str()
-        .map(|p| p.to_string())
-}
-
 pub fn walk_dir<P: AsRef<Path>>(root: P) -> BTreeSet<String> {
     let walker = WalkDir::new(root)
         .into_iter()
@@ -104,11 +97,11 @@ pub fn walk_dir<P: AsRef<Path>>(root: P) -> BTreeSet<String> {
 
     walker
         .into_iter()
-        .filter_map(to_string)
+        .filter_map(|e| e.path().to_str().map(|s| s.to_string()))
         .collect::<BTreeSet<String>>()
 }
 
-pub fn dirs_ordered_by_descending_depth<P: AsRef<Path>>(root: P) -> Vec<String> {
+pub fn dirs_ordered_by_descending_depth<P: AsRef<Path>>(root: P) -> Vec<PathBuf> {
     let mut walker = WalkDir::new(root)
         .into_iter()
         .filter_entry(is_target)
@@ -124,8 +117,8 @@ pub fn dirs_ordered_by_descending_depth<P: AsRef<Path>>(root: P) -> Vec<String> 
 
     walker
         .into_iter()
-        .filter_map(to_string)
-        .collect::<Vec<String>>()
+        .map(|e| e.path().to_path_buf())
+        .collect::<Vec<PathBuf>>()
 }
 
 
