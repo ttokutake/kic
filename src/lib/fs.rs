@@ -114,6 +114,7 @@ pub fn dirs_ordered_by_descending_depth<P: AsRef<Path>>(root: P) -> Vec<PathBuf>
 mod tests {
     use super::*;
 
+    use std::collections::BTreeSet;
     use std::fs::{self, File};
     use std::io::Write;
     use std::path::{Path, PathBuf};
@@ -157,6 +158,10 @@ mod tests {
             let mut f = File::create(Self::path_to_f1()).unwrap();
             f.write("\n".as_ref()).ok();
             fs::copy(Self::path_to_f1(), Self::path_to_f2()).ok();
+        }
+
+        fn to_string_forcely(path: PathBuf) -> String {
+            path.to_str().unwrap().to_string()
         }
     }
 
@@ -206,6 +211,15 @@ mod tests {
 
     #[test]
     fn walk_dir_should_return_b_tree_set() {
+        Helper::create_dirs_and_files();
+
+        let mut correct = BTreeSet::new();
+        correct.insert(Helper::to_string_forcely(Helper::path_to_f1()));
+        correct.insert(Helper::to_string_forcely(Helper::path_to_f2()));
+
+        assert_eq!(correct, walk_dir(Helper::path_to_d1()));
+
+        Helper::remove_dirs_and_files();
     }
 
     #[test]
