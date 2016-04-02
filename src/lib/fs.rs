@@ -120,44 +120,53 @@ mod tests {
     use std::path::{Path, PathBuf};
 
 
-    struct Helper;
+    struct Helper {
+        d1: String,
+        d2: String,
+        d3: String,
+        f1: String,
+        f2: String,
+    }
     impl Helper {
-        fn d1() -> String { "directory1".to_string() }
-        fn d2() -> String { "directory2".to_string() }
-        fn d3() -> String { "directory3".to_string() }
-
-        fn f1() -> String { "file1".to_string() }
-        fn f2() -> String { "file2".to_string() }
-
-        fn path_to_d1() -> PathBuf {
-            PathBuf::new().join(Self::d1())
-        }
-        fn path_to_d2() -> PathBuf {
-            Self::path_to_d1().join(Self::d2())
-        }
-        fn path_to_d3() -> PathBuf {
-            Self::path_to_d2().join(Self::d3())
+        fn new(suffix: &str) -> Self {
+            Helper {
+                d1: format!("directory1_{}", suffix),
+                d2: format!("directory2_{}", suffix),
+                d3: format!("directory3_{}", suffix),
+                f1: format!("file1_{}"     , suffix),
+                f2: format!("file2_{}"     , suffix),
+            }
         }
 
-        fn path_to_f1() -> PathBuf {
-            Self::path_to_d1().join(Self::f1())
+        fn path_to_d1(&self) -> PathBuf {
+            PathBuf::new().join(&self.d1)
         }
-        fn path_to_f2() -> PathBuf {
-            Self::path_to_d2().join(Self::f2())
+        fn path_to_d2(&self) -> PathBuf {
+            self.path_to_d1().join(&self.d2)
+        }
+        fn path_to_d3(&self) -> PathBuf {
+            self.path_to_d2().join(&self.d3)
         }
 
-        fn remove_dirs_and_files() {
-            fs::remove_dir_all(Self::path_to_d1()).ok();
+        fn path_to_f1(&self) -> PathBuf {
+            self.path_to_d1().join(&self.f1)
+        }
+        fn path_to_f2(&self) -> PathBuf {
+            self.path_to_d2().join(&self.f2)
         }
 
-        fn create_dirs_and_files() {
-            Self::remove_dirs_and_files();
+        fn remove_dirs_and_files(&self) {
+            fs::remove_dir_all(self.path_to_d1()).ok();
+        }
 
-            fs::create_dir_all(Self::path_to_d3()).ok();
+        fn create_dirs_and_files(&self) {
+            self.remove_dirs_and_files();
 
-            let mut f = File::create(Self::path_to_f1()).unwrap();
+            fs::create_dir_all(self.path_to_d3()).ok();
+
+            let mut f = File::create(self.path_to_f1()).unwrap();
             f.write("\n".as_ref()).ok();
-            fs::copy(Self::path_to_f1(), Self::path_to_f2()).ok();
+            fs::copy(self.path_to_f1(), self.path_to_f2()).ok();
         }
 
         fn to_string_forcely(path: PathBuf) -> String {
@@ -180,56 +189,61 @@ mod tests {
 
     #[test]
     fn ls_should_return_ok() {
-        Helper::create_dirs_and_files();
+        let helper = Helper::new("ls_Ok");
+        helper.create_dirs_and_files();
 
         let empty_vec: Vec<String> = Vec::new();
 
-        assert_eq!(vec![Helper::d2(), Helper::f1()], ls(Helper::path_to_d1()).unwrap());
-        assert_eq!(vec![Helper::d3(), Helper::f2()], ls(Helper::path_to_d2()).unwrap());
-        assert_eq!(empty_vec                       , ls(Helper::path_to_d3()).unwrap());
+        assert_eq!(vec![helper.d2.clone(), helper.f1.clone()], ls(helper.path_to_d1()).unwrap());
+        assert_eq!(vec![helper.d3.clone(), helper.f2.clone()], ls(helper.path_to_d2()).unwrap());
+        assert_eq!(empty_vec                                 , ls(helper.path_to_d3()).unwrap());
 
-        Helper::remove_dirs_and_files();
+        helper.remove_dirs_and_files();
     }
 
     #[test]
     fn is_empty_dir_should_return_true() {
-        Helper::create_dirs_and_files();
+        let helper = Helper::new("is_empty_dir_true");
+        helper.create_dirs_and_files();
 
-        assert!(is_empty_dir(Helper::path_to_d3()));
+        assert!(is_empty_dir(helper.path_to_d3()));
 
-        Helper::remove_dirs_and_files();
+        helper.remove_dirs_and_files();
     }
     #[test]
     fn is_empty_dir_should_return_false() {
-        Helper::create_dirs_and_files();
+        let helper = Helper::new("is_empty_dir_false");
+        helper.create_dirs_and_files();
 
-        assert!(!is_empty_dir(Helper::path_to_d1()));
-        assert!(!is_empty_dir(Helper::path_to_d2()));
+        assert!(!is_empty_dir(helper.path_to_d1()));
+        assert!(!is_empty_dir(helper.path_to_d2()));
 
-        Helper::remove_dirs_and_files();
+        helper.remove_dirs_and_files();
     }
 
     #[test]
     fn walk_dir_should_return_b_tree_set() {
-        Helper::create_dirs_and_files();
+        let helper = Helper::new("walk_dir_BTreeSet");
+        helper.create_dirs_and_files();
 
         let mut correct = BTreeSet::new();
-        correct.insert(Helper::to_string_forcely(Helper::path_to_f1()));
-        correct.insert(Helper::to_string_forcely(Helper::path_to_f2()));
+        correct.insert(Helper::to_string_forcely(helper.path_to_f1()));
+        correct.insert(Helper::to_string_forcely(helper.path_to_f2()));
 
-        assert_eq!(correct, walk_dir(Helper::path_to_d1()));
+        assert_eq!(correct, walk_dir(helper.path_to_d1()));
 
-        Helper::remove_dirs_and_files();
+        helper.remove_dirs_and_files();
     }
 
     #[test]
     fn dirs_ordered_by_descending_depth_should_return_vec() {
-        Helper::create_dirs_and_files();
+        let helper = Helper::new("dirs_ordered_by_descending_depth_Vec");
+        helper.create_dirs_and_files();
 
-        let correct = vec![Helper::path_to_d3(), Helper::path_to_d2(), Helper::path_to_d1()];
+        let correct = vec![helper.path_to_d3(), helper.path_to_d2(), helper.path_to_d1()];
 
-        assert_eq!(correct, dirs_ordered_by_descending_depth(Helper::path_to_d1()));
+        assert_eq!(correct, dirs_ordered_by_descending_depth(helper.path_to_d1()));
 
-        Helper::remove_dirs_and_files();
+        helper.remove_dirs_and_files();
     }
 }
