@@ -40,7 +40,7 @@ fn is_hidden_name(file_name: &str) -> bool {
     file_name.starts_with(".") && file_name.len() > 1 && file_name != ".."
 }
 #[test]
-fn hidden_name() {
+fn is_hidden_name_should_return_true() {
     let file_names = [
         ".a",
         ".ab",
@@ -53,7 +53,7 @@ fn hidden_name() {
     }
 }
 #[test]
-fn non_hidden_name() {
+fn is_hidden_name_should_return_false() {
     let file_names = [
         "",
 
@@ -115,7 +115,7 @@ mod tests {
     use std::path::{Path, PathBuf};
 
     #[test]
-    fn create_path_buf() {
+    fn path_buf_macro_should_create_path_buf() {
         let paths = [
             (Path::new("path").to_path_buf()          , path_buf!["path"              ]),
             (Path::new("path").join("to")             , path_buf!["path", "to"        ]),
