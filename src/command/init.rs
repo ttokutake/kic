@@ -17,9 +17,13 @@ impl Command for Init {
 
         try!(Storage::create());
 
-        try!(Config::default().create());
+        if !Config::exist() {
+            try!(Config::default().create());
+        }
 
-        try!(Ignore::default().create());
+        if !Ignore::exist() {
+            try!(Ignore::default().create());
+        }
 
         Ok(())
     }
