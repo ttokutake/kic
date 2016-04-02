@@ -79,7 +79,7 @@ impl Storage {
         Ok(())
     }
 
-    pub fn squeeze_only_empty_dir<P: AsRef<Path>>(&self, path_to_dir: P) -> Result<(), IoError> {
+    pub fn squeeze_empty_dir_only<P: AsRef<Path>>(&self, path_to_dir: P) -> Result<(), IoError> {
         let path_to_dir = path_to_dir.as_ref();
 
         if is_empty_dir(path_to_dir) {

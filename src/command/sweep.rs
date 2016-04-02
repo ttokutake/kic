@@ -28,7 +28,7 @@ impl Command for Sweep {
 
         let all_dirs = dirs_ordered_by_descending_depth(".");
         for target in &all_dirs {
-            try!(storage.squeeze_only_empty_dir(target));
+            try!(storage.squeeze_empty_dir_only(target));
         }
 
         Ok(())
