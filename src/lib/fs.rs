@@ -124,34 +124,39 @@ mod tests {
     const D3: &'static str = "directory3";
     const F1: &'static str = "file1";
     const F2: &'static str = "file2";
-    const F3: &'static str = "file3";
 
-    fn remove_dirs_and_files() {
-        let path_to_d1 = Path::new(D1);
-        let path_to_f1 = Path::new(F1);
-
-        fs::remove_dir_all(path_to_d1).ok();
-        if path_to_f1.is_file() {
-            fs::remove_file(path_to_f1).ok();
+    struct TestHelper;
+    impl TestHelper {
+        fn path_to_d1() -> PathBuf {
+            PathBuf::new().join(D1)
         }
-    }
+        fn path_to_d2() -> PathBuf {
+            Self::path_to_d1().join(D2)
+        }
+        fn path_to_d3() -> PathBuf {
+            Self::path_to_d2().join(D3)
+        }
 
-    fn create_dirs_and_files() {
-        remove_dirs_and_files();
+        fn path_to_f1() -> PathBuf {
+            Self::path_to_d1().join(F1)
+        }
+        fn path_to_f2() -> PathBuf {
+            Self::path_to_d2().join(F2)
+        }
 
-        let path_to_d1 = Path::new(D1);
-        let path_to_d2 = path_to_d1.join(D2);
-        let path_to_d3 = path_to_d2.join(D3);
-        let path_to_f1 = Path::new(F1);
-        let path_to_f2 = path_to_d1.join(F2);
-        let path_to_f3 = path_to_d2.join(F3);
+        fn remove_dirs_and_files() {
+            fs::remove_dir_all(Self::path_to_d1()).ok();
+        }
 
-        fs::create_dir_all(path_to_d3).ok();
+        fn create_dirs_and_files() {
+            Self::remove_dirs_and_files();
 
-        let mut f = File::create(path_to_f1).unwrap();
-        f.write("\n".as_ref()).ok();
-        fs::copy(path_to_f1, path_to_f2).ok();
-        fs::copy(path_to_f1, path_to_f3).ok();
+            fs::create_dir_all(Self::path_to_d3()).ok();
+
+            let mut f = File::create(Self::path_to_f1()).unwrap();
+            f.write("\n".as_ref()).ok();
+            fs::copy(Self::path_to_f1(), Self::path_to_f2()).ok();
+        }
     }
 
 
@@ -169,9 +174,19 @@ mod tests {
 
     #[test]
     fn ls_should_return_ok() {
+        TestHelper::create_dirs_and_files();
+
+        let empty_vec: Vec<String> = Vec::new();
+
+        assert_eq!(vec![D2.to_string(), F1.to_string()], ls(TestHelper::path_to_d1()).unwrap());
+        assert_eq!(vec![D3.to_string(), F2.to_string()], ls(TestHelper::path_to_d2()).unwrap());
+        assert_eq!(empty_vec                           , ls(TestHelper::path_to_d3()).unwrap());
+
+        TestHelper::remove_dirs_and_files();
     }
     #[test]
     fn ls_should_return_err() {
+        // need to cause permission error
     }
 
     #[test]
