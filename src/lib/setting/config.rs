@@ -185,7 +185,7 @@ impl Config {
     pub fn set<CK: Borrow<ConfigKey>>(mut self, key: CK, value: String) -> Result<Self, ConfigError> {
         let mut editable = try!(EditableToml::from(self.toml));
 
-        editable.overwrite(key.borrow(), value);
+        editable.overwrite(key, value);
 
         self.toml = editable.to_toml();
 
@@ -221,5 +221,37 @@ impl Config {
                 }
             },
         }
+    }
+}
+
+
+#[test]
+fn default_should_return_config() {
+}
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn get_should_return_ok() {
+    }
+    #[test]
+    fn get_should_return_err() {
+    }
+
+    #[test]
+    fn set_should_return_ok() {
+    }
+    #[test]
+    fn set_should_retrun_err() {
+    }
+
+    #[test]
+    fn validate_should_return_ok() {
+    }
+    #[test]
+    fn validate_should_return_err() {
     }
 }
