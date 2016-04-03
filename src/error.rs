@@ -182,10 +182,10 @@ impl EssentialLack {
 impl Display for EssentialLack {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         write!(f, "{} does not exist. Please use \"init\" command", match self.what {
-            EssentialKind::WorkingDir => format!("{} directory", constant::WORKING_DIR_NAME),
-            EssentialKind::StorageDir => format!("{} directory", constant::STORAGE_DIR_NAME),
-            EssentialKind::ConfigFile => format!("{} file"     , constant::CONFIG_FILE_NAME),
-            EssentialKind::IgnoreFile => format!("{} file"     , constant::IGNORE_FILE_NAME),
+            EssentialKind::WorkingDir => format!("\"{}\" directory", constant::WORKING_DIR_NAME),
+            EssentialKind::StorageDir => format!("\"{}\" directory", constant::STORAGE_DIR_NAME),
+            EssentialKind::ConfigFile => format!("\"{}\" file"     , constant::CONFIG_FILE_NAME),
+            EssentialKind::IgnoreFile => format!("\"{}\" file"     , constant::IGNORE_FILE_NAME),
         })
     }
 }

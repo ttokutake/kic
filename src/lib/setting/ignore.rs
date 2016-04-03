@@ -1,4 +1,5 @@
 use constant::{IGNORE_FILE_NAME, MAIN_DIR};
+use lib::io::*;
 use lib::fs::*;
 use std::collections::BTreeSet;
 use std::fs::File;
@@ -27,6 +28,8 @@ impl Ignore {
     }
 
     pub fn create(&self) -> Result<(), IoError> {
+        print_with_tag(Tag::Info, format!("Create \"{}\" file", IGNORE_FILE_NAME));
+
         super::create_setting_file(Self::path(), self.to_string())
     }
 
@@ -46,6 +49,8 @@ impl Ignore {
     }
 
     pub fn read() -> Result<Self, IoError> {
+        print_with_tag(Tag::Info, format!("Read \"{}\" file", IGNORE_FILE_NAME));
+
         let mut f = try!(File::open(Self::path()));
 
         let mut contents = String::new();

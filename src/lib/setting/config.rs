@@ -8,6 +8,7 @@ use self::toml::Value as Toml;
 
 use constant::CONFIG_FILE_NAME;
 use error::{CannotHappenError, CliError, ConfigError, ConfigErrorKind};
+use lib::io::*;
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 use std::fs::File;
@@ -103,6 +104,8 @@ impl Config {
     }
 
     pub fn create(&self) -> Result<(), IoError> {
+        print_with_tag(Tag::Info, format!("Create \"{}\" file", CONFIG_FILE_NAME));
+
         super::create_setting_file(Self::path(), self.to_string())
     }
 
@@ -121,6 +124,8 @@ impl Config {
     }
 
     pub fn read() -> Result<Self, CliError> {
+        print_with_tag(Tag::Info, format!("Read \"{}\" file", CONFIG_FILE_NAME));
+
         let mut f = try!(File::open(Self::path()));
 
         let mut contents = String::new();

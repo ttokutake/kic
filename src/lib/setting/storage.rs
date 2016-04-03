@@ -27,6 +27,8 @@ impl Storage {
     }
 
     pub fn create() -> Result<(), IoError> {
+        print_with_tag(Tag::Info, format!("Create \"{}\" directory", STORAGE_DIR_NAME));
+
         super::create_essential_dir(Self::path())
     }
 
@@ -47,6 +49,8 @@ impl Storage {
     }
 
     pub fn create_box(&self) -> Result<(), IoError> {
+        print_with_tag(Tag::Info, format!(r#"Create "{}" directory in "{}""#, self.date, STORAGE_DIR_NAME));
+
         super::create_essential_dir_all(self.path_to_dust_box())
     }
 

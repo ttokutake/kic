@@ -3,6 +3,7 @@ mod ignore;
 mod storage;
 
 use constant::WORKING_DIR_NAME;
+use lib::io::*;
 use std::fs::{self, File};
 use std::io::{Error as IoError, Write};
 use std::path::{Path, PathBuf};
@@ -21,10 +22,14 @@ pub fn working_dir_exists() -> bool {
 }
 
 pub fn create_working_dir() -> Result<(), IoError> {
+    print_with_tag(Tag::Info, format!("Create \"{}\" directory", WORKING_DIR_NAME));
+
     create_essential_dir(working_dir())
 }
 
 pub fn delete_working_dir() -> Result<(), IoError> {
+    print_with_tag(Tag::Info, format!("Delete \"{}\" directory", WORKING_DIR_NAME));
+
     delete_dir_all(working_dir())
 }
 
