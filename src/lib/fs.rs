@@ -6,7 +6,7 @@ use std::collections::BTreeSet;
 use std::ffi::OsString;
 use std::fs;
 use std::io::Error as IoError;
-use std::path::{Path, PathBuf};
+use std::path::{MAIN_SEPARATOR, Path, PathBuf};
 use std::result::Result;
 
 
@@ -17,6 +17,15 @@ macro_rules! path_buf {
     };
 }
 
+
+pub fn trim_current_dir_prefix<S: AsRef<str>>(path_name: S) -> String {
+    let pattern = format!(".{}", MAIN_SEPARATOR);
+
+    path_name
+        .as_ref()
+        .trim_left_matches(&pattern)
+        .to_string()
+}
 
 pub fn ls<P: AsRef<Path>>(path: P) -> Result<Vec<String>, IoError> {
     let dirs = try!(fs::read_dir(path));
@@ -85,7 +94,7 @@ pub fn walk_dir<P: AsRef<Path>>(root: P) -> BTreeSet<String> {
 
     walker
         .into_iter()
-        .filter_map(|e| e.path().to_str().map(|s| s.to_string()))
+        .filter_map(|e| e.path().to_str().map(trim_current_dir_prefix))
         .collect::<BTreeSet<String>>()
 }
 
@@ -184,6 +193,36 @@ mod tests {
         ];
         for &(ref correct, ref calculated) in &paths {
             assert_eq!(correct, calculated);
+        }
+    }
+
+    #[test]
+    fn trim_current_dir_prefix_should_return_trimmed() {
+        let path_names = [
+            (""   , "./"    ),
+            (""   , "././"  ),
+            (""   , "./././"),
+            ("a"  , "./a"   ),
+            ("a/" , "./a/"  ),
+            ("a/b", "./a/b" ),
+        ];
+        for &(ref correct, ref input) in &path_names {
+            assert_eq!(correct.to_string(), trim_current_dir_prefix(input));
+        }
+    }
+    #[test]
+    fn trim_current_dir_prefix_should_return_as_it_is() {
+        let path_names = [
+            "",
+            "/",
+            "/a",
+            "/a/b",
+            "a",
+            "a/",
+            "a/b",
+        ];
+        for path_name in &path_names {
+            assert_eq!(path_name.to_string(), trim_current_dir_prefix(path_name));
         }
     }
 
