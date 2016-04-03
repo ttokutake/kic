@@ -17,6 +17,10 @@ use std::path::PathBuf;
 use std::str::FromStr;
 
 
+const CONFIG_KEY_BURN_AFTER  : &'static str = "burn.after";
+const CONFIG_KEY_SWEEP_PERIOD: &'static str = "sweep.period";
+const CONFIG_KEY_SWEEP_TIME  : &'static str = "sweep.time";
+
 pub enum ConfigKey {
     BurnAfter,
     SweepPeriod,
@@ -26,18 +30,18 @@ pub enum ConfigKey {
 impl ConfigKey {
     pub fn from<S: AsRef<str>>(key: S) -> Result<ConfigKey, ConfigError> {
         match key.as_ref().trim() {
-            "burn.after"   => Ok(ConfigKey::BurnAfter),
-            "sweep.period" => Ok(ConfigKey::SweepPeriod),
-            "sweep.time"   => Ok(ConfigKey::SweepTime),
-            _              => Err(ConfigError::new(ConfigErrorKind::InvalidKey)),
+            CONFIG_KEY_BURN_AFTER   => Ok(ConfigKey::BurnAfter),
+            CONFIG_KEY_SWEEP_PERIOD => Ok(ConfigKey::SweepPeriod),
+            CONFIG_KEY_SWEEP_TIME   => Ok(ConfigKey::SweepTime),
+            _                       => Err(ConfigError::new(ConfigErrorKind::InvalidKey)),
         }
     }
 
     fn to_str(&self) -> &str {
         match *self {
-            ConfigKey::BurnAfter   => "burn.after",
-            ConfigKey::SweepPeriod => "sweep.period",
-            ConfigKey::SweepTime   => "sweep.time",
+            ConfigKey::BurnAfter   => CONFIG_KEY_BURN_AFTER,
+            ConfigKey::SweepPeriod => CONFIG_KEY_SWEEP_PERIOD,
+            ConfigKey::SweepTime   => CONFIG_KEY_SWEEP_TIME,
         }
     }
 
@@ -227,18 +231,20 @@ impl Config {
 
 
 #[test]
-fn config_key_from_should_return_ok() {
-}
-#[test]
-fn config_key_from_should_return_err() {
-}
-
-#[test]
-fn config_key_to_str_should_return_correct_str() {
-}
-
-#[test]
 fn config_key_to_pair_should_return_pair() {
+    let key1              = ConfigKey::BurnAfter;
+    let (first1, second1) = key1.to_pair();
+    assert_eq!(CONFIG_KEY_BURN_AFTER.to_string(), format!("{}.{}", first1, second1));
+
+    let key2              = ConfigKey::SweepPeriod;
+    let (first2, second2) = key2.to_pair();
+    assert_eq!(CONFIG_KEY_SWEEP_PERIOD.to_string(), format!("{}.{}", first2, second2));
+
+    let key3            = ConfigKey::SweepTime;
+    let (first3, second3) = key3.to_pair();
+    assert_eq!(CONFIG_KEY_SWEEP_TIME.to_string(), format!("{}.{}", first3, second3));
+
+    assert_eq!(first2, first3);
 }
 
 #[test]
