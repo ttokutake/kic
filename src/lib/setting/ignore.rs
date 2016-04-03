@@ -101,3 +101,29 @@ impl Ignore {
         self
     }
 }
+
+
+#[test]
+fn remove_should_remove_specified_files() {
+    let f1 = "a"  .to_string();
+    let f2 = "b"  .to_string();
+    let f3 = "c/d".to_string();
+    let f4 = "c/e".to_string();
+
+    let mut files = BTreeSet::new();
+    files.insert(f1.clone());
+    files.insert(f2.clone());
+    files.insert(f3.clone());
+    files.insert(f4.clone());
+
+    let ignore = Ignore::_new(files.clone());
+
+    files.remove(&f1);
+    let ignore = ignore.remove(&vec![f1]);
+    assert_eq!(&files, ignore.files());
+
+    files.remove(&f3);
+    files.remove(&f4);
+    let ignore = ignore.remove(&vec![f3, f4]);
+    assert_eq!(&files, ignore.files());
+}

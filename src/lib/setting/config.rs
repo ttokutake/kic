@@ -226,6 +226,10 @@ impl Config {
 
 
 #[test]
+fn overwrite_should_add_value {
+}
+
+#[test]
 fn default_should_return_config() {
 }
 
@@ -245,6 +249,13 @@ mod tests {
     }
     #[test]
     fn set_should_retrun_err() {
+    }
+
+    #[test]
+    fn to_duration_should_return_ok {
+    }
+    #[test]
+    fn to_duration_should_return_err {
     }
 
     #[test]
