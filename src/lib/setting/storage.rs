@@ -58,6 +58,8 @@ impl Storage {
     pub fn squeeze_dusts<P: AsRef<Path>>(&self, paths_to_dust: Vec<P>) -> Result<(), CliError> {
         let path_to_dust_box = self.path_to_dust_box();
 
+        print_with_tag(Tag::Info, format!("Move dusts to \"{}\"", path_to_dust_box.display()));
+
         for path_to_dust in &paths_to_dust {
             let path_to_dust = path_to_dust.as_ref();
             let target_file  = try!(path_to_dust.file_name().ok_or(CannotHappenError));
@@ -65,7 +67,7 @@ impl Storage {
 
             let to = path_buf![&path_to_dust_box, target_base];
 
-            let message = format!("Move \"{}\" to \"{}\"", path_to_dust.display(), path_to_dust_box.display());
+            let message = format!("  => \"{}\"", path_to_dust.display());
             print_with_tag(Tag::Info, message);
 
             try!(super::create_essential_dir_all(&to));
@@ -74,7 +76,7 @@ impl Storage {
             match fs::rename(path_to_dust, path_buf![to, target_file]) {
                 Ok(_)  => (),
                 Err(e) => match e.kind() {
-                    IoErrorKind::PermissionDenied => print_with_tag(Tag::Info, "Interrupted moving file for permission"),
+                    IoErrorKind::PermissionDenied => print_with_tag(Tag::Info, "     Interrupted for permission"),
                     _                             => return Err(From::from(e)),
                 },
             };
@@ -86,17 +88,19 @@ impl Storage {
     pub fn squeeze_empty_dirs_only<P: AsRef<Path>>(&self, paths_to_dir: Vec<P>) -> Result<(), IoError> {
         let path_to_dust_box = self.path_to_dust_box();
 
+        print_with_tag(Tag::Info, format!("Move empty dirs to \"{}\"", path_to_dust_box.display()));
+
         for path_to_dir in &paths_to_dir {
             if is_empty_dir(path_to_dir) {
                 let path_to_dir = path_to_dir.as_ref();
 
-                let message = format!("Move empty \"{}\" to \"{}\"", path_to_dir.display(), path_to_dust_box.display());
+                let message = format!("  => \"{}\"", path_to_dir.display());
                 print_with_tag(Tag::Info, message);
 
                 match fs::remove_dir(path_to_dir) {
                     Ok(_)  => try!(super::create_essential_dir_all(path_buf![&path_to_dust_box, path_to_dir])),
                     Err(e) => match e.kind() {
-                        IoErrorKind::PermissionDenied => print_with_tag(Tag::Info, "Interrupted moving directory for permission"),
+                        IoErrorKind::PermissionDenied => print_with_tag(Tag::Info, "     Interrupted for permission"),
                         _                             => return Err(From::from(e)),
                     },
                 };
@@ -110,6 +114,8 @@ impl Storage {
     pub fn delete_expired_boxes(&self, moratorium: Duration) -> Result<(), IoError> {
         let path_to_storage = Self::path();
 
+        print_with_tag(Tag::Info, "Delete expired dusts");
+
         let target_boxes = try!(ls(&path_to_storage))
             .into_iter()
             .filter(|date| match Local.datetime_from_str(format!("{} 00:00:00", date).as_ref(), "%Y-%m-%d %H:%M:%S") {
@@ -120,7 +126,7 @@ impl Storage {
             .collect::<Vec<PathBuf>>();
 
         for target_box in &target_boxes {
-            print_with_tag(Tag::Info, format!("Remove \"{}\"", target_box.display()));
+            print_with_tag(Tag::Info, format!("  => \"{}\"", target_box.display()));
             try!(super::delete_dir_all(target_box));
         };
 
