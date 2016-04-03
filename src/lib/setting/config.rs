@@ -53,6 +53,7 @@ impl ConfigKey {
 
 type EditableTomlCore = BTreeMap<String, BTreeMap<String, String>>;
 
+#[derive(Clone)]
 struct EditableToml(EditableTomlCore);
 
 impl EditableToml {
@@ -226,7 +227,56 @@ impl Config {
 
 
 #[test]
-fn overwrite_should_add_value {
+fn config_key_from_should_return_ok() {
+}
+#[test]
+fn config_key_from_should_return_err() {
+}
+
+#[test]
+fn config_key_to_str_should_return_correct_str() {
+}
+
+#[test]
+fn config_key_to_pair_should_return_pair() {
+}
+
+#[test]
+fn editable_toml_overwrite_should_add_value() {
+    let b_tree_map: EditableTomlCore = BTreeMap::new();
+    let mut correct                  = b_tree_map.clone();
+    let mut editable                 = EditableToml(b_tree_map);
+
+    let v1 = "value1".to_string();
+
+    let mut entry         = BTreeMap::new();
+    let key1              = ConfigKey::BurnAfter;
+    let (first1, second1) = key1.to_pair();
+    entry.insert(second1.to_string(), v1.clone());
+    correct.insert(first1.to_string(), entry);
+
+    editable.overwrite(ConfigKey::BurnAfter, v1);
+    let EditableToml(calculated) = editable.clone();
+
+    assert_eq!(&correct, &calculated);
+
+    let v2 = "value2".to_string();
+    let v3 = "value3".to_string();
+
+    let mut entry         = BTreeMap::new();
+    let key2              = ConfigKey::SweepPeriod;
+    let (first2, second2) = key2.to_pair();
+    let key3              = ConfigKey::SweepTime;
+    let (_, second3)      = key3.to_pair();
+    entry.insert(second2.to_string(), v2.clone());
+    entry.insert(second3.to_string(), v3.clone());
+    correct.insert(first2.to_string(), entry);
+
+    editable.overwrite(ConfigKey::SweepPeriod, v2);
+    editable.overwrite(ConfigKey::SweepTime  , v3);
+    let &EditableToml(ref calculated) = &editable;
+
+    assert_eq!(&correct, calculated);
 }
 
 #[test]
@@ -252,10 +302,10 @@ mod tests {
     }
 
     #[test]
-    fn to_duration_should_return_ok {
+    fn to_duration_should_return_ok() {
     }
     #[test]
-    fn to_duration_should_return_err {
+    fn to_duration_should_return_err() {
     }
 
     #[test]
