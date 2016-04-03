@@ -4,7 +4,6 @@ use super::Command;
 extern crate toml;
 
 use constant::CONFIG_FILE_NAME;
-use lib::io::*;
 use lib::setting;
 
 pub struct Config {
@@ -55,15 +54,8 @@ impl Config {
     }
 
     fn init(&self) -> Result<(), CliError> {
-        let message = format!("Do you want to initialize \"{}\"? [yes/no]: ", CONFIG_FILE_NAME);
-        echo(format_with_tag(Tag::Caution, message));
+        let message = format!("Do you want to initialize \"{}\"?", CONFIG_FILE_NAME);
 
-        if try!(Self::inquiry()) {
-            try!(setting::Config::default().create())
-        } else {
-            print_with_tag(Tag::Notice, "Interrupted by user");
-        }
-
-        Ok(())
+        Self::run_after_confirmation(message,|| setting::Config::default().create())
     }
 }

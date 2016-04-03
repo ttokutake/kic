@@ -58,13 +58,18 @@ trait Command {
         }
     }
 
-    fn inquiry() -> Result<bool, IoError> where Self: Sized {
-        read_line_from_stdin()
-            .map(|input| input.to_lowercase())
-            .map(|input| match input.as_ref() {
-                "y" | "yes" => true,
-                _           => false,
-            })
+    fn run_after_confirmation<F>(message: String, danger_exec: F) -> Result<(), CliError>
+        where Self: Sized, F: FnOnce() -> Result<(), IoError>
+    {
+        echo(format_with_tag(Tag::Caution, format!("{} [yes/no]: ", message)));
+
+        let input = try!(read_line_from_stdin()).to_lowercase();
+        match input.as_ref() {
+            "y" | "yes" => try!(danger_exec()),
+            _           => print_with_tag(Tag::Notice, "Interrupted by user"),
+        };
+
+        Ok(())
     }
 }
 
