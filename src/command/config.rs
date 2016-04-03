@@ -37,9 +37,9 @@ impl Config {
     }
 
     fn set(&self) -> Result<(), CliError> {
-        let (key, value) = match (self.key.clone(), self.value.clone()) {
-            (Some(k), Some(v)) => (k, v),
-            _                  => return Err(From::from(self.usage())),
+        let (key, value) = match (&self.key, &self.value) {
+            (&Some(ref k), &Some(ref v)) => (k, v),
+            _                            => return Err(From::from(self.usage())),
         };
 
         let key   = try!(setting::ConfigKey::from(key));
