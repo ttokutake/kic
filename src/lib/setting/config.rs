@@ -21,6 +21,11 @@ const CONFIG_KEY_BURN_AFTER  : &'static str = "burn.after";
 const CONFIG_KEY_SWEEP_PERIOD: &'static str = "sweep.period";
 const CONFIG_KEY_SWEEP_TIME  : &'static str = "sweep.time";
 
+const CONFIG_DEFAULT_VALUE_BURN_AFTER  : &'static str = "2 weeks";
+const CONFIG_DEFAULT_VALUE_SWEEP_PERIOD: &'static str = "daily";
+const CONFIG_DEFAULT_VALUE_SWEEP_TIME  : &'static str = "00:00";
+
+
 pub enum ConfigKey {
     BurnAfter,
     SweepPeriod,
@@ -121,9 +126,9 @@ impl Config {
 
     pub fn default() -> Self {
         let mut editable = EditableToml(BTreeMap::new());
-        editable.overwrite(ConfigKey::BurnAfter  , "2 weeks".to_string());
-        editable.overwrite(ConfigKey::SweepPeriod, "daily"  .to_string());
-        editable.overwrite(ConfigKey::SweepTime  , "00:00"  .to_string());
+        editable.overwrite(ConfigKey::BurnAfter  , CONFIG_DEFAULT_VALUE_BURN_AFTER  .to_string());
+        editable.overwrite(ConfigKey::SweepPeriod, CONFIG_DEFAULT_VALUE_SWEEP_PERIOD.to_string());
+        editable.overwrite(ConfigKey::SweepTime  , CONFIG_DEFAULT_VALUE_SWEEP_TIME  .to_string());
 
         Self::_new(editable.to_toml())
     }
