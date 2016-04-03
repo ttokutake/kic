@@ -48,34 +48,6 @@ pub fn is_empty_dir<P: AsRef<Path>>(path: P) -> bool {
 fn is_hidden_name(file_name: &str) -> bool {
     file_name.starts_with(".") && file_name.len() > 1 && file_name != ".."
 }
-#[test]
-fn is_hidden_name_should_return_true() {
-    let file_names = [
-        ".a",
-        ".ab",
-        ".abc",
-        "..a",
-        "...",
-    ];
-    for file_name in &file_names {
-        assert!(is_hidden_name(file_name));
-    }
-}
-#[test]
-fn is_hidden_name_should_return_false() {
-    let file_names = [
-        "",
-
-        ".",
-        "..",
-        "a",
-        "ab",
-        "abc",
-    ];
-    for file_name in &file_names {
-        assert!(!is_hidden_name(file_name));
-    }
-}
 
 fn is_hidden(entry: &WalkDirEntry) -> bool {
     entry
@@ -118,6 +90,35 @@ pub fn dirs_ordered_by_descending_depth<P: AsRef<Path>>(root: P) -> Vec<PathBuf>
         .collect::<Vec<PathBuf>>()
 }
 
+
+#[test]
+fn is_hidden_name_should_return_true() {
+    let file_names = [
+        ".a",
+        ".ab",
+        ".abc",
+        "..a",
+        "...",
+    ];
+    for file_name in &file_names {
+        assert!(is_hidden_name(file_name));
+    }
+}
+#[test]
+fn is_hidden_name_should_return_false() {
+    let file_names = [
+        "",
+
+        ".",
+        "..",
+        "a",
+        "ab",
+        "abc",
+    ];
+    for file_name in &file_names {
+        assert!(!is_hidden_name(file_name));
+    }
+}
 
 #[cfg(test)]
 mod tests {

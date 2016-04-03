@@ -229,7 +229,6 @@ impl Config {
 fn default_should_return_config() {
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
