@@ -152,7 +152,7 @@ impl Display for ConfigError {
             ConfigErrorKind::InvalidKey        => r#"Cannot set this key"#,
             ConfigErrorKind::NonStringValue    => r#"Please set values as "String""#,
             ConfigErrorKind::NotFoundBurnAfter => r#"Please set [burn]after param"#,
-            ConfigErrorKind::BurnAfter         => r#"Please set value like "3 days" or "1 week" as "[burn]after""#,
+            ConfigErrorKind::BurnAfter         => r#"Please set value like "3days" or "1week" as "[burn]after""#,
             ConfigErrorKind::SweepPeriod       => r#"Please set "daily" or "weekly" as "[sweep]period""#,
             ConfigErrorKind::SweepTime         => r#"Please set value from "00:00" to "23:59" as "[sweep]time""#,
         })
