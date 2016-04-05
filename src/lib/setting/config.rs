@@ -310,6 +310,17 @@ mod tests {
 
     #[test]
     fn get_should_return_ok() {
+        let config = Config::default();
+
+        assert!(config.get(ConfigKey::BurnAfter  ).is_ok());
+    }
+    #[test]
+    #[should_panic(expected = "not yet implemented")]
+    fn get_should_panic() {
+        let config = Config::default();
+
+        assert!(config.get(ConfigKey::SweepPeriod).is_ok());
+        assert!(config.get(ConfigKey::SweepTime  ).is_ok());
     }
     #[test]
     fn get_should_return_err() {
