@@ -237,19 +237,15 @@ impl Config {
 
 #[test]
 fn config_key_to_pair_should_return_pair() {
-    let key1              = ConfigKey::BurnAfter;
-    let (first1, second1) = key1.to_pair();
-    assert_eq!(CONFIG_KEY_BURN_AFTER.to_string(), format!("{}.{}", first1, second1));
-
-    let key2              = ConfigKey::SweepPeriod;
-    let (first2, second2) = key2.to_pair();
-    assert_eq!(CONFIG_KEY_SWEEP_PERIOD.to_string(), format!("{}.{}", first2, second2));
-
-    let key3            = ConfigKey::SweepTime;
-    let (first3, second3) = key3.to_pair();
-    assert_eq!(CONFIG_KEY_SWEEP_TIME.to_string(), format!("{}.{}", first3, second3));
-
-    assert_eq!(first2, first3);
+    let keys = [
+        (ConfigKey::BurnAfter  , CONFIG_KEY_BURN_AFTER  ),
+        (ConfigKey::SweepPeriod, CONFIG_KEY_SWEEP_PERIOD),
+        (ConfigKey::SweepTime  , CONFIG_KEY_SWEEP_TIME  ),
+    ];
+    for &(ref key, ref correct) in &keys {
+        let (first, second) = key.to_pair();
+        assert_eq!(correct.to_string(), format!("{}.{}", first, second));
+    }
 }
 
 #[test]
@@ -292,6 +288,22 @@ fn editable_toml_overwrite_should_add_value() {
 
 #[test]
 fn default_should_return_config() {
+    let correct: Toml = format!(
+        r#"
+            [burn]
+            after = "{}"
+            [sweep]
+            period = "{}"
+            time   = "{}"
+        "#,
+        CONFIG_DEFAULT_VALUE_BURN_AFTER,
+        CONFIG_DEFAULT_VALUE_SWEEP_PERIOD,
+        CONFIG_DEFAULT_VALUE_SWEEP_TIME
+    )
+        .parse()
+        .unwrap();
+
+    assert_eq!(correct, Config::default().toml);
 }
 
 #[cfg(test)]
