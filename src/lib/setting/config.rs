@@ -288,7 +288,7 @@ fn editable_toml_overwrite_should_add_value() {
 
 #[test]
 fn default_should_return_config() {
-    let correct: Toml = format!(
+    let correct: Result<Toml, Vec<toml::ParserError>> = format!(
         r#"
             [burn]
             after = "{}"
@@ -299,11 +299,9 @@ fn default_should_return_config() {
         CONFIG_DEFAULT_VALUE_BURN_AFTER,
         CONFIG_DEFAULT_VALUE_SWEEP_PERIOD,
         CONFIG_DEFAULT_VALUE_SWEEP_TIME
-    )
-        .parse()
-        .unwrap();
+    ).parse();
 
-    assert_eq!(correct, Config::default().toml);
+    assert_eq!(correct.unwrap(), Config::default().toml);
 }
 
 #[cfg(test)]
