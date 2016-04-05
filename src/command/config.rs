@@ -42,9 +42,7 @@ impl Config {
             _                            => return Err(From::from(self.usage())),
         };
 
-        let key   = try!(setting::ConfigKey::from(key));
-        let value = try!(setting::Config::validate(&key, value));
-
+        let key    = try!(setting::ConfigKey::from(key));
         let config = try!(setting::Config::read());
         let config = try!(config.set(key, value));
 

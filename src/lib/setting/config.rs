@@ -192,7 +192,9 @@ impl Config {
     }
 
 
-    pub fn set<CK: Borrow<ConfigKey>>(mut self, key: CK, value: String) -> Result<Self, ConfigError> {
+    pub fn set<CK: Borrow<ConfigKey>, S: AsRef<str>>(mut self, key: CK, value: S) -> Result<Self, CliError> {
+        let value = try!(Self::validate(key.borrow(), value));
+
         let mut editable = try!(EditableToml::from(self.toml));
 
         editable.overwrite(key, value);
@@ -203,7 +205,7 @@ impl Config {
     }
 
 
-    pub fn validate<CK: Borrow<ConfigKey>, S: AsRef<str>>(key: CK, value: S) -> Result<String, CliError> {
+    fn validate<CK: Borrow<ConfigKey>, S: AsRef<str>>(key: CK, value: S) -> Result<String, CliError> {
         let value = value.as_ref().trim();
 
         match *key.borrow() {
@@ -304,6 +306,13 @@ fn default_should_return_config() {
     assert_eq!(correct.unwrap(), Config::default().toml);
 }
 
+#[test]
+fn validate_should_return_ok() {
+}
+#[test]
+fn validate_should_return_err() {
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -322,15 +331,9 @@ mod tests {
         assert!(config.get(ConfigKey::SweepPeriod).is_ok());
         assert!(config.get(ConfigKey::SweepTime  ).is_ok());
     }
-    #[test]
-    fn get_should_return_err() {
-    }
 
     #[test]
     fn set_should_return_ok() {
-    }
-    #[test]
-    fn set_should_retrun_err() {
     }
 
     #[test]
@@ -338,12 +341,5 @@ mod tests {
     }
     #[test]
     fn to_duration_should_return_err() {
-    }
-
-    #[test]
-    fn validate_should_return_ok() {
-    }
-    #[test]
-    fn validate_should_return_err() {
     }
 }
