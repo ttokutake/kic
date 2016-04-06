@@ -160,6 +160,8 @@ impl Config {
     pub fn get<CK: Borrow<ConfigKey>>(&self, key: CK) -> Result<String, CliError> {
         let key = key.borrow();
 
+        print_with_tag(Tag::Info, format!("Get the parameter for \"{}\"", key.to_str()));
+
         let result = self.toml
             .lookup(key.to_str())
             .ok_or(ConfigError::new(match *key {
@@ -194,7 +196,11 @@ impl Config {
 
 
     pub fn set<CK: Borrow<ConfigKey>, S: AsRef<str>>(mut self, key: CK, value: S) -> Result<Self, CliError> {
-        let value = try!(Self::validate(key.borrow(), value));
+        let key = key.borrow();
+
+        print_with_tag(Tag::Info, format!("Set the parameter for \"{}\"", key.to_str()));
+
+        let value = try!(Self::validate(key, value));
 
         let mut editable = try!(EditableToml::from(self.toml));
 
