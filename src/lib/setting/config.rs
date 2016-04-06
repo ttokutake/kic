@@ -95,6 +95,7 @@ impl EditableToml {
 }
 
 
+#[derive(Debug)]
 pub struct Config {
     toml: Toml,
 }
@@ -316,6 +317,7 @@ mod tests {
 
     use self::regex::Regex;
 
+    use error::{CliError, ConfigError, ConfigErrorKind};
     use std::u32;
 
     #[test]
@@ -388,32 +390,38 @@ mod tests {
             assert_eq!(raw_value.to_string(), config.get(ConfigKey::SweepTime).unwrap())
         }
     }
-    //#[test]
-    //fn set_should_return_err() {
-    //    let data_set = vec![
-    //        (ConfigKey::BurnAfter, "1hour" , ConfigError::new(ConfigErrorKind::BurnAfter)),
-    //        (ConfigKey::BurnAfter, "1month", ConfigError::new(ConfigErrorKind::BurnAfter)),
-    //        (ConfigKey::BurnAfter, "1year" , ConfigError::new(ConfigErrorKind::BurnAfter)),
-    //        (ConfigKey::BurnAfter, "-1day" , ConfigError::new(ConfigErrorKind::BurnAfter)),
-    //        (ConfigKey::BurnAfter, "-1week", ConfigError::new(ConfigErrorKind::BurnAfter)),
+    #[test]
+    fn set_should_return_err() {
+        let data_set = vec![
+            (ConfigKey::BurnAfter, "1hour" , ConfigError::new(ConfigErrorKind::BurnAfter)),
+            (ConfigKey::BurnAfter, "1month", ConfigError::new(ConfigErrorKind::BurnAfter)),
+            (ConfigKey::BurnAfter, "1year" , ConfigError::new(ConfigErrorKind::BurnAfter)),
+            (ConfigKey::BurnAfter, "-1day" , ConfigError::new(ConfigErrorKind::BurnAfter)),
+            (ConfigKey::BurnAfter, "-1week", ConfigError::new(ConfigErrorKind::BurnAfter)),
 
-    //        (ConfigKey::SweepPeriod, "day"    , ConfigError::new(ConfigErrorKind::SweepPeriod)),
-    //        (ConfigKey::SweepPeriod, "week"   , ConfigError::new(ConfigErrorKind::SweepPeriod)),
-    //        (ConfigKey::SweepPeriod, "hourly" , ConfigError::new(ConfigErrorKind::SweepPeriod)),
-    //        (ConfigKey::SweepPeriod, "monthly", ConfigError::new(ConfigErrorKind::SweepPeriod)),
-    //        (ConfigKey::SweepPeriod, "yearly" , ConfigError::new(ConfigErrorKind::SweepPeriod)),
+            (ConfigKey::SweepPeriod, "day"    , ConfigError::new(ConfigErrorKind::SweepPeriod)),
+            (ConfigKey::SweepPeriod, "week"   , ConfigError::new(ConfigErrorKind::SweepPeriod)),
+            (ConfigKey::SweepPeriod, "hourly" , ConfigError::new(ConfigErrorKind::SweepPeriod)),
+            (ConfigKey::SweepPeriod, "monthly", ConfigError::new(ConfigErrorKind::SweepPeriod)),
+            (ConfigKey::SweepPeriod, "yearly" , ConfigError::new(ConfigErrorKind::SweepPeriod)),
 
-    //        (ConfigKey::SweepTime, "-00:01"   , ConfigError::new(ConfigErrorKind::SweepTime)),
-    //        (ConfigKey::SweepTime,  "24:00"   , ConfigError::new(ConfigErrorKind::SweepTime)),
-    //        (ConfigKey::SweepTime,  "00"      , ConfigError::new(ConfigErrorKind::SweepTime)),
-    //        (ConfigKey::SweepTime,  "00:00:00", ConfigError::new(ConfigErrorKind::SweepTime)),
-    //    ];
+            (ConfigKey::SweepTime, "-00:01"   , ConfigError::new(ConfigErrorKind::SweepTime)),
+            (ConfigKey::SweepTime,  "24:00"   , ConfigError::new(ConfigErrorKind::SweepTime)),
+            (ConfigKey::SweepTime,  "00"      , ConfigError::new(ConfigErrorKind::SweepTime)),
+            (ConfigKey::SweepTime,  "00:00:00", ConfigError::new(ConfigErrorKind::SweepTime)),
+        ];
 
-    //    for (key, value, err) in data_set.into_iter() {
-    //        let config = Config::default();
-    //        assert_eq!(err, config.set(key, value).unwrap_err());
-    //    }
-    //}
+        for (key, value, correct) in data_set.into_iter() {
+            let cli_err = Config::default()
+                .set(key, value)
+                .unwrap_err();
+            let err = match cli_err {
+                CliError::Config(e) => e,
+                _                   => panic!("unexpected error"),
+            };
+            assert_eq!(correct, err);
+        }
+    }
 
     #[test]
     fn to_duration_should_return_ok() {

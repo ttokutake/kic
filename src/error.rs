@@ -114,7 +114,7 @@ impl From<Usage> for CliError {
 }
 
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct CannotHappenError;
 impl Display for CannotHappenError {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
@@ -126,7 +126,7 @@ impl Error for CannotHappenError {
 }
 
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum ConfigErrorKind {
     Something,
     InvalidKey,
@@ -136,7 +136,7 @@ pub enum ConfigErrorKind {
     SweepPeriod,
     SweepTime,
 }
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct ConfigError {
     kind: ConfigErrorKind,
 }
@@ -163,14 +163,14 @@ impl Error for ConfigError {
 }
 
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum EssentialKind {
     WorkingDir,
     StorageDir,
     ConfigFile,
     IgnoreFile,
 }
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct EssentialLack {
     what: EssentialKind,
 }
@@ -194,7 +194,7 @@ impl Error for EssentialLack {
 }
 
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct RunningPlaceError {
     dir: String,
 }
@@ -213,7 +213,7 @@ impl Error for RunningPlaceError {
 }
 
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum UsageKind {
     Nothing,
     Init,
@@ -312,7 +312,7 @@ impl UsageKind {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct Usage {
     kind: UsageKind,
 }
