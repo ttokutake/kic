@@ -95,7 +95,6 @@ impl EditableToml {
 }
 
 
-#[derive(Debug)]
 pub struct Config {
     toml: Toml,
 }
