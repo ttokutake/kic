@@ -95,6 +95,7 @@ impl EditableToml {
 }
 
 
+#[derive(Debug)]
 pub struct Config {
     toml: Toml,
 }
@@ -290,7 +291,7 @@ fn editable_toml_overwrite_should_add_value() {
 
 #[test]
 fn default_should_return_config() {
-    let correct: Result<Toml, Vec<toml::ParserError>> = format!(
+    let correct: Toml = format!(
         r#"
             [burn]
             after = "{}"
@@ -301,27 +302,28 @@ fn default_should_return_config() {
         CONFIG_DEFAULT_VALUE_BURN_AFTER,
         CONFIG_DEFAULT_VALUE_SWEEP_PERIOD,
         CONFIG_DEFAULT_VALUE_SWEEP_TIME
-    ).parse();
+    )
+        .parse()
+        .unwrap();
 
-    assert_eq!(correct.unwrap(), Config::default().toml);
-}
-
-#[test]
-fn validate_should_return_ok() {
-}
-#[test]
-fn validate_should_return_err() {
+    assert_eq!(correct, Config::default().toml);
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
+    extern crate regex;
+
+    use self::regex::Regex;
+
+    use std::u32;
+
     #[test]
     fn get_should_return_ok() {
         let config = Config::default();
 
-        assert!(config.get(ConfigKey::BurnAfter  ).is_ok());
+        assert!(config.get(ConfigKey::BurnAfter).is_ok());
     }
     #[test]
     #[should_panic(expected = "not yet implemented")]
@@ -334,7 +336,85 @@ mod tests {
 
     #[test]
     fn set_should_return_ok() {
+        let raw_values = [
+            "1day"  .to_string(),
+            "1days" .to_string(),
+            "1 day" .to_string(),
+            "1 days".to_string(),
+            "1week"  .to_string(),
+            "1weeks" .to_string(),
+            "1 week" .to_string(),
+            "1 weeks".to_string(),
+
+            format!("{}day"  , u32::MAX),
+            format!("{}days" , u32::MAX),
+            format!("{} day" , u32::MAX),
+            format!("{} days", u32::MAX),
+            format!("{}week"  , u32::MAX),
+            format!("{}weeks" , u32::MAX),
+            format!("{} week" , u32::MAX),
+            format!("{} weeks", u32::MAX),
+        ];
+        let corrects_and_inputs = raw_values
+            .into_iter()
+            .map(|i| {
+                let re = Regex::new(r"(?P<num>\d+)(?P<unit>[^\d\s]+)").unwrap();
+                (re.replace(i.as_ref(), "$num $unit"), i.clone())
+            })
+            .collect::<Vec<(String, String)>>();
+
+        for &(ref correct, ref input) in &corrects_and_inputs {
+            let config = Config::default()
+                .set(ConfigKey::BurnAfter, input)
+                .unwrap();
+            assert_eq!(correct, &(config.get(ConfigKey::BurnAfter).unwrap()));
+        }
     }
+    #[test]
+    #[should_panic(expected = "not yet implemented")]
+    fn set_should_return_panic() {
+        let raw_values = ["daily", "weekly"];
+        for raw_value in &raw_values {
+            let config = Config::default()
+                .set(ConfigKey::SweepPeriod, &raw_value)
+                .unwrap();
+            assert_eq!(raw_value.to_string(), config.get(ConfigKey::SweepPeriod).unwrap())
+        }
+
+        let raw_values = ["00:00", "23:59"];
+        for raw_value in &raw_values {
+            let config = Config::default()
+                .set(ConfigKey::SweepPeriod, &raw_value)
+                .unwrap();
+            assert_eq!(raw_value.to_string(), config.get(ConfigKey::SweepTime).unwrap())
+        }
+    }
+    //#[test]
+    //fn set_should_return_err() {
+    //    let data_set = vec![
+    //        (ConfigKey::BurnAfter, "1hour" , ConfigError::new(ConfigErrorKind::BurnAfter)),
+    //        (ConfigKey::BurnAfter, "1month", ConfigError::new(ConfigErrorKind::BurnAfter)),
+    //        (ConfigKey::BurnAfter, "1year" , ConfigError::new(ConfigErrorKind::BurnAfter)),
+    //        (ConfigKey::BurnAfter, "-1day" , ConfigError::new(ConfigErrorKind::BurnAfter)),
+    //        (ConfigKey::BurnAfter, "-1week", ConfigError::new(ConfigErrorKind::BurnAfter)),
+
+    //        (ConfigKey::SweepPeriod, "day"    , ConfigError::new(ConfigErrorKind::SweepPeriod)),
+    //        (ConfigKey::SweepPeriod, "week"   , ConfigError::new(ConfigErrorKind::SweepPeriod)),
+    //        (ConfigKey::SweepPeriod, "hourly" , ConfigError::new(ConfigErrorKind::SweepPeriod)),
+    //        (ConfigKey::SweepPeriod, "monthly", ConfigError::new(ConfigErrorKind::SweepPeriod)),
+    //        (ConfigKey::SweepPeriod, "yearly" , ConfigError::new(ConfigErrorKind::SweepPeriod)),
+
+    //        (ConfigKey::SweepTime, "-00:01"   , ConfigError::new(ConfigErrorKind::SweepTime)),
+    //        (ConfigKey::SweepTime,  "24:00"   , ConfigError::new(ConfigErrorKind::SweepTime)),
+    //        (ConfigKey::SweepTime,  "00"      , ConfigError::new(ConfigErrorKind::SweepTime)),
+    //        (ConfigKey::SweepTime,  "00:00:00", ConfigError::new(ConfigErrorKind::SweepTime)),
+    //    ];
+
+    //    for (key, value, err) in data_set.into_iter() {
+    //        let config = Config::default();
+    //        assert_eq!(err, config.set(key, value).unwrap_err());
+    //    }
+    //}
 
     #[test]
     fn to_duration_should_return_ok() {
