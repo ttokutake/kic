@@ -337,7 +337,7 @@ mod tests {
 
     #[test]
     fn set_should_return_ok() {
-        let raw_values = [
+        let raw_values = vec![
             "1day"  .to_string(),
             "1days" .to_string(),
             "1 day" .to_string(),
@@ -360,15 +360,15 @@ mod tests {
             .into_iter()
             .map(|i| {
                 let re = Regex::new(r"(?P<num>\d+)(?P<unit>[^\d\s]+)").unwrap();
-                (re.replace(i.as_ref(), "$num $unit"), i.clone())
+                (re.replace(i.as_ref(), "$num $unit"), i)
             })
             .collect::<Vec<(String, String)>>();
 
-        for &(ref correct, ref input) in &corrects_and_inputs {
+        for (correct, input) in corrects_and_inputs.into_iter() {
             let config = Config::default()
                 .set(ConfigKey::BurnAfter, input)
                 .unwrap();
-            assert_eq!(correct, &(config.get(ConfigKey::BurnAfter).unwrap()));
+            assert_eq!(correct, config.get(ConfigKey::BurnAfter).unwrap());
         }
     }
     #[test]
