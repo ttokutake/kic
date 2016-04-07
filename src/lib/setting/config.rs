@@ -319,8 +319,10 @@ fn default_should_return_config() {
 mod tests {
     use super::*;
 
+    extern crate chrono;
     extern crate regex;
 
+    use self::chrono::Duration;
     use self::regex::Regex;
 
     use error::{CliError, ConfigError, ConfigErrorKind};
@@ -445,8 +447,19 @@ mod tests {
 
     #[test]
     fn to_duration_should_return_ok() {
-    }
-    #[test]
-    fn to_duration_should_return_err() {
+        let data_set = vec![
+            ("1 day" , Duration::days(1)),
+            ("1 days", Duration::days(1)),
+            ("2 day" , Duration::days(2)),
+            ("2 days", Duration::days(2)),
+
+            ("1 week" , Duration::weeks(1)),
+            ("1 weeks", Duration::weeks(1)),
+            ("2 week" , Duration::weeks(2)),
+            ("2 weeks", Duration::weeks(2)),
+        ];
+        for (input, correct) in data_set.into_iter() {
+            assert_eq!(correct, Config::to_duration(input.to_string()).unwrap());
+        }
     }
 }
