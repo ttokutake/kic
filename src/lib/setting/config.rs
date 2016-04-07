@@ -221,8 +221,8 @@ impl Config {
                     .captures(value)
                     .map_or((None, None), |caps| (caps.name("num"), caps.name("unit")));
                 let (num, unit) = match pair {
-                    (Some(num), Some(unit)) => (num, unit),
-                    _                       => return Err(From::from(ConfigError::new(ConfigErrorKind::BurnAfter))),
+                    (Some(num), Some(unit)) if num != "0" => (num, unit),
+                    _                                     => return Err(From::from(ConfigError::new(ConfigErrorKind::BurnAfter))),
                 };
                 Ok(format!("{} {}", num, unit))
             },
@@ -399,11 +399,25 @@ mod tests {
     #[test]
     fn set_should_return_err() {
         let data_set = vec![
-            (ConfigKey::BurnAfter, "1hour" , ConfigError::new(ConfigErrorKind::BurnAfter)),
-            (ConfigKey::BurnAfter, "1month", ConfigError::new(ConfigErrorKind::BurnAfter)),
-            (ConfigKey::BurnAfter, "1year" , ConfigError::new(ConfigErrorKind::BurnAfter)),
-            (ConfigKey::BurnAfter, "-1day" , ConfigError::new(ConfigErrorKind::BurnAfter)),
-            (ConfigKey::BurnAfter, "-1week", ConfigError::new(ConfigErrorKind::BurnAfter)),
+            (ConfigKey::BurnAfter, "-1day"   , ConfigError::new(ConfigErrorKind::BurnAfter)),
+            (ConfigKey::BurnAfter, "-1days"  , ConfigError::new(ConfigErrorKind::BurnAfter)),
+            (ConfigKey::BurnAfter, "-1 day"  , ConfigError::new(ConfigErrorKind::BurnAfter)),
+            (ConfigKey::BurnAfter, "-1 days" , ConfigError::new(ConfigErrorKind::BurnAfter)),
+            (ConfigKey::BurnAfter, "0day"    , ConfigError::new(ConfigErrorKind::BurnAfter)),
+            (ConfigKey::BurnAfter, "0days"   , ConfigError::new(ConfigErrorKind::BurnAfter)),
+            (ConfigKey::BurnAfter, "0 day"   , ConfigError::new(ConfigErrorKind::BurnAfter)),
+            (ConfigKey::BurnAfter, "0 days"  , ConfigError::new(ConfigErrorKind::BurnAfter)),
+            (ConfigKey::BurnAfter, "-1week"  , ConfigError::new(ConfigErrorKind::BurnAfter)),
+            (ConfigKey::BurnAfter, "-1weeks" , ConfigError::new(ConfigErrorKind::BurnAfter)),
+            (ConfigKey::BurnAfter, "-1 week" , ConfigError::new(ConfigErrorKind::BurnAfter)),
+            (ConfigKey::BurnAfter, "-1 weeks", ConfigError::new(ConfigErrorKind::BurnAfter)),
+            (ConfigKey::BurnAfter, "0week"   , ConfigError::new(ConfigErrorKind::BurnAfter)),
+            (ConfigKey::BurnAfter, "0weeks"  , ConfigError::new(ConfigErrorKind::BurnAfter)),
+            (ConfigKey::BurnAfter, "0 week"  , ConfigError::new(ConfigErrorKind::BurnAfter)),
+            (ConfigKey::BurnAfter, "0 weeks" , ConfigError::new(ConfigErrorKind::BurnAfter)),
+            (ConfigKey::BurnAfter, "1hour"   , ConfigError::new(ConfigErrorKind::BurnAfter)),
+            (ConfigKey::BurnAfter, "1month"  , ConfigError::new(ConfigErrorKind::BurnAfter)),
+            (ConfigKey::BurnAfter, "1year"   , ConfigError::new(ConfigErrorKind::BurnAfter)),
 
             (ConfigKey::SweepPeriod, "day"    , ConfigError::new(ConfigErrorKind::SweepPeriod)),
             (ConfigKey::SweepPeriod, "week"   , ConfigError::new(ConfigErrorKind::SweepPeriod)),
