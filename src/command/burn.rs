@@ -3,6 +3,7 @@ use super::Command;
 
 use lib::setting::{Config, ConfigKey, Storage};
 
+#[derive(Debug)]
 pub struct Burn;
 
 impl Command for Burn {

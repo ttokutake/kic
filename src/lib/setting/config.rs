@@ -26,6 +26,7 @@ const CONFIG_DEFAULT_VALUE_SWEEP_PERIOD: &'static str = "daily";
 const CONFIG_DEFAULT_VALUE_SWEEP_TIME  : &'static str = "00:00";
 
 
+#[derive(Debug)]
 pub enum ConfigKey {
     BurnAfter,
     SweepPeriod,
@@ -62,7 +63,7 @@ impl ConfigKey {
 
 type EditableTomlCore = BTreeMap<String, BTreeMap<String, String>>;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 struct EditableToml(EditableTomlCore);
 
 impl EditableToml {

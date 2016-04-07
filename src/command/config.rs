@@ -6,6 +6,7 @@ extern crate toml;
 use constant::CONFIG_FILE_NAME;
 use lib::setting;
 
+#[derive(Debug)]
 pub struct Config {
     command: Option<String>,
     key    : Option<String>,

@@ -3,6 +3,7 @@ use super::Command;
 
 use lib::setting::{self, Config, Ignore, Storage};
 
+#[derive(Debug)]
 pub struct Init;
 
 impl Command for Init {

@@ -5,6 +5,7 @@ use constant::MAIN_DIR;
 use lib::fs::*;
 use lib::setting::{Ignore, Storage};
 
+#[derive(Debug)]
 pub struct Sweep;
 
 impl Command for Sweep {

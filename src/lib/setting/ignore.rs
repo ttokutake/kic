@@ -7,6 +7,7 @@ use std::io::{Error as IoError, Read};
 use std::path::{Path, PathBuf};
 
 
+#[derive(Debug)]
 pub struct Ignore {
     files: BTreeSet<String>,
 }

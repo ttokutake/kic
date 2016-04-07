@@ -1,6 +1,7 @@
 use error::{CliError, Usage, UsageKind};
 use super::Command;
 
+#[derive(Debug)]
 pub struct Start;
 
 impl Command for Start {

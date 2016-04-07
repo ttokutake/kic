@@ -4,6 +4,7 @@ use super::Command;
 use constant::ME;
 use lib::setting;
 
+#[derive(Debug)]
 pub struct Destroy;
 
 impl Command for Destroy {

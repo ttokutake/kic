@@ -4,6 +4,7 @@ use super::Command;
 use constant::IGNORE_FILE_NAME;
 use lib::setting;
 
+#[derive(Debug)]
 pub struct Ignore {
     command: Option<String>,
     paths  : Vec<String>,
