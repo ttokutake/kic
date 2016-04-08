@@ -178,21 +178,22 @@ impl Config {
             .and_then(|s| Self::validate(key, s))
     }
 
-    pub fn to_duration(value: String) -> Result<Duration, CliError> {
+    pub fn to_duration(value: String) -> Result<Duration, CannotHappenError> {
         let mut value   = value.split(' ');
         let (num, unit) = match (value.next(), value.next()) {
             (Some(num), Some(unit)) => (num, unit),
-            _                       => return Err(From::from(CannotHappenError)),
+            _                       => return Err(CannotHappenError),
         };
-        let num = try!(num.parse::<u32>()) as i64;
-
-        let duration = match unit {
-            "day"  | "days"  => Duration::days(num),
-            "week" | "weeks" => Duration::weeks(num),
-            _                => return Err(From::from(CannotHappenError)),
+        let num = match num.parse::<u32>() {
+            Ok(u)  => u as i64,
+            Err(_) => return Err(CannotHappenError),
         };
 
-        Ok(duration)
+        match unit {
+            "day"  | "days"  => Ok(Duration::days(num) ),
+            "week" | "weeks" => Ok(Duration::weeks(num)),
+            _                => Err(CannotHappenError),
+        }
     }
 
 
