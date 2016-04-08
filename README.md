@@ -9,7 +9,8 @@
 ## Commands
 
 - `init`
-- `set`
+- `config`
+- `ignore`
 - `sweep`
 - `burn`
 - `start`
