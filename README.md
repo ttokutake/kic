@@ -1,5 +1,7 @@
 # KIC (Keep It Clean)
 
+[![Build Status](https://travis-ci.org/ttokutake/kic.svg?branch=master)](https://travis-ci.org/ttokutake/kic)
+
 ## Feature
 
 - "kic" prevents someone from making a mess of directories.
