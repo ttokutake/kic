@@ -44,7 +44,5 @@ fn create_essential_dir<P: AsRef<Path>>(path_to_dir: P) -> Result<(), IoError> {
 
 fn create_setting_file<P: AsRef<Path>, U: AsRef<[u8]>>(path_to_file: P, contents: U) -> Result<(), IoError> {
     let mut f = try!(File::create(path_to_file));
-    try!(f.write(contents.as_ref()));
-
-    Ok(())
+    f.write(contents.as_ref()).map(|_| ())
 }
