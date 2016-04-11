@@ -51,7 +51,7 @@ impl Storage {
     pub fn create_box(&self) -> Result<(), IoError> {
         print_with_tag(Tag::Info, format!(r#"Create "{}" directory in "{}""#, self.date, STORAGE_DIR_NAME));
 
-        super::create_essential_dir_all(self.path_to_dust_box())
+        fs::create_dir_all(self.path_to_dust_box())
     }
 
 
@@ -70,7 +70,7 @@ impl Storage {
             let message = format!("  => \"{}\"", path_to_dust.display());
             print_with_tag(Tag::Info, message);
 
-            try!(super::create_essential_dir_all(&to));
+            try!(fs::create_dir_all(&to));
 
             // forcedly overwrite if the file exists with same name.
             match fs::rename(path_to_dust, path_buf![to, target_file]) {
@@ -98,7 +98,7 @@ impl Storage {
                 print_with_tag(Tag::Info, message);
 
                 match fs::remove_dir(path_to_dir) {
-                    Ok(_)  => try!(super::create_essential_dir_all(path_buf![&path_to_dust_box, path_to_dir])),
+                    Ok(_)  => try!(fs::create_dir_all(path_buf![&path_to_dust_box, path_to_dir])),
                     Err(e) => match e.kind() {
                         IoErrorKind::PermissionDenied => print_with_tag(Tag::Info, "     Interrupted for permission"),
                         _                             => return Err(From::from(e)),
@@ -127,7 +127,7 @@ impl Storage {
 
         for target_box in &target_boxes {
             print_with_tag(Tag::Info, format!("  => \"{}\"", target_box.display()));
-            try!(super::delete_dir_all(target_box));
+            try!(fs::remove_dir_all(target_box));
         };
 
         Ok(())

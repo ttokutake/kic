@@ -30,7 +30,7 @@ pub fn create_working_dir() -> Result<(), IoError> {
 pub fn delete_working_dir() -> Result<(), IoError> {
     print_with_tag(Tag::Info, format!("Delete \"{}\" directory", WORKING_DIR_NAME));
 
-    delete_dir_all(working_dir())
+    fs::remove_dir_all(working_dir())
 }
 
 
@@ -42,22 +42,9 @@ fn create_essential_dir<P: AsRef<Path>>(path_to_dir: P) -> Result<(), IoError> {
     Ok(())
 }
 
-fn create_essential_dir_all<P: AsRef<Path>>(path_to_dir: P) -> Result<(), IoError> {
-    try!(fs::create_dir_all(path_to_dir));
-
-    Ok(())
-}
-
-
 fn create_setting_file<P: AsRef<Path>, U: AsRef<[u8]>>(path_to_file: P, contents: U) -> Result<(), IoError> {
     let mut f = try!(File::create(path_to_file));
     try!(f.write(contents.as_ref()));
-
-    Ok(())
-}
-
-fn delete_dir_all<P: AsRef<Path>>(path: P) -> Result<(), IoError> {
-    try!(fs::remove_dir_all(path));
 
     Ok(())
 }
