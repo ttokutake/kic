@@ -11,10 +11,11 @@ use std::result::Result;
 
 
 macro_rules! path_buf {
-    ($($x: expr),+) => {
-        PathBuf::new()
-            $(.join($x))+
-    };
+    ($($x: expr),+) => ({
+        let mut path = PathBuf::new();
+        $(path.push($x);)+
+        path
+    });
 }
 
 
