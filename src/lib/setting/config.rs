@@ -209,7 +209,6 @@ impl Config {
         editable.overwrite(key, value);
 
         self.toml = editable.to_toml();
-
         Ok(self)
     }
 

@@ -14,9 +14,11 @@ impl Command for Start {
     }
 
     fn main(&self) -> Result<(), CliError> {
-        let cron = Cron::read();
+        let cron = try!(Cron::read());
 
-        println!("{:?}", cron);
+        let new_cron = try!(cron.update());
+
+        println!("{:?}", new_cron);
 
         Ok(())
     }
