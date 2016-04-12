@@ -1,6 +1,8 @@
 use error::{CliError, Usage, UsageKind};
 use super::Command;
 
+use lib::setting::Cron;
+
 #[derive(Debug)]
 pub struct Start;
 
@@ -12,6 +14,10 @@ impl Command for Start {
     }
 
     fn main(&self) -> Result<(), CliError> {
-        unimplemented!();
+        let cron = Cron::read();
+
+        println!("{:?}", cron);
+
+        Ok(())
     }
 }

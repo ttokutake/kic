@@ -15,6 +15,7 @@ use std::io::Error as IoError;
 pub enum CliError {
     CannotHappen(CannotHappenError),
     Config(ConfigError),
+    Cron(CronError),
     Essential(EssentialLack),
     Io(IoError),
     ParseInt(ParseIntError),
@@ -28,6 +29,7 @@ impl Display for CliError {
         match *self {
             CliError::CannotHappen(ref e) => e.fmt(f),
             CliError::Config(ref e)       => e.fmt(f),
+            CliError::Cron(ref e)         => e.fmt(f),
             CliError::Essential(ref e)    => e.fmt(f),
             CliError::Io(ref e)           => e.fmt(f),
             CliError::ParseInt(ref e)     => e.fmt(f),
@@ -43,6 +45,7 @@ impl Error for CliError {
         match *self {
             CliError::CannotHappen(ref e) => Some(e),
             CliError::Config(ref e)       => Some(e),
+            CliError::Cron(ref e)         => Some(e),
             CliError::Essential(ref e)    => Some(e),
             CliError::Io(ref e)           => Some(e),
             CliError::ParseInt(ref e)     => Some(e),
@@ -57,6 +60,7 @@ impl Error for CliError {
         match *self {
             CliError::CannotHappen(ref e) => e.description(),
             CliError::Config(ref e)       => e.description(),
+            CliError::Cron(ref e)         => e.description(),
             CliError::Essential(ref e)    => e.description(),
             CliError::Io(ref e)           => e.description(),
             CliError::ParseInt(ref e)     => e.description(),
@@ -75,6 +79,11 @@ impl From<CannotHappenError> for CliError {
 impl From<ConfigError> for CliError {
     fn from(e: ConfigError) -> CliError {
         CliError::Config(e)
+    }
+}
+impl From<CronError> for CliError {
+    fn from(e: CronError) -> CliError {
+        CliError::Cron(e)
     }
 }
 impl From<EssentialLack> for CliError {
@@ -160,6 +169,18 @@ impl Display for ConfigError {
 }
 impl Error for ConfigError {
     fn description(&self) -> &str { "invalid parameters" }
+}
+
+
+#[derive(Debug, PartialEq)]
+pub struct CronError;
+impl Display for CronError {
+    fn fmt(&self, f: &mut Formatter) -> FmtResult {
+        write!(f, "The characters which are not UTF-8 may be mixed in the \"cron\" file")
+    }
+}
+impl Error for CronError {
+    fn description(&self) -> &str { "problems around cron" }
 }
 
 

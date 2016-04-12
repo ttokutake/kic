@@ -1,4 +1,5 @@
 mod config;
+mod cron;
 mod ignore;
 mod storage;
 
@@ -8,6 +9,7 @@ use std::fs::{self, File};
 use std::io::{Error as IoError, Write};
 use std::path::{Path, PathBuf};
 
+pub use self::cron::Cron;
 pub use self::config::{Config, ConfigKey};
 pub use self::ignore::Ignore;
 pub use self::storage::Storage;
