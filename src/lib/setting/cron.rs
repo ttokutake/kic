@@ -54,8 +54,8 @@ impl Cron {
     pub fn update(mut self) -> Result<Self, RegexError> {
         let start_mark  = Cron::start_mark();
         let end_mark    = Cron::end_mark();
-        let my_area     = format!("{}.*{}"    , &start_mark, &end_mark);
-        let my_new_area = format!("{}# blur{}", &start_mark, &end_mark);
+        let my_area     = format!("{}(.|\n)*{}" , &start_mark, &end_mark);
+        let my_new_area = format!("{}# blur\n{}", &start_mark, &end_mark);
 
         let re           = try!(Regex::new(&my_area));
         let new_contents = if re.is_match(&self.contents) {
