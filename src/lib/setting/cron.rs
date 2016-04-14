@@ -43,7 +43,7 @@ impl Cron {
         let output = try!(result);
 
         let contents = if output.status.success() {
-            try!(str::from_utf8(&output.stdout).map_err(|_| CronError::new(CronErrorKind::IncludingInvalidCharacters)))
+            try!(str::from_utf8(&output.stdout).map_err(|_| CronError::new(CronErrorKind::InvalidCharacterCode)))
         } else {
             ""
         };

@@ -153,7 +153,7 @@ impl Error for ConfigError {
 
 #[derive(Debug, PartialEq)]
 pub enum CronErrorKind {
-    IncludingInvalidCharacters,
+    InvalidCharacterCode,
     FailedToWrite,
 }
 #[derive(Debug, PartialEq)]
@@ -168,8 +168,8 @@ impl CronError {
 impl Display for CronError {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         write!(f, "{}", match self.kind {
-            CronErrorKind::IncludingInvalidCharacters => "The characters which are not UTF-8 may be mixed in the \"cron\" file",
-            CronErrorKind::FailedToWrite              => "Failed to write new \"cron\" file"
+            CronErrorKind::InvalidCharacterCode => "The \"cron\" file consists of non-UTF-8 character code",
+            CronErrorKind::FailedToWrite        => "Failed to write new \"cron\" file"
         })
     }
 }
