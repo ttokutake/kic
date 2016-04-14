@@ -1,6 +1,6 @@
 extern crate regex;
 
-use self::regex::{Error as RegexError, Regex};
+use self::regex::Regex;
 
 use constant::ME;
 use error::{CliError, CronError, CronErrorKind};
@@ -12,7 +12,9 @@ use std::str;
 
 #[derive(Debug)]
 pub struct Cron {
-    contents: String,
+    upper  : String,
+    my_area: String,
+    lower  : String,
 }
 
 impl Cron {
@@ -28,10 +30,10 @@ impl Cron {
         )
     }
     fn start_mark() -> String {
-        Cron::base_mark("from this")
+        Self::base_mark("from this")
     }
     fn end_mark() -> String {
-        Cron::base_mark("up to here")
+        Self::base_mark("up to here")
     }
 
     pub fn read() -> Result<Self, CliError> {
@@ -48,28 +50,27 @@ impl Cron {
             ""
         };
 
-        Ok(Cron { contents: contents.to_string() })
-    }
+        let areas = format!("^(?P<upper>(.|\n)*){}(?P<my_area>(.|\n)*){}(?P<lower>(.|\n)*)$", Self::start_mark(), Self::end_mark());
+        let re    = try!(Regex::new(&areas));
 
-    pub fn update(mut self) -> Result<Self, RegexError> {
-        let start_mark  = Cron::start_mark();
-        let end_mark    = Cron::end_mark();
-        let my_area     = format!("{}(.|\n)*{}" , &start_mark, &end_mark);
-        let my_new_area = format!("{}# blur\n{}", &start_mark, &end_mark);
-
-        let re           = try!(Regex::new(&my_area));
-        let new_contents = if re.is_match(&self.contents) {
-            let my_new_area: &str = my_new_area.as_ref();
-            re.replace(self.contents.as_ref(), my_new_area)
-        } else {
-            self.contents + &my_new_area
+        let (upper, my_area, lower) = match re.captures(contents) {
+            Some(caps) => match (caps.name("upper"), caps.name("my_area"), caps.name("lower")) {
+                (Some(u), Some(m), Some(l)) => (u, m, l),
+                _                           => unreachable!("Mistake regular expression!!"),
+            },
+            None => (contents, "", ""),
         };
 
-        self.contents = new_contents;
-        Ok(self)
+        Ok(Cron { upper: upper.to_string(), my_area: my_area.to_string(), lower: lower.to_string() })
     }
 
-    pub fn set(&self) -> Result<(), CliError> {
+    pub fn update(mut self) -> Self {
+        let my_new_area = "# blur\n".to_string();
+        self.my_area    = my_new_area;
+        self
+    }
+
+    pub fn set(self) -> Result<(), CliError> {
         print_with_tag(Tag::Info, "Set new cron");
 
         let result = process::Command::new("crontab")
@@ -77,13 +78,17 @@ impl Cron {
             .spawn();
         let mut child = try!(result);
 
+        let contents = self.upper
+            + &Self::start_mark()
+            + &self.my_area
+            + &Self::end_mark()
+            + &self.lower;
         match &mut child.stdin {
-            &mut Some(ref mut stdin) => try!(stdin.write_all(self.contents.as_bytes())),
+            &mut Some(ref mut stdin) => try!(stdin.write_all(contents.as_bytes())),
             &mut None                => unreachable!("Please set Stdio::piped()!!"),
         };
 
         let output = try!(child.wait_with_output());
-
         if output.status.success() {
             Ok(())
         } else {
