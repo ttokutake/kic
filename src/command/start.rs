@@ -18,8 +18,6 @@ impl Command for Start {
 
         let new_cron = try!(cron.update());
 
-        println!("{:?}", new_cron);
-
-        Ok(())
+        new_cron.set()
     }
 }
