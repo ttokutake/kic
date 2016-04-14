@@ -13,7 +13,6 @@ use std::io::Error as IoError;
 
 #[derive(Debug)]
 pub enum CliError {
-    CannotHappen(CannotHappenError),
     Config(ConfigError),
     Cron(CronError),
     Essential(EssentialLack),
@@ -27,7 +26,6 @@ pub enum CliError {
 impl Display for CliError {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         match *self {
-            CliError::CannotHappen(ref e) => e.fmt(f),
             CliError::Config(ref e)       => e.fmt(f),
             CliError::Cron(ref e)         => e.fmt(f),
             CliError::Essential(ref e)    => e.fmt(f),
@@ -43,7 +41,6 @@ impl Display for CliError {
 impl Error for CliError {
     fn cause(&self) -> Option<&Error> {
         match *self {
-            CliError::CannotHappen(ref e) => Some(e),
             CliError::Config(ref e)       => Some(e),
             CliError::Cron(ref e)         => Some(e),
             CliError::Essential(ref e)    => Some(e),
@@ -58,7 +55,6 @@ impl Error for CliError {
 
     fn description(&self) -> &str {
         match *self {
-            CliError::CannotHappen(ref e) => e.description(),
             CliError::Config(ref e)       => e.description(),
             CliError::Cron(ref e)         => e.description(),
             CliError::Essential(ref e)    => e.description(),
@@ -69,11 +65,6 @@ impl Error for CliError {
             CliError::RunningPlace(ref e) => e.description(),
             CliError::Usage(ref u)        => u.description(),
         }
-    }
-}
-impl From<CannotHappenError> for CliError {
-    fn from(e: CannotHappenError) -> CliError {
-        CliError::CannotHappen(e)
     }
 }
 impl From<ConfigError> for CliError {
@@ -120,18 +111,6 @@ impl From<Usage> for CliError {
     fn from(u: Usage) -> CliError {
         CliError::Usage(u)
     }
-}
-
-
-#[derive(Debug, PartialEq)]
-pub struct CannotHappenError;
-impl Display for CannotHappenError {
-    fn fmt(&self, f: &mut Formatter) -> FmtResult {
-        write!(f, "Cannot happen")
-    }
-}
-impl Error for CannotHappenError {
-    fn description(&self) -> &str { "cannot happen" }
 }
 
 

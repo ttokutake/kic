@@ -4,7 +4,6 @@ use self::chrono::{DateTime, Duration, Local};
 use self::chrono::offset::TimeZone;
 
 use constant::STORAGE_DIR_NAME;
-use error::{CannotHappenError, CliError};
 use lib::fs::*;
 use lib::io::*;
 use std::fs;
@@ -55,15 +54,21 @@ impl Storage {
     }
 
 
-    pub fn squeeze_dusts<P: AsRef<Path>>(&self, paths_to_dust: Vec<P>) -> Result<(), CliError> {
+    pub fn squeeze_dusts<P: AsRef<Path>>(&self, paths_to_dust: Vec<P>) -> Result<(), IoError> {
         let path_to_dust_box = self.path_to_dust_box();
 
         print_with_tag(Tag::Info, format!("Move dusts to \"{}\"", path_to_dust_box.display()));
 
         for path_to_dust in &paths_to_dust {
             let path_to_dust = path_to_dust.as_ref();
-            let target_file  = try!(path_to_dust.file_name().ok_or(CannotHappenError));
-            let target_base  = try!(path_to_dust.parent().ok_or(CannotHappenError));
+            let target_file  = match path_to_dust.file_name() {
+                Some(f) => f,
+                None    => unreachable!("Cannot get file name from path!!"),
+            };
+            let target_base = match path_to_dust.parent() {
+                Some(b) => b,
+                None    => unreachable!("Cannot get base name from path!!"),
+            };
 
             let to = path_buf![&path_to_dust_box, target_base];
 

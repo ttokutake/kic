@@ -7,7 +7,7 @@ use self::regex::Regex;
 use self::toml::Value as Toml;
 
 use constant::CONFIG_FILE_NAME;
-use error::{CannotHappenError, CliError, ConfigError, ConfigErrorKind};
+use error::{CliError, ConfigError, ConfigErrorKind};
 use lib::io::*;
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
@@ -150,7 +150,7 @@ impl Config {
             Ok(toml)    => toml,
             Err(option) => match option {
                 Some(e) => return Err(From::from(e)),
-                None    => return Err(From::from(CannotHappenError)),
+                None    => return unreachable!("Evil thing will occur in toml-rs!!"),
             },
         };
 
@@ -178,21 +178,21 @@ impl Config {
             .and_then(|s| Self::validate(key, s))
     }
 
-    pub fn to_duration(value: String) -> Result<Duration, CannotHappenError> {
+    pub fn to_duration(value: String) -> Duration {
         let mut value   = value.split(' ');
         let (num, unit) = match (value.next(), value.next()) {
             (Some(num), Some(unit)) => (num, unit),
-            _                       => return Err(CannotHappenError),
+            _                       => unreachable!("Wrong to use to_duration()!!"),
         };
         let num = match num.parse::<u32>() {
             Ok(u)  => u as i64,
-            Err(_) => return Err(CannotHappenError),
+            Err(_) => unreachable!("Wrong to use to_duration()!!"),
         };
 
         match unit {
-            "day"  | "days"  => Ok(Duration::days(num) ),
-            "week" | "weeks" => Ok(Duration::weeks(num)),
-            _                => Err(CannotHappenError),
+            "day"  | "days"  => Duration::days(num),
+            "week" | "weeks" => Duration::weeks(num),
+            _                => unreachable!("Wrong to use to_duration()!!"),
         }
     }
 
@@ -447,7 +447,7 @@ mod tests {
     }
 
     #[test]
-    fn to_duration_should_return_ok() {
+    fn to_duration_should_return_duration() {
         let data_set = vec![
             ("1 day" , Duration::days(1)),
             ("1 days", Duration::days(1)),
@@ -460,7 +460,7 @@ mod tests {
             ("2 weeks", Duration::weeks(2)),
         ];
         for (input, correct) in data_set.into_iter() {
-            assert_eq!(correct, Config::to_duration(input.to_string()).unwrap());
+            assert_eq!(correct, Config::to_duration(input.to_string()));
         }
     }
 }

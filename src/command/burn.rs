@@ -16,7 +16,7 @@ impl Command for Burn {
     fn main(&self) -> Result<(), CliError> {
         let config         = try!(Config::read());
         let raw_moratorium = try!(config.get(ConfigKey::BurnAfter));
-        let moratorium     = try!(Config::to_duration(raw_moratorium));
+        let moratorium     = Config::to_duration(raw_moratorium);
 
         let storage = Storage::new();
         try!(storage.delete_expired_boxes(moratorium));

@@ -3,7 +3,7 @@ extern crate regex;
 use self::regex::{Error as RegexError, Regex};
 
 use constant::ME;
-use error::{CannotHappenError, CliError, CronError, CronErrorKind};
+use error::{CliError, CronError, CronErrorKind};
 use lib::io::*;
 use std::io::Write;
 use std::process::{self, Stdio};
@@ -79,7 +79,7 @@ impl Cron {
 
         match &mut child.stdin {
             &mut Some(ref mut stdin) => try!(stdin.write_all(self.contents.as_bytes())),
-            &mut None                => return Err(From::from(CannotHappenError)),
+            &mut None                => unreachable!("Please set Stdio::piped()!!"),
         };
 
         let output = try!(child.wait_with_output());
