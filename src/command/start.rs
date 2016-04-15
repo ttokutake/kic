@@ -19,14 +19,14 @@ impl Command for Start {
 
         let pair_for_burn  = ("0 0 * * *", "burn");
 
-        let config = try!(Config::read());
-        let day    = match try!(config.get(ConfigKey::SweepPeriod)).as_ref() {
+        let config        = try!(Config::read());
+        let day_and_month = match try!(config.get(ConfigKey::SweepPeriod)).as_ref() {
             "daily"  => "* * *",
             "weekly" => "* * 0",
             _        => unreachable!("Mistake SweepPeriod's validation!!"),
         };
         let (hour, minute) = Config::to_hour_and_minute(try!(config.get(ConfigKey::SweepTime)));
-        let time = format!("{} {} {}", minute, hour, day);
+        let time = format!("{} {} {}", minute, hour, day_and_month);
         let pair_for_sweep = (&time as &str, "sweep");
 
         let new_cron = try!(cron.update(&[pair_for_burn, pair_for_sweep]));

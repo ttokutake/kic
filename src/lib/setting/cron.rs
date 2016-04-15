@@ -6,7 +6,7 @@ use constant::ME;
 use error::{CliError, CronError, CronErrorKind};
 use lib::io::*;
 use std::env;
-use std::io::{Error as IoError, Write};
+use std::io::Write;
 use std::process::{self, Stdio};
 use std::str;
 
@@ -65,11 +65,11 @@ impl Cron {
         Ok(Cron { upper: upper.to_string(), my_area: my_area.to_string(), lower: lower.to_string() })
     }
 
-    pub fn update(mut self, pairs: &[(&str, &str); 2]) -> Result<Self, IoError> {
+    pub fn update(mut self, pairs: &[(&str, &str); 2]) -> Result<Self, CliError> {
         let current_dir = try!(env::current_dir());
         let current_dir = match current_dir.to_str() {
             Some(p) => p,
-            None    => unimplemented!(),
+            None    => return Err(From::from(CronError::new(CronErrorKind::InvalidPath))),
         };
 
         let my_new_area = pairs
