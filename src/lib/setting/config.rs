@@ -167,8 +167,8 @@ impl Config {
             .lookup(key.to_str())
             .ok_or(ConfigError::new(match *key {
                 ConfigKey::BurnAfter   => ConfigErrorKind::NotFoundBurnAfter,
-                ConfigKey::SweepPeriod => unimplemented!(),
-                ConfigKey::SweepTime   => unimplemented!(),
+                ConfigKey::SweepPeriod => ConfigErrorKind::NotFoundSweepPeriod,
+                ConfigKey::SweepTime   => ConfigErrorKind::NotFoundSweepTime,
             }));
         let value = try!(result);
 
@@ -334,12 +334,6 @@ mod tests {
         let config = Config::default();
 
         assert!(config.get(ConfigKey::BurnAfter).is_ok());
-    }
-    #[test]
-    #[should_panic(expected = "not yet implemented")]
-    fn get_should_panic() {
-        let config = Config::default();
-
         assert!(config.get(ConfigKey::SweepPeriod).is_ok());
         assert!(config.get(ConfigKey::SweepTime  ).is_ok());
     }
@@ -379,10 +373,7 @@ mod tests {
                 .unwrap();
             assert_eq!(correct, config.get(ConfigKey::BurnAfter).unwrap());
         }
-    }
-    #[test]
-    #[should_panic(expected = "not yet implemented")]
-    fn set_should_return_panic() {
+
         let raw_values = ["daily", "weekly"];
         for raw_value in &raw_values {
             let config = Config::default()
@@ -394,7 +385,7 @@ mod tests {
         let raw_values = ["00:00", "23:59"];
         for raw_value in &raw_values {
             let config = Config::default()
-                .set(ConfigKey::SweepPeriod, &raw_value)
+                .set(ConfigKey::SweepTime, &raw_value)
                 .unwrap();
             assert_eq!(raw_value.to_string(), config.get(ConfigKey::SweepTime).unwrap())
         }
