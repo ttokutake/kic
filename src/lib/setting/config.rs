@@ -196,6 +196,18 @@ impl Config {
         }
     }
 
+    pub fn to_hour_and_minute(value: String) -> (u32, u32) {
+        let mut value = value.split(':');
+        let (hour, minute) = match (value.next(), value.next()) {
+            (Some(hour), Some(minute)) => (hour, minute),
+            _                          => unreachable!("Wrong to use to_hour_and_minute()!!"),
+        };
+        match (hour.parse::<u32>(), minute.parse::<u32>()) {
+            (Ok(h), Ok(m)) => (h, m),
+            _              => unreachable!("Wrong to use to_hour_and_minute()!!"),
+        }
+    }
+
 
     pub fn set<CK: Borrow<ConfigKey>, S: AsRef<str>>(mut self, key: CK, value: S) -> Result<Self, CliError> {
         let key = key.borrow();

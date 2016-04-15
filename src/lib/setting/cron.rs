@@ -65,17 +65,21 @@ impl Cron {
         Ok(Cron { upper: upper.to_string(), my_area: my_area.to_string(), lower: lower.to_string() })
     }
 
-    pub fn update(mut self) -> Result<Self, IoError> {
+    pub fn update(mut self, pairs: &[(&str, &str); 2]) -> Result<Self, IoError> {
         let current_dir = try!(env::current_dir());
         let current_dir = match current_dir.to_str() {
             Some(p) => p,
             None    => unimplemented!(),
         };
 
-        let burn_area = format!("0 0 * * *\tcd {} && kic burn\n", current_dir);
+        let my_new_area = pairs
+            .iter()
+            .fold(String::new(), |area, &(ref time, ref command)| {
+                let line = format!("{}\tcd {} && kic {}\n", time, current_dir, command);
+                area + &line
+            });
 
-        let my_new_area = burn_area;
-        self.my_area    = my_new_area;
+        self.my_area = my_new_area;
         Ok(self)
     }
 
