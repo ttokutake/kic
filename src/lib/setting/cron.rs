@@ -150,14 +150,14 @@ fn my_area_is_empty_return_true() {
         "\t",
         "\r",
         "\n",
-        " \t\r\n ",
+        " \t\r\n",
     ];
 
     for empty in &empties {
         let cron = Cron {
-            upper: "".to_string(),
+            upper: ""     .to_string(),
             my_area: empty.to_string(),
-            lower: "".to_string()
+            lower: ""     .to_string(),
         };
         assert!(cron.my_area_is_empty());
     }
@@ -186,10 +186,44 @@ fn my_area_is_empty_return_false() {
 
     for non_empty in &non_empties {
         let cron = Cron {
-            upper: "".to_string(),
+            upper  : ""       .to_string(),
             my_area: non_empty.to_string(),
-            lower: "".to_string()
+            lower  : ""       .to_string(),
         };
         assert!(!cron.my_area_is_empty());
+    }
+}
+
+#[test]
+fn delete_return_ok() {
+    fn wrap_by_extra_content<S: AsRef<str>>(target: S) -> String {
+        let extra_content = "when cd path_to_extra && kic command\n";
+        format!("{}{}{}", extra_content, target.as_ref(), extra_content)
+    }
+
+    let mut cron = Cron {
+        upper  : "upper\n".to_string(),
+        my_area: ""       .to_string(),
+        lower  : "lower\n".to_string(),
+    };
+
+    let dir = "path_to_dir";
+
+    let areas = vec![
+        ("".to_string(), format!("cd {} && kic\n"             , dir)),
+        ("".to_string(), format!("when cd {} && kic\n"        , dir)),
+        ("".to_string(), format!("cd {} && kic command\n"     , dir)),
+        ("".to_string(), format!("when cd {} && kic command\n", dir)),
+
+        (wrap_by_extra_content(""), wrap_by_extra_content(format!("cd {} && kic\n"             , dir))),
+        (wrap_by_extra_content(""), wrap_by_extra_content(format!("when cd {} && kic\n"        , dir))),
+        (wrap_by_extra_content(""), wrap_by_extra_content(format!("cd {} && kic command\n"     , dir))),
+        (wrap_by_extra_content(""), wrap_by_extra_content(format!("when cd {} && kic command\n", dir))),
+    ];
+
+    for (correct, area) in areas.into_iter() {
+        cron.my_area = area;
+        cron.delete(&dir).ok();
+        assert_eq!(correct, cron.my_area);
     }
 }
