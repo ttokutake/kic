@@ -29,9 +29,8 @@ impl Command for Start {
         let when = format!("{} {} {}", minute, hour, day_and_month);
         let pair_for_sweep = (&when as &str, "sweep");
 
-        let new_cron = try!(cron.update(&[pair_for_burn, pair_for_sweep]));
-        try!(new_cron.set());
-
-        Ok(())
+        cron
+            .update(&[pair_for_burn, pair_for_sweep])
+            .and_then(|new_cron| new_cron.set())
     }
 }
