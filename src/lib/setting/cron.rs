@@ -67,10 +67,7 @@ impl Cron {
 
     pub fn update(mut self, pairs: &[(&str, &str); 2]) -> Result<Self, CliError> {
         let current_dir = try!(env::current_dir());
-        let current_dir = match current_dir.to_str() {
-            Some(p) => p,
-            None    => return Err(From::from(CronError::new(CronErrorKind::InvalidPath))),
-        };
+        let current_dir = try!(current_dir.to_str().ok_or(CronError::new(CronErrorKind::InvalidPath)));
 
         let my_new_area = pairs
             .iter()
