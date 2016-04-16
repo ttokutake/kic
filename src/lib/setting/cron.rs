@@ -74,7 +74,7 @@ impl Cron {
 
         let my_new_area = pairs
             .iter()
-            .fold(String::new(), |area, &(ref time, ref command)| {
+            .fold(String::new(), |area, &(time, command)| {
                 let line = format!("{}\tcd {} && kic {}\n", time, current_dir, command);
                 area + &line
             });
