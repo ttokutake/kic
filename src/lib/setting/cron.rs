@@ -97,11 +97,15 @@ impl Cron {
             .spawn();
         let mut child = try!(result);
 
-        let contents = self.upper
-            + &Self::start_mark()
-            + &self.my_area
-            + &Self::end_mark()
-            + &self.lower;
+        let contents = if self.my_area_is_empty() {
+            self.upper + &self.lower
+        } else {
+            self.upper
+                + &Self::start_mark()
+                + &self.my_area
+                + &Self::end_mark()
+                + &self.lower
+        };
         match &mut child.stdin {
             &mut Some(ref mut stdin) => try!(stdin.write_all(contents.as_bytes())),
             &mut None                => unreachable!("Please set Stdio::piped()!!"),
@@ -116,11 +120,23 @@ impl Cron {
     }
 
 
-    pub fn current_dir_string() -> Result<String, CliError> {
-        let current_dir = try!(env::current_dir());
+    pub fn current_dir_string() -> Result<String, CronError> {
+        let current_dir = match env::current_dir() {
+            Ok(d)  => d,
+            Err(_) => unreachable!("There is a problem for current directory!!"),
+        };
         current_dir
             .to_str()
-            .ok_or(From::from(CronError::new(CronErrorKind::InvalidPath)))
+            .ok_or(CronError::new(CronErrorKind::InvalidPath))
             .map(|s| s.to_string())
+    }
+
+
+    fn my_area_is_empty(&self) -> bool {
+        let re = match Regex::new(r"^\s*$") {
+            Ok(re) => re,
+            Err(_) => unreachable!("Mistake the regular expression!!"),
+        };
+        re.is_match(self.my_area.as_ref())
     }
 }
