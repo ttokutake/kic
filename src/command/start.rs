@@ -1,8 +1,7 @@
 use error::{CliError, Usage, UsageKind};
 use super::Command;
 
-use lib::setting::{Config, ConfigKey};
-use lib::setting::Cron;
+use lib::setting::{Config, ConfigKey, Cron};
 
 #[derive(Debug)]
 pub struct Start;
