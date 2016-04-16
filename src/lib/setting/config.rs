@@ -466,4 +466,15 @@ mod tests {
             assert_eq!(correct, Config::to_duration(input.to_string()));
         }
     }
+
+    #[test]
+    fn to_hour_and_minute_should_return_tuple() {
+        let data_set = vec![
+            ("00:00", ( 0,  0)),
+            ("23:59", (23, 59)),
+        ];
+        for (input, correct) in data_set.into_iter() {
+            assert_eq!(correct, Config::to_hour_and_minute(input.to_string()));
+        }
+    }
 }
