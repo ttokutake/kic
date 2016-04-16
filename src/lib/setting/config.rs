@@ -2,7 +2,7 @@ extern crate chrono;
 extern crate regex;
 extern crate toml;
 
-use self::chrono::{Duration, NaiveTime};
+use self::chrono::{Duration, NaiveTime, ParseError as TimeParseError, Timelike};
 use self::regex::Regex;
 use self::toml::Value as Toml;
 
@@ -197,15 +197,11 @@ impl Config {
     }
 
     pub fn to_hour_and_minute(value: String) -> (u32, u32) {
-        let mut value = value.split(':');
-        let (hour, minute) = match (value.next(), value.next()) {
-            (Some(hour), Some(minute)) => (hour, minute),
-            _                          => unreachable!("Wrong to use to_hour_and_minute()!!"),
+        let time = match Self::to_naive_time(value) {
+            Ok(t)  => t,
+            Err(_) => unreachable!("Wrong to use to_hour_and_minute()!!"),
         };
-        match (hour.parse::<u32>(), minute.parse::<u32>()) {
-            (Ok(h), Ok(m)) => (h, m),
-            _              => unreachable!("Wrong to use to_hour_and_minute()!!"),
-        }
+        (time.hour(), time.minute())
     }
 
 
@@ -224,6 +220,10 @@ impl Config {
         Ok(self)
     }
 
+
+    fn to_naive_time<S: AsRef<str>>(value: S) -> Result<NaiveTime, TimeParseError> {
+        NaiveTime::from_str(format!("{}:00", value.as_ref()).as_ref())
+    }
 
     fn validate<CK: Borrow<ConfigKey>, S: AsRef<str>>(key: CK, value: S) -> Result<String, CliError> {
         let value = value.as_ref().trim();
@@ -246,9 +246,8 @@ impl Config {
                 }
             },
             ConfigKey::SweepTime => {
-                match NaiveTime::from_str(format!("{}:00", value).as_ref()) {
+                match Self::to_naive_time(value) {
                     Ok(_)  => Ok(value.to_string()),
-                    // should set Err(e) to Error::cause()
                     Err(_) => Err(From::from(ConfigError::new(ConfigErrorKind::SweepTime))),
                 }
             },
