@@ -140,3 +140,56 @@ impl Cron {
         re.is_match(self.my_area.as_ref())
     }
 }
+
+
+#[test]
+fn my_area_is_empty_return_true() {
+    let empties = [
+        "",
+        " ",
+        "\t",
+        "\r",
+        "\n",
+        " \t\r\n ",
+    ];
+
+    for empty in &empties {
+        let cron = Cron {
+            upper: "".to_string(),
+            my_area: empty.to_string(),
+            lower: "".to_string()
+        };
+        assert!(cron.my_area_is_empty());
+    }
+}
+#[test]
+fn my_area_is_empty_return_false() {
+    let non_empties = [
+        "a",
+        "ab",
+        " ab",
+        "a b",
+        "ab ",
+        "\tab",
+        "a\tb",
+        "ab\t",
+        "\rab",
+        "a\rb",
+        "ab\r",
+        "\nab",
+        "a\nb",
+        "ab\n",
+        " \t\r\nab",
+        "a \t\r\nb",
+        "ab \t\r\n",
+    ];
+
+    for non_empty in &non_empties {
+        let cron = Cron {
+            upper: "".to_string(),
+            my_area: non_empty.to_string(),
+            lower: "".to_string()
+        };
+        assert!(!cron.my_area_is_empty());
+    }
+}
