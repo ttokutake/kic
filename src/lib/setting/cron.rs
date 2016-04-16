@@ -1,6 +1,6 @@
 extern crate regex;
 
-use self::regex::Regex;
+use self::regex::{Error as RegexError, Regex};
 
 use constant::ME;
 use error::{CliError, CronError, CronErrorKind};
@@ -69,6 +69,8 @@ impl Cron {
         let current_dir = try!(env::current_dir());
         let current_dir = try!(current_dir.to_str().ok_or(CronError::new(CronErrorKind::InvalidPath)));
 
+        try!(self.delete(current_dir));
+
         let my_new_area = pairs
             .iter()
             .fold(String::new(), |area, &(ref time, ref command)| {
@@ -76,7 +78,7 @@ impl Cron {
                 area + &line
             });
 
-        self.my_area = my_new_area;
+        self.my_area = self.my_area + &my_new_area;
         Ok(self)
     }
 
@@ -104,5 +106,12 @@ impl Cron {
         } else {
             Err(From::from(CronError::new(CronErrorKind::FailedToWrite)))
         }
+    }
+
+
+    fn delete(&mut self, current_dir: &str) -> Result<(), RegexError> {
+        let re = try!(Regex::new(&format!(r".*cd\s+{}\s+&&\s+kic.*\n", current_dir)));
+        self.my_area = re.replace_all(&self.my_area, "");
+        Ok(())
     }
 }
