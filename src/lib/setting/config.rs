@@ -158,7 +158,7 @@ impl Config {
     }
 
 
-    pub fn get<CK: Borrow<ConfigKey>>(&self, key: CK) -> Result<String, CliError> {
+    pub fn get<CK: Borrow<ConfigKey>>(&self, key: CK) -> Result<String, ConfigError> {
         let key = key.borrow();
 
         print_with_tag(Tag::Info, format!("Get the parameter for \"{}\"", key.to_str()));
@@ -174,7 +174,7 @@ impl Config {
 
         value
             .as_str()
-            .ok_or(From::from(ConfigError::new(ConfigErrorKind::NonStringValue)))
+            .ok_or(ConfigError::new(ConfigErrorKind::NonStringValue))
             .and_then(|s| Self::validate(key, s))
     }
 
@@ -225,12 +225,16 @@ impl Config {
         NaiveTime::from_str(format!("{}:00", value.as_ref()).as_ref())
     }
 
-    fn validate<CK: Borrow<ConfigKey>, S: AsRef<str>>(key: CK, value: S) -> Result<String, CliError> {
+    fn validate<CK: Borrow<ConfigKey>, S: AsRef<str>>(key: CK, value: S) -> Result<String, ConfigError> {
         let value = value.as_ref().trim();
 
         match *key.borrow() {
             ConfigKey::BurnAfter => {
-                let pair = try!(Regex::new(r"^(?P<num>\d+)\s?(?P<unit>days?|weeks?)$"))
+                let re = match Regex::new(r"^(?P<num>\d+)\s?(?P<unit>days?|weeks?)$") {
+                    Ok(re) => re,
+                    Err(_) => unreachable!("Mistake the regular expression!!"),
+                };
+                let pair = re
                     .captures(value)
                     .map_or((None, None), |caps| (caps.name("num"), caps.name("unit")));
                 let (num, unit) = match pair {

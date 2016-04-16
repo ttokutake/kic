@@ -1,6 +1,6 @@
 extern crate regex;
 
-use self::regex::{Error as RegexError, Regex};
+use self::regex::Regex;
 
 use constant::ME;
 use error::{CliError, CronError, CronErrorKind};
@@ -52,7 +52,10 @@ impl Cron {
         };
 
         let areas = format!("^(?P<upper>(.|\n)*){}(?P<my_area>(.|\n)*){}(?P<lower>(.|\n)*)$", Self::start_mark(), Self::end_mark());
-        let re    = try!(Regex::new(&areas));
+        let re    = match Regex::new(&areas) {
+            Ok(re) => re,
+            Err(_) => unreachable!("Mistake the regular expression!!"),
+        };
 
         let (upper, my_area, lower) = match re.captures(contents) {
             Some(caps) => match (caps.name("upper"), caps.name("my_area"), caps.name("lower")) {
@@ -69,7 +72,7 @@ impl Cron {
         let current_dir = try!(env::current_dir());
         let current_dir = try!(current_dir.to_str().ok_or(CronError::new(CronErrorKind::InvalidPath)));
 
-        try!(self.delete(current_dir));
+        self.delete(current_dir);
 
         let my_new_area = pairs
             .iter()
@@ -109,9 +112,11 @@ impl Cron {
     }
 
 
-    fn delete(&mut self, current_dir: &str) -> Result<(), RegexError> {
-        let re = try!(Regex::new(&format!(r".*cd\s+{}\s+&&\s+kic.*\n", current_dir)));
+    fn delete(&mut self, dir: &str) {
+        let re = match Regex::new(&format!(r".*cd\s+{}\s+&&\s+kic.*\n", dir)) {
+            Ok(re) => re,
+            Err(_) => unreachable!("Mistake the regular expression!!"),
+        };
         self.my_area = re.replace_all(&self.my_area, "");
-        Ok(())
     }
 }
