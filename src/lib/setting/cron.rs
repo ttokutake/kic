@@ -1,6 +1,6 @@
 extern crate regex;
 
-use self::regex::Regex;
+use self::regex::{Error as RegexError, Regex};
 
 use constant::ME;
 use error::{CliError, CronError, CronErrorKind};
@@ -69,10 +69,8 @@ impl Cron {
     }
 
     pub fn update(mut self, pairs: &[(&str, &str); 2]) -> Result<Self, CliError> {
-        let current_dir = try!(env::current_dir());
-        let current_dir = try!(current_dir.to_str().ok_or(CronError::new(CronErrorKind::InvalidPath)));
-
-        self.delete(current_dir);
+        let current_dir = try!(Self::current_dir_string());
+        try!(self.delete(&current_dir));
 
         let my_new_area = pairs
             .iter()
@@ -83,6 +81,12 @@ impl Cron {
 
         self.my_area = self.my_area + &my_new_area;
         Ok(self)
+    }
+
+    pub fn delete<S: AsRef<str>>(&mut self, dir: S) -> Result<(), RegexError> {
+        let re = try!(Regex::new(&format!(r".*cd\s+{}\s+&&\s+kic.*\n", dir.as_ref())));
+        self.my_area = re.replace_all(&self.my_area, "");
+        Ok(())
     }
 
     pub fn set(self) -> Result<(), CliError> {
@@ -112,11 +116,11 @@ impl Cron {
     }
 
 
-    fn delete(&mut self, dir: &str) {
-        let re = match Regex::new(&format!(r".*cd\s+{}\s+&&\s+kic.*\n", dir)) {
-            Ok(re) => re,
-            Err(_) => unreachable!("Mistake the regular expression!!"),
-        };
-        self.my_area = re.replace_all(&self.my_area, "");
+    pub fn current_dir_string() -> Result<String, CliError> {
+        let current_dir = try!(env::current_dir());
+        current_dir
+            .to_str()
+            .ok_or(From::from(CronError::new(CronErrorKind::InvalidPath)))
+            .map(|s| s.to_string())
     }
 }
