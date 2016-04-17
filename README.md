@@ -18,7 +18,10 @@
 - `start`
 - `end`
 - `destroy`
+- `patrol`
 
 ## Option
 
 - `-h`, `--help`
+- `-v`, `--version`
+- `--dry-run`
