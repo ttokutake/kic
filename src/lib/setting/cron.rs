@@ -75,7 +75,7 @@ impl Cron {
         let my_new_area = pairs
             .iter()
             .fold(String::new(), |area, &(time, command)| {
-                let line = format!("{}\tcd {} && kic {}\n", time, current_dir, command);
+                let line = format!("{}\tcd {} && {} {}\n", time, current_dir, ME, command);
                 area + &line
             });
 
@@ -84,7 +84,7 @@ impl Cron {
     }
 
     pub fn delete<S: AsRef<str>>(&mut self, dir: S) -> Result<(), RegexError> {
-        let re = try!(Regex::new(&format!(r".*cd\s+{}\s+&&\s+kic.*\n", dir.as_ref())));
+        let re = try!(Regex::new(&format!(r".*cd\s+{}\s+&&\s+{}.*\n", dir.as_ref(), ME)));
         self.my_area = re.replace_all(&self.my_area, "");
         Ok(())
     }
