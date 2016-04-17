@@ -1,6 +1,8 @@
 use error::{CliError, Usage, UsageKind};
 use super::Command;
 
+use lib::setting::Cron;
+
 #[derive(Debug)]
 pub struct Patrol;
 
@@ -12,6 +14,8 @@ impl Command for Patrol {
     }
 
     fn main(&self) -> Result<(), CliError> {
-        unimplemented!();
+        let cron = try!(Cron::read());
+        let cron = try!(cron.discard());
+        cron.set()
     }
 }
