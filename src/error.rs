@@ -245,6 +245,7 @@ pub enum UsageKind {
     Start,
     End,
     Destroy,
+    Patrol,
 }
 impl UsageKind {
     fn command(&self) -> &str {
@@ -258,6 +259,7 @@ impl UsageKind {
             UsageKind::Start   => "start",
             UsageKind::End     => "end",
             UsageKind::Destroy => "destroy",
+            UsageKind::Patrol  => "patrol",
         }
     }
 
@@ -296,6 +298,7 @@ impl UsageKind {
             UsageKind::Start   => "Register with \"cron\" for autonomous operation.",
             UsageKind::End     => "Unregister from \"cron\".",
             UsageKind::Destroy => "Unregister current directory.",
+            UsageKind::Patrol  => "Keep \"cron\" file clean.",
         }
     }
 
@@ -311,6 +314,7 @@ impl UsageKind {
                     format!("{}{}", "start   # ", UsageKind::Start  .description()),
                     format!("{}{}", "end     # ", UsageKind::End    .description()),
                     format!("{}{}", "destroy # ", UsageKind::Destroy.description()),
+                    format!("{}{}", "patrol  # ", UsageKind::Patrol .description()),
                 ]
             },
             UsageKind::Config => {

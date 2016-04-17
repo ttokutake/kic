@@ -6,6 +6,7 @@ mod burn;
 mod start;
 mod end;
 mod destroy;
+mod patrol;
 
 use self::init::Init;
 use self::config::Config;
@@ -15,6 +16,7 @@ use self::burn::Burn;
 use self::start::Start;
 use self::end::End;
 use self::destroy::Destroy;
+use self::patrol::Patrol;
 
 use constant::BANNED_DIRS;
 use error::{CliError, EssentialLack, EssentialKind, RunningPlaceError, Usage, UsageKind};
@@ -103,6 +105,7 @@ pub fn execute() -> Result<(), CliError> {
             "start"   => Box::new(Start                                                ),
             "end"     => Box::new(End                                                  ),
             "destroy" => Box::new(Destroy                                              ),
+            "patrol"  => Box::new(Patrol                                               ),
             _         => return Err(From::from(Usage::new(UsageKind::Nothing))),
         },
         None => return Err(From::from(Usage::new(UsageKind::Nothing))),
