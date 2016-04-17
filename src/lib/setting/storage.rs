@@ -6,14 +6,15 @@ use self::chrono::offset::TimeZone;
 use constant::STORAGE_DIR_NAME;
 use lib::fs::*;
 use lib::io::*;
-use std::fs;
-use std::io::{Error as IoError, ErrorKind as IoErrorKind};
+use std::fs::{self, OpenOptions};
+use std::io::{Error as IoError, ErrorKind as IoErrorKind, Write};
 use std::path::{Path, PathBuf};
 
 
 pub struct Storage {
-    now : DateTime<Local>,
-    date: String,
+    now     : DateTime<Local>,
+    date    : String,
+    log_file: Option<String>,
 }
 
 impl Storage {
@@ -35,7 +36,7 @@ impl Storage {
     pub fn new() -> Self {
         let now  = Local::now();
         let date = now.format("%Y-%m-%d").to_string();
-        Storage { now: now, date: date }
+        Storage { now: now, date: date, log_file: None }
     }
 
 
@@ -48,9 +49,46 @@ impl Storage {
     }
 
     pub fn create_box(&self) -> Result<(), IoError> {
-        print_with_tag(Tag::Info, format!(r#"Create "{}" directory in "{}""#, self.date, STORAGE_DIR_NAME));
+        print_with_tag(Tag::Info, format!(r#"Create "{}" directory in "{}""#, self.date, Self::path().display()));
 
         fs::create_dir_all(self.path_to_dust_box())
+    }
+
+    fn path_to_log(&self) -> PathBuf {
+        let file_name = match &self.log_file {
+            &Some(ref s) => s,
+            &None        => unreachable!("Wrong to use path_to_log()"),
+        };
+        path_buf![self.path_to_box(), &file_name]
+    }
+
+    fn start_mark_for_log(&self) -> String {
+        let datetime = self.now.format("%H:%M:%S").to_string();
+        format!(
+            "############
+# {} #
+############\n",
+            datetime,
+        )
+    }
+
+    pub fn create_log_file(mut self, file_name: &str) -> Result<Self, IoError> {
+        let file_name = format!("{}.log", file_name);
+
+        print_with_tag(Tag::Info, format!(r#"Create "{}" file in "{}""#, file_name, Self::path().display()));
+
+        self.log_file = Some(file_name);
+
+        let file = OpenOptions::new()
+            .create(true)
+            .write(true) // it's needed against doc.rust-lang.org/std/fs/struct.OpenOptions.html#method.append
+            .append(true)
+            .open(self.path_to_log());
+        let mut file = try!(file);
+
+        try!(file.write(self.start_mark_for_log().as_bytes()));
+
+        Ok(self)
     }
 
 

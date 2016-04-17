@@ -18,6 +18,7 @@ impl Command for Sweep {
     fn main(&self) -> Result<(), CliError> {
         let storage = Storage::new();
         try!(storage.create_box());
+        let storage = try!(storage.create_log_file("sweep"));
 
         let ignore = try!(Ignore::read());
 
