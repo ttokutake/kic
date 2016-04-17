@@ -65,7 +65,6 @@ impl Storage {
     fn write_log<U: AsRef<[u8]>>(&self, content: U) -> Result<usize, IoError> {
         let file = OpenOptions::new()
             .create(true)
-            .write(true) // it's needed against doc.rust-lang.org/std/fs/struct.OpenOptions.html#method.append
             .append(true)
             .open(self.path_to_log());
         let mut file = try!(file);
