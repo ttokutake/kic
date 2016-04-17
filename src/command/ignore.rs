@@ -65,7 +65,7 @@ impl Ignore {
     }
 
     fn ignore_current_files() -> Result<(), CliError> {
-        let message = format!("Do you want to initialize \"{}\"?", IGNORE_FILE_NAME);
+        let message = "Do you want to preserve current state?";
 
         Self::run_after_confirmation(message, || setting::Ignore::default().create())
     }

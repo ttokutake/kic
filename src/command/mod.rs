@@ -23,6 +23,7 @@ use error::{CliError, EssentialLack, EssentialKind, RunningPlaceError, Usage, Us
 use lib::io::*;
 use lib::setting;
 use std::env;
+use std::fmt::Display;
 use std::io::Error as IoError;
 
 trait Command {
@@ -60,7 +61,7 @@ trait Command {
         }
     }
 
-    fn run_after_confirmation<F>(message: String, danger_exec: F) -> Result<(), CliError>
+    fn run_after_confirmation<D: Display, F>(message: D, danger_exec: F) -> Result<(), CliError>
         where Self: Sized, F: FnOnce() -> Result<(), IoError>
     {
         echo(format_with_tag(Tag::Caution, format!("{} [yes/no]: ", message)));
