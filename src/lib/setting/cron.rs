@@ -7,6 +7,7 @@ use error::{CliError, CronError, CronErrorKind};
 use lib::io::*;
 use std::collections::BTreeSet;
 use std::env;
+use std::fmt::Display;
 use std::io::Write;
 use std::path::Path;
 use std::process::{self, Stdio};
@@ -21,22 +22,35 @@ pub struct Cron {
 }
 
 impl Cron {
-    fn base_mark(keyword: &str) -> String {
+    fn base_mark<D: Display>(keyword: &str, exec: D) -> String {
         format!(
             r#"###################################
 # "{}" uses the lines {}.
 # Please don't touch them and me!
 ###################################
-"#,
+{}"#,
             ME,
             keyword,
+            exec,
         )
     }
     fn start_mark() -> String {
-        Self::base_mark("from this")
+        Self::base_mark("from this", Self::patrol())
     }
     fn end_mark() -> String {
-        Self::base_mark("up to here")
+        Self::base_mark("up to here", "")
+    }
+
+    fn patrol() -> String {
+        format!("0 0 * * *\t{} patrol\n", ME)
+    }
+
+    fn escape_asterisk<S: AsRef<str>>(s: S) -> String {
+        let re = match Regex::new(r"\*") {
+            Ok(re) => re,
+            Err(_) => unreachable!("Mistake regular expression!!"),
+        };
+        re.replace_all(s.as_ref(), "\\*")
     }
 
 
@@ -54,8 +68,12 @@ impl Cron {
             ""
         };
 
-        let areas = format!("^(?P<upper>(.|\n)*){}(?P<my_area>(.|\n)*){}(?P<lower>(.|\n)*)$", Self::start_mark(), Self::end_mark());
-        let re    = match Regex::new(&areas) {
+        let areas = format!(
+            "^(?P<upper>(.|\n)*){}(?P<my_area>(.|\n)*){}(?P<lower>(.|\n)*)$",
+            Self::escape_asterisk(Self::start_mark()),
+            Self::end_mark(),
+        );
+        let re = match Regex::new(&areas) {
             Ok(re) => re,
             Err(_) => unreachable!("Mistake the regular expression!!"),
         };
