@@ -18,7 +18,7 @@ impl Command for Burn {
         let raw_moratorium = try!(config.get(ConfigKey::BurnAfter));
         let moratorium     = Config::to_duration(raw_moratorium);
 
-        let storage = Storage::new();
+        let storage = try!(Storage::new().create_box_with_log("burn"));
         try!(storage.delete_expired_boxes(moratorium));
 
         Ok(())
