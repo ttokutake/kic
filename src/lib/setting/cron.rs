@@ -256,9 +256,9 @@ fn delete_should_success() {
     }
 
     let mut cron = Cron {
-        upper  : "upper\n".to_string(),
-        my_area: ""       .to_string(),
-        lower  : "lower\n".to_string(),
+        upper  : "upper" .to_string(),
+        my_area: "middle".to_string(),
+        lower  : "lower" .to_string(),
     };
 
     let dir = "path_to_dir";
@@ -283,12 +283,51 @@ fn delete_should_success() {
 }
 #[test]
 #[should_panic(expect = "entered unreachable code")]
-fn delete_should_fail() {
+fn delete_should_panic() {
     let mut cron = Cron {
-        upper  : "upper\n".to_string(),
-        my_area: ""       .to_string(),
-        lower  : "lower\n".to_string(),
+        upper  : "upper" .to_string(),
+        my_area: "middle".to_string(),
+        lower  : "lower" .to_string(),
     };
 
     cron.delete("() <= mistaken Regular Expression!");
+}
+
+#[test]
+fn discard_should_remove_lines_including_non_existing_dir() {
+    let mut cron = Cron {
+        upper  : "upper" .to_string(),
+        my_area: "middle".to_string(),
+        lower  : "lower" .to_string(),
+    };
+
+    cron.my_area = format!("
+        cd /path/to/non/existing/dir && {} command
+        cd /path/to/non/existing/dir && {} command2
+        cd /path/to/really/non/existing/dir && {} command
+        cd /path/to/really/non/existing/dir && {} command2
+    ", ME, ME, ME, ME);
+
+    let cron = cron.discard();
+    assert!(cron.is_ok());
+    assert!(cron.unwrap().my_area_is_empty());
+}
+#[test]
+fn discard_should_return_regex_err() {
+    let mut cron = Cron {
+        upper  : "upper" .to_string(),
+        my_area: "middle".to_string(),
+        lower  : "lower" .to_string(),
+    };
+
+    cron.my_area = format!("
+        cd /()/<=/mischief/by/bad/user && {} command
+    ", ME);
+
+    let cron = cron.discard();
+    assert!(cron.is_err());
+    match cron {
+        Err(RegexError::Syntax(_)) => (),
+        _                          => panic!("test failed!!!"),
+    };
 }
