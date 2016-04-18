@@ -122,7 +122,7 @@ impl Config {
     }
 
 
-    fn _new(toml: Toml) -> Self {
+    fn new(toml: Toml) -> Self {
         Config { toml: toml }
     }
 
@@ -154,7 +154,7 @@ impl Config {
             },
         };
 
-        Ok(Self::_new(toml))
+        Ok(Self::new(toml))
     }
 
 
@@ -185,8 +185,8 @@ impl Config {
             _                       => unreachable!("Wrong to use to_duration()!!"),
         };
         let num = match num.parse::<u32>() {
-            Ok(u)  => u as i64,
-            Err(_) => unreachable!("Wrong to use to_duration()!!"),
+            Ok(u) if u > 0 => u as i64,
+            _              => unreachable!("Wrong to use to_duration()!!"),
         };
 
         match unit {
@@ -348,13 +348,13 @@ mod tests {
     fn get_should_return_ok() {
         let config = Config::default();
 
-        assert!(config.get(ConfigKey::BurnAfter).is_ok());
+        assert!(config.get(ConfigKey::BurnAfter  ).is_ok());
         assert!(config.get(ConfigKey::SweepPeriod).is_ok());
         assert!(config.get(ConfigKey::SweepTime  ).is_ok());
     }
 
     #[test]
-    fn set_should_return_ok() {
+    fn set_should_replace_value_with_new_value() {
         let raw_values = vec![
             "1day"  .to_string(),
             "1days" .to_string(),
@@ -446,7 +446,7 @@ mod tests {
                 .unwrap_err();
             let err = match cli_err {
                 CliError::Config(e) => e,
-                _                   => panic!("unexpected error"),
+                _                   => panic!("test failed!!!"),
             };
             assert_eq!(correct, err);
         }
@@ -469,6 +469,21 @@ mod tests {
             assert_eq!(correct, Config::to_duration(input.to_string()));
         }
     }
+    #[test]
+    #[should_panic(expect = "entered unreachable code")]
+    fn to_duration_should_panic_for_0_day() {
+        Config::to_duration("0 day".to_string());
+    }
+    #[test]
+    #[should_panic(expect = "entered unreachable code")]
+    fn to_duration_should_panic_for_0_week() {
+        Config::to_duration("0 week".to_string());
+    }
+    #[test]
+    #[should_panic(expect = "entered unreachable code")]
+    fn to_duration_should_panic_for_incoherent() {
+        Config::to_duration("invalid value".to_string());
+    }
 
     #[test]
     fn to_hour_and_minute_should_return_tuple() {
@@ -479,5 +494,10 @@ mod tests {
         for (input, correct) in data_set.into_iter() {
             assert_eq!(correct, Config::to_hour_and_minute(input.to_string()));
         }
+    }
+    #[test]
+    #[should_panic(expect = "entered unreachable code")]
+    fn to_hour_and_minute_should_panic_for_incoherent() {
+        Config::to_hour_and_minute("invalid value".to_string());
     }
 }
