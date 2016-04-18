@@ -11,8 +11,6 @@ pub struct Ignore {
 }
 
 impl Command for Ignore {
-    fn validation(&self) -> bool { true }
-
     fn usage(&self) -> Usage {
         return Usage::new(UsageKind::Ignore);
     }

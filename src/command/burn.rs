@@ -7,8 +7,6 @@ use lib::setting::{Config, ConfigKey, Storage};
 pub struct Burn;
 
 impl Command for Burn {
-    fn validation(&self) -> bool { true }
-
     fn usage(&self) -> Usage {
         return Usage::new(UsageKind::Burn);
     }

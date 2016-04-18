@@ -7,8 +7,6 @@ use lib::setting::Cron;
 pub struct End;
 
 impl Command for End {
-    fn validation(&self) -> bool { true }
-
     fn usage(&self) -> Usage {
         return Usage::new(UsageKind::End);
     }

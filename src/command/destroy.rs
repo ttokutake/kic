@@ -8,8 +8,6 @@ use lib::setting;
 pub struct Destroy;
 
 impl Command for Destroy {
-    fn validation(&self) -> bool { true }
-
     fn usage(&self) -> Usage {
         return Usage::new(UsageKind::Destroy);
     }

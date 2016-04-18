@@ -27,7 +27,8 @@ use std::fmt::Display;
 use std::io::Error as IoError;
 
 trait Command {
-    fn validation(&self) -> bool;
+    fn validation(&self) -> bool { true }
+
     fn validate(&self) -> Result<(), EssentialLack> {
         if !setting::working_dir_exists() {
             return Err(EssentialLack::new(EssentialKind::WorkingDir));

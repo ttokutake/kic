@@ -7,8 +7,6 @@ use lib::setting::{Config, ConfigKey, Cron};
 pub struct Start;
 
 impl Command for Start {
-    fn validation(&self) -> bool { true }
-
     fn usage(&self) -> Usage {
         return Usage::new(UsageKind::Start);
     }

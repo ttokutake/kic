@@ -9,8 +9,6 @@ use lib::setting::{Ignore, Storage};
 pub struct Sweep;
 
 impl Command for Sweep {
-    fn validation(&self) -> bool { true }
-
     fn usage(&self) -> Usage {
         return Usage::new(UsageKind::Sweep);
     }
