@@ -128,7 +128,10 @@ impl Cron {
                 None    => unreachable!("Mistake regular expression!!"),
             })
             .filter(|path| !Path::new(path).is_dir())
-            .collect::<BTreeSet<String>>(); // We want to use "&str" if ownership allows it.
+            .collect::<BTreeSet<String>>();
+        if target_paths.len() == 0 {
+            return Ok(self);
+        }
 
         let re_core = target_paths
             .iter()
