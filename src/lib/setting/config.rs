@@ -332,11 +332,31 @@ fn default_should_return_config() {
 }
 
 #[test]
-fn to_naivetime_should_return_xxx() {
+fn to_naive_time_should_return_naivetime() {
+    let data_set = vec![
+        (NaiveTime::from_hms(0 , 0 , 0), "00:00"),
+        (NaiveTime::from_hms(23, 59, 0), "23:59"),
+    ];
+    for (correct, input) in data_set.into_iter() {
+        let result = Config::to_naive_time(input.to_string());
+        assert!(result.is_ok());
+        assert_eq!(correct, result.unwrap());
+    }
 }
-
 #[test]
-fn validate_should_return_xxx() {
+fn to_naive_time_should_return_err() {
+    let data_set = [
+        "-00:00",
+        "00",
+        "00:00:00",
+        "23:59:59",
+        "24:00",
+        "invalid value",
+    ];
+    for input in &data_set {
+        let result = Config::to_naive_time(input.to_string());
+        assert!(result.is_err());
+    }
 }
 
 #[cfg(test)]

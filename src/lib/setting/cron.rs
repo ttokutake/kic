@@ -326,8 +326,4 @@ fn discard_should_return_regex_err() {
 
     let cron = cron.discard();
     assert!(cron.is_err());
-    match cron {
-        Err(RegexError::Syntax(_)) => (),
-        _                          => panic!("test failed!!!"),
-    };
 }
