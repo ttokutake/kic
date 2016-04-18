@@ -132,7 +132,7 @@ impl Config {
         editable.overwrite(ConfigKey::SweepPeriod, CONFIG_DEFAULT_VALUE_SWEEP_PERIOD.to_string());
         editable.overwrite(ConfigKey::SweepTime  , CONFIG_DEFAULT_VALUE_SWEEP_TIME  .to_string());
 
-        Self::_new(editable.to_toml())
+        Self::new(editable.to_toml())
     }
 
     pub fn read() -> Result<Self, CliError> {
@@ -329,6 +329,14 @@ fn default_should_return_config() {
         .unwrap();
 
     assert_eq!(correct, Config::default().toml);
+}
+
+#[test]
+fn to_naivetime_should_return_xxx() {
+}
+
+#[test]
+fn validate_should_return_xxx() {
 }
 
 #[cfg(test)]
