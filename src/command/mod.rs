@@ -27,8 +27,17 @@ use std::fmt::Display;
 use std::io::Error as IoError;
 
 trait Command {
-    fn allow_to_check_settings(&self) -> bool { true }
+    fn allow_to_check_current_dir(&self) -> bool { true }
+    fn check_current_dir(&self) -> Result<(), CliError> {
+        let current_dir = try!(env::current_dir());
 
+        match BANNED_DIRS.iter().find(|d| current_dir.ends_with(d)) {
+            Some(d) => Err(From::from(RunningPlaceError::new(d.to_string()))),
+            None    => Ok(()),
+        }
+    }
+
+    fn allow_to_check_settings(&self) -> bool { true }
     fn check_settings(&self) -> Result<(), EssentialLack> {
         if !setting::working_dir_exists() {
             return Err(EssentialLack::new(EssentialKind::WorkingDir));
@@ -51,6 +60,10 @@ trait Command {
     fn main(&self) -> Result<(), CliError>;
 
     fn exec(&self, help: bool) -> Result<(), CliError> {
+        if self.allow_to_check_current_dir() {
+            try!(self.check_current_dir());
+        }
+
         if self.allow_to_check_settings() {
             try!(self.check_settings());
         }
@@ -77,18 +90,7 @@ trait Command {
     }
 }
 
-fn validate_at_first() -> Result<(), CliError> {
-    let current_dir = try!(env::current_dir());
-
-    match BANNED_DIRS.iter().find(|d| current_dir.ends_with(d)) {
-        Some(d) => Err(From::from(RunningPlaceError::new(d.to_string()))),
-        None    => Ok(()),
-    }
-}
-
 pub fn execute() -> Result<(), CliError> {
-    try!(validate_at_first());
-
     let args = env::args()
         .skip(1)
         .collect::<Vec<String>>();

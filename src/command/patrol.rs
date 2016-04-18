@@ -7,6 +7,7 @@ use lib::setting::Cron;
 pub struct Patrol;
 
 impl Command for Patrol {
+    fn allow_to_check_current_dir(&self) -> bool { false }
     fn allow_to_check_settings(&self) -> bool { false }
 
     fn usage(&self) -> Usage {
