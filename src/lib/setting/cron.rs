@@ -92,7 +92,7 @@ impl Cron {
 
     pub fn update(mut self, pairs: &[(&str, &str); 2]) -> Result<Self, CliError> {
         let current_dir = try!(Self::current_dir_string());
-        try!(self.delete(&current_dir));
+        self.delete(&current_dir);
 
         let my_new_area = pairs
             .iter()
@@ -110,11 +110,13 @@ impl Cron {
         format!(r".*cd\s+{}\s+&&\s+{}.*\n", core.as_ref(), ME)
     }
 
-    pub fn delete<S: AsRef<str>>(&mut self, dir: S) -> Result<(), RegexError> {
+    pub fn delete<S: AsRef<str>>(&mut self, dir: S) {
         let re = Self::re_for_matching_line(dir);
-        let re = try!(Regex::new(re.as_ref()));
+        let re = match Regex::new(re.as_ref()) {
+            Ok(re) => re,
+            Err(_) => unreachable!("Mistake regular expression!!"),
+        };
         self.my_area = re.replace_all(&self.my_area, "");
-        Ok(())
     }
 
     pub fn discard(mut self) -> Result<Self, RegexError> {
@@ -192,7 +194,7 @@ impl Cron {
 
 
 #[test]
-fn my_area_is_empty_return_true() {
+fn my_area_is_empty_should_return_true() {
     let empties = [
         "",
         " ",
@@ -212,7 +214,7 @@ fn my_area_is_empty_return_true() {
     }
 }
 #[test]
-fn my_area_is_empty_return_false() {
+fn my_area_is_empty_should_return_false() {
     let non_empties = [
         "a",
         "ab",
@@ -244,7 +246,7 @@ fn my_area_is_empty_return_false() {
 }
 
 #[test]
-fn delete_return_ok() {
+fn delete_should_success() {
     fn wrap_by_extra_content<S: AsRef<str>>(target: S) -> String {
         let extra_content = "when cd path_to_extra && kic command\n";
         format!("{}{}{}", extra_content, target.as_ref(), extra_content)
@@ -272,7 +274,7 @@ fn delete_return_ok() {
 
     for (correct, area) in areas.into_iter() {
         cron.my_area = area;
-        cron.delete(&dir).ok();
+        cron.delete(&dir);
         assert_eq!(correct, cron.my_area);
     }
 }

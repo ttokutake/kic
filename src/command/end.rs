@@ -15,7 +15,7 @@ impl Command for End {
         let mut cron = try!(Cron::read());
 
         let current_dir = try!(Cron::current_dir_string());
-        try!(cron.delete(current_dir));
+        cron.delete(current_dir);
 
         cron.set()
     }
