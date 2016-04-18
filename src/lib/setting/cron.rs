@@ -281,3 +281,14 @@ fn delete_should_success() {
         assert_eq!(correct, cron.my_area);
     }
 }
+#[test]
+#[should_panic(expect = "entered unreachable code")]
+fn delete_should_fail() {
+    let mut cron = Cron {
+        upper  : "upper\n".to_string(),
+        my_area: ""       .to_string(),
+        lower  : "lower\n".to_string(),
+    };
+
+    cron.delete("() <= mistaken Regular Expression!");
+}
