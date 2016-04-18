@@ -27,9 +27,9 @@ use std::fmt::Display;
 use std::io::Error as IoError;
 
 trait Command {
-    fn validation(&self) -> bool { true }
+    fn allow_to_check_settings(&self) -> bool { true }
 
-    fn validate(&self) -> Result<(), EssentialLack> {
+    fn check_settings(&self) -> Result<(), EssentialLack> {
         if !setting::working_dir_exists() {
             return Err(EssentialLack::new(EssentialKind::WorkingDir));
         }
@@ -51,8 +51,8 @@ trait Command {
     fn main(&self) -> Result<(), CliError>;
 
     fn exec(&self, help: bool) -> Result<(), CliError> {
-        if self.validation() {
-            try!(self.validate());
+        if self.allow_to_check_settings() {
+            try!(self.check_settings());
         }
 
         if help {

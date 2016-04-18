@@ -7,7 +7,7 @@ use lib::setting::{self, Config, Ignore, Storage};
 pub struct Init;
 
 impl Command for Init {
-    fn validation(&self) -> bool { false }
+    fn allow_to_check_settings(&self) -> bool { false }
 
     fn usage(&self) -> Usage {
         return Usage::new(UsageKind::Init);

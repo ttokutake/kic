@@ -7,7 +7,7 @@ use lib::setting::Cron;
 pub struct Patrol;
 
 impl Command for Patrol {
-    fn validation(&self) -> bool { false }
+    fn allow_to_check_settings(&self) -> bool { false }
 
     fn usage(&self) -> Usage {
         return Usage::new(UsageKind::Patrol);
