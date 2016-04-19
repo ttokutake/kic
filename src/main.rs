@@ -20,7 +20,7 @@ fn main() {
                 1
             },
             CliError::Usage(u) => {
-                println!("{}", u);
+                echo(u);
                 1
             },
             _ => {

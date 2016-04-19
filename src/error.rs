@@ -237,6 +237,7 @@ impl Error for RunningPlaceError {
 #[derive(Debug, PartialEq)]
 pub enum UsageKind {
     Nothing,
+    Help,
     Init,
     Config,
     Ignore,
@@ -251,6 +252,7 @@ impl UsageKind {
     fn command(&self) -> &str {
         match *self {
             UsageKind::Nothing => "<Command>",
+            UsageKind::Help    => "help",
             UsageKind::Init    => "init",
             UsageKind::Config  => "config",
             UsageKind::Ignore  => "ignore",
@@ -264,25 +266,22 @@ impl UsageKind {
     }
 
     fn common_usage(&self) -> String {
-        format!("{} {} [Option]", ME, self.command())
+        format!("{} {}", ME, self.command())
     }
 
     fn usages(&self) -> Vec<String> {
         match *self {
-            UsageKind::Config => {
-                vec![
-                    format!("{} set <Key> <Value>", self.common_usage()),
-                    format!("{} init"             , self.common_usage()),
-                ]
-            },
-            UsageKind::Ignore => {
-                vec![
-                    format!("{} add <File> ..."   , self.common_usage()),
-                    format!("{} remove <File> ...", self.common_usage()),
-                    format!("{} current"          , self.common_usage()),
-                    format!("{} clear"            , self.common_usage()),
-                ]
-            },
+            UsageKind::Help   => vec![format!("{} <SubCommand>", self.common_usage())],
+            UsageKind::Config => vec![
+                format!("{} set <Key> <Value>", self.common_usage()),
+                format!("{} init"             , self.common_usage()),
+            ],
+            UsageKind::Ignore => vec![
+                format!("{} add <File> ..."   , self.common_usage()),
+                format!("{} remove <File> ...", self.common_usage()),
+                format!("{} current"          , self.common_usage()),
+                format!("{} clear"            , self.common_usage()),
+            ],
             _ => vec![self.common_usage()],
         }
     }
@@ -290,6 +289,7 @@ impl UsageKind {
     fn description(&self) -> &str {
         match *self {
             UsageKind::Nothing => "Keep your directories clean!",
+            UsageKind::Help    => "Display usage for each command.",
             UsageKind::Init    => "Register current directory.",
             UsageKind::Config  => "Change parameter.",
             UsageKind::Ignore  => "Change \"non-dust\" file's list.",
@@ -304,25 +304,22 @@ impl UsageKind {
 
     fn sub_descriptions(&self) -> Vec<String> {
         match *self {
-            UsageKind::Nothing => {
-                vec![
-                    format!("{}{}", "init    # ", UsageKind::Init   .description()),
-                    format!("{}{}", "config  # ", UsageKind::Config .description()),
-                    format!("{}{}", "ignore  # ", UsageKind::Ignore .description()),
-                    format!("{}{}", "sweep   # ", UsageKind::Sweep  .description()),
-                    format!("{}{}", "burn    # ", UsageKind::Burn   .description()),
-                    format!("{}{}", "start   # ", UsageKind::Start  .description()),
-                    format!("{}{}", "end     # ", UsageKind::End    .description()),
-                    format!("{}{}", "destroy # ", UsageKind::Destroy.description()),
-                    format!("{}{}", "patrol  # ", UsageKind::Patrol .description()),
-                ]
-            },
-            UsageKind::Config => {
-                vec![
-                    "set  # Set parameter"       .to_string(),
-                    "init # Initialize configure".to_string(),
-                ]
-            },
+            UsageKind::Nothing => vec![
+                format!("{}{}", "help    # ", UsageKind::Help   .description()),
+                format!("{}{}", "init    # ", UsageKind::Init   .description()),
+                format!("{}{}", "config  # ", UsageKind::Config .description()),
+                format!("{}{}", "ignore  # ", UsageKind::Ignore .description()),
+                format!("{}{}", "sweep   # ", UsageKind::Sweep  .description()),
+                format!("{}{}", "burn    # ", UsageKind::Burn   .description()),
+                format!("{}{}", "start   # ", UsageKind::Start  .description()),
+                format!("{}{}", "end     # ", UsageKind::End    .description()),
+                format!("{}{}", "destroy # ", UsageKind::Destroy.description()),
+                format!("{}{}", "patrol  # ", UsageKind::Patrol .description()),
+            ],
+            UsageKind::Config => vec![
+                "set  # Set parameter"       .to_string(),
+                "init # Initialize configure".to_string(),
+            ],
             UsageKind::Ignore => {
                 let file_expression = "\"non-dust\" file's list";
                 vec![
@@ -347,17 +344,6 @@ impl Usage {
     }
 
     fn message(&self) -> String {
-        let common = format!(
-"Option:
-    -h|--help    # Display help message.
-    -v|--version # Display software version.
-
-Description:
-    {}
-",
-            self.kind.description(),
-        );
-
         let usage = self.kind
             .usages()
             .iter()
@@ -365,7 +351,7 @@ Description:
                 message + "    " + line + "\n"
             });
 
-        let main = format!("Usage:\n{}\n{}", usage, common);
+        let main = format!("Usage:\n{}\nDescription:\n    {}\n", usage, self.kind.description());
 
         let sub_description = self.kind
             .sub_descriptions()
