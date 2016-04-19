@@ -117,3 +117,11 @@ pub fn execute() -> Result<(), CliError> {
 
     command.exec(help)
 }
+
+pub fn clean_up_cron() -> Result<(), CliError> {
+    if cfg!(unix) {
+        End.main()
+    } else {
+        Ok(())
+    }
+}

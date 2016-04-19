@@ -14,6 +14,9 @@ fn main() {
         let error_code = match why {
             CliError::Essential(_) | CliError::RunningPlace(_) => {
                 print_with_tag(Tag::Warning, why);
+                if let Err(e) = command::clean_up_cron() {
+                    print_with_tag(Tag::Error, e);
+                }
                 1
             },
             CliError::Usage(u) => {
