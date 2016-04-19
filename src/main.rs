@@ -1,9 +1,7 @@
-#[macro_use]
-mod lib;
-
 mod command;
 mod constant;
 mod error;
+mod lib;
 
 use error::CliError;
 use lib::io::*;
