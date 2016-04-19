@@ -59,7 +59,11 @@ trait Command {
 
     fn main(&self) -> Result<(), CliError>;
 
-    fn exec(&self, help: bool) -> Result<(), CliError> {
+    fn exec(&self, need_help: bool) -> Result<(), CliError> {
+        if need_help {
+            return Err(From::from(self.usage()));
+        }
+
         if self.allow_to_check_current_dir() {
             try!(self.check_current_dir());
         }
@@ -68,11 +72,7 @@ trait Command {
             try!(self.check_settings());
         }
 
-        if help {
-            Err(From::from(self.usage()))
-        } else {
-            self.main()
-        }
+        self.main()
     }
 
     fn run_after_confirmation<D: Display, F>(message: D, danger_exec: F) -> Result<(), CliError>
@@ -95,27 +95,28 @@ pub fn execute() -> Result<(), CliError> {
         .skip(1)
         .collect::<Vec<String>>();
 
-    let help = args.iter().any(|a| *a == "-h" || *a == "--help");
-
     let mut args = args.into_iter();
 
-    let command: Box<Command> = match args.next() {
-        Some(first) => match first.as_ref() {
-            "init"    => Box::new(Init                                                 ),
-            "config"  => Box::new(Config::new(args.next(), args.next()   , args.next())),
-            "ignore"  => Box::new(Ignore::new(args.next(), args.collect()             )),
-            "sweep"   => Box::new(Sweep                                                ),
-            "burn"    => Box::new(Burn                                                 ),
-            "start"   => Box::new(Start                                                ),
-            "end"     => Box::new(End                                                  ),
-            "destroy" => Box::new(Destroy                                              ),
-            "patrol"  => Box::new(Patrol                                               ),
-            _         => return Err(From::from(Usage::new(UsageKind::Nothing))),
-        },
-        None => return Err(From::from(Usage::new(UsageKind::Nothing))),
+    let command = try!(args.next().ok_or(Usage::new(UsageKind::Nothing)));
+
+    let (command, need_help) = if &command == "help" {
+        (try!(args.next().ok_or(Usage::new(UsageKind::Help))), true)
+    } else {
+        (command, false)
     };
 
-    command.exec(help)
+    match command.as_ref() {
+        "init"    => Init                                                 .exec(need_help),
+        "config"  => Config::new(args.next(), args.next()   , args.next()).exec(need_help),
+        "ignore"  => Ignore::new(args.next(), args.collect()             ).exec(need_help),
+        "sweep"   => Sweep                                                .exec(need_help),
+        "burn"    => Burn                                                 .exec(need_help),
+        "start"   => Start                                                .exec(need_help),
+        "end"     => End                                                  .exec(need_help),
+        "destroy" => Destroy                                              .exec(need_help),
+        "patrol"  => Patrol                                               .exec(need_help),
+        _         => Err(From::from(Usage::new(UsageKind::Nothing))),
+    }
 }
 
 pub fn clean_up_cron() -> Result<(), CliError> {
