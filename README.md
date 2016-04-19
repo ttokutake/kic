@@ -10,6 +10,9 @@
 
 ## Commands
 
+- `help`
+- `version`
+- `dry-run`
 - `init`
 - `config`
 - `ignore`
@@ -19,9 +22,3 @@
 - `end`
 - `destroy`
 - `patrol`
-
-## Option
-
-- `-h`, `--help`
-- `-v`, `--version`
-- `--dry-run`
