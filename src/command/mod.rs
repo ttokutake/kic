@@ -1,3 +1,4 @@
+mod version;
 mod init;
 mod config;
 mod ignore;
@@ -8,6 +9,7 @@ mod end;
 mod destroy;
 mod patrol;
 
+use self::version::Version;
 use self::init::Init;
 use self::config::Config;
 use self::ignore::Ignore;
@@ -106,6 +108,7 @@ pub fn execute() -> Result<(), CliError> {
     };
 
     match command.as_ref() {
+        "version" => Version                                              .exec(need_help),
         "init"    => Init                                                 .exec(need_help),
         "config"  => Config::new(args.next(), args.next()   , args.next()).exec(need_help),
         "ignore"  => Ignore::new(args.next(), args.collect()             ).exec(need_help),

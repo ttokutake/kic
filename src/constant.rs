@@ -1,4 +1,5 @@
-pub const ME: &'static str = "kic";
+pub const ME: &'static str      = "kic";
+pub const VERSION: &'static str = env!("CARGO_PKG_VERSION");
 
 pub const MAIN_DIR: &'static str = ".";
 

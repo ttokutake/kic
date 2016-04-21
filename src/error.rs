@@ -238,6 +238,7 @@ impl Error for RunningPlaceError {
 pub enum UsageKind {
     Nothing,
     Help,
+    Version,
     Init,
     Config,
     Ignore,
@@ -253,6 +254,7 @@ impl UsageKind {
         match *self {
             UsageKind::Nothing => "<Command>",
             UsageKind::Help    => "help",
+            UsageKind::Version => "version",
             UsageKind::Init    => "init",
             UsageKind::Config  => "config",
             UsageKind::Ignore  => "ignore",
@@ -290,6 +292,7 @@ impl UsageKind {
         match *self {
             UsageKind::Nothing => "Keep your directories clean!",
             UsageKind::Help    => "Display usage for each command.",
+            UsageKind::Version => "Display the version of this software.",
             UsageKind::Init    => "Register current directory.",
             UsageKind::Config  => "Change parameter.",
             UsageKind::Ignore  => "Change \"non-dust\" file's list.",
@@ -306,6 +309,7 @@ impl UsageKind {
         match *self {
             UsageKind::Nothing => vec![
                 format!("{}{}", "help    # ", UsageKind::Help   .description()),
+                format!("{}{}", "version # ", UsageKind::Version.description()),
                 format!("{}{}", "init    # ", UsageKind::Init   .description()),
                 format!("{}{}", "config  # ", UsageKind::Config .description()),
                 format!("{}{}", "ignore  # ", UsageKind::Ignore .description()),
