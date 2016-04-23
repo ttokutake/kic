@@ -35,15 +35,13 @@ impl Cron {
             exec,
         )
     }
-    fn start_mark<S: AsRef<str>>(exe: S) -> String {
-        Self::base_mark("from this", Self::patrol(exe))
+    fn start_mark<D: Display>(addition: D) -> String {
+        Self::base_mark("from this", addition)
     }
-    fn end_mark() -> String {
+    fn start_mark_with_patrol<S: AsRef<str>>(exe: S) -> String {
+        Self::start_mark(format!("0 12 * * *\t{} patrol\n", exe.as_ref()))
+    } fn end_mark() -> String {
         Self::base_mark("up to here", "")
-    }
-
-    fn patrol<S: AsRef<str>>(exe: S) -> String {
-        format!("0 0 * * *\t{} patrol\n", exe.as_ref())
     }
 
     fn escape_asterisk<S: AsRef<str>>(s: S) -> String {
@@ -74,7 +72,7 @@ impl Cron {
 
         let areas = format!(
             "^(?P<upper>(.|\n)*){}(?P<my_area>(.|\n)*){}(?P<lower>(.|\n)*)$",
-            Self::escape_asterisk(Self::start_mark(exe)),
+            Self::escape_asterisk(Self::start_mark_with_patrol(exe)),
             Self::end_mark(),
         );
         let re = match Regex::new(&areas) {
@@ -153,6 +151,14 @@ impl Cron {
             self.my_area = re.replace_all(&self.my_area, "");
         }
 
+        let re = format!("{}(.|\n)*{}", Self::start_mark(""), Self::end_mark());
+        let re = match Regex::new(re.as_ref()) {
+            Ok(re) => re,
+            Err(_) => unreachable!("Mistake regular expression!!"),
+        };
+        self.upper = re.replace_all(&self.upper, "");
+        self.lower = re.replace_all(&self.lower, "");
+
         Ok(self)
     }
 
@@ -168,7 +174,7 @@ impl Cron {
             self.upper + &self.lower
         } else {
             self.upper
-                + &Self::start_mark(&self.exe)
+                + &Self::start_mark_with_patrol(&self.exe)
                 + &self.my_area
                 + &Self::end_mark()
                 + &self.lower
@@ -330,7 +336,18 @@ fn discard_should_remove_lines_including_non_existing_dir() {
 
     let cron = cron.discard();
     assert!(cron.is_ok());
-    assert!(cron.unwrap().my_area_is_empty());
+    let mut cron = cron.unwrap();
+    assert!(cron.my_area_is_empty());
+
+
+    cron.upper = Cron::start_mark("when path_to_bin command") + &Cron::end_mark();
+    cron.lower = Cron::start_mark("when path_to_bin command") + &Cron::end_mark();
+
+    let cron = cron.discard();
+    assert!(cron.is_ok());
+    let cron = cron.unwrap();
+    assert_eq!("", cron.upper);
+    assert_eq!("", cron.lower);
 }
 #[test]
 fn discard_should_return_regex_err() {
