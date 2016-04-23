@@ -239,20 +239,20 @@ impl Config {
                     .map_or((None, None), |caps| (caps.name("num"), caps.name("unit")));
                 let (num, unit) = match pair {
                     (Some(num), Some(unit)) if num != "0" => (num, unit),
-                    _                                     => return Err(From::from(ConfigError::new(ConfigErrorKind::BurnAfter))),
+                    _                                     => return Err(ConfigError::new(ConfigErrorKind::BurnAfter)),
                 };
                 Ok(format!("{} {}", num, unit))
             },
             ConfigKey::SweepPeriod => {
                 match value {
                     "daily" | "weekly" => Ok(value.to_string()),
-                    _                  => Err(From::from(ConfigError::new(ConfigErrorKind::SweepPeriod))),
+                    _                  => Err(ConfigError::new(ConfigErrorKind::SweepPeriod)),
                 }
             },
             ConfigKey::SweepTime => {
                 match Self::to_naive_time(value) {
                     Ok(_)  => Ok(value.to_string()),
-                    Err(_) => Err(From::from(ConfigError::new(ConfigErrorKind::SweepTime))),
+                    Err(_) => Err(ConfigError::new(ConfigErrorKind::SweepTime)),
                 }
             },
         }

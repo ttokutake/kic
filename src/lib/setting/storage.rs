@@ -129,7 +129,7 @@ impl Storage {
                 Ok(_)  => (),
                 Err(e) => match e.kind() {
                     IoErrorKind::PermissionDenied => try!(self.print_and_log("     Interrupted for permission")),
-                    _                             => return Err(From::from(e)),
+                    _                             => return Err(e),
                 },
             };
         }
@@ -154,7 +154,7 @@ impl Storage {
                     Ok(_)  => try!(fs::create_dir_all(path_buf![&path_to_dust_box, path_to_dir])),
                     Err(e) => match e.kind() {
                         IoErrorKind::PermissionDenied => try!(self.print_and_log("     Interrupted for permission")),
-                        _                             => return Err(From::from(e)),
+                        _                             => return Err(e),
                     },
                 };
             }
