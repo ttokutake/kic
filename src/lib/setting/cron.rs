@@ -2,7 +2,7 @@ extern crate regex;
 
 use self::regex::{Error as RegexError, Regex};
 
-use constant::ME;
+use constant::{ME, WORKING_DIR_NAME};
 use error::{CliError, CronError, CronErrorKind};
 use lib::io::*;
 use std::collections::BTreeSet;
@@ -115,12 +115,12 @@ impl Cron {
     }
 
 
-    fn re_for_matching_line<S: AsRef<str>>(&self, core: S) -> String {
+    fn re_for_matching_missing_dir_line<S: AsRef<str>>(&self, core: S) -> String {
         format!(r".*cd\s+{}\s+&&\s+{}.*\n", core.as_ref(), self.bin)
     }
 
     pub fn delete<S: AsRef<str>>(&mut self, dir: S) {
-        let re = self.re_for_matching_line(dir);
+        let re = self.re_for_matching_missing_dir_line(dir);
         let re = match Regex::new(re.as_ref()) {
             Ok(re) => re,
             Err(_) => unreachable!("Wrong to use delete()!!"),
@@ -129,26 +129,30 @@ impl Cron {
     }
 
     pub fn discard(mut self) -> Result<Self, RegexError> {
-        let re = self.re_for_matching_line(r"(?P<path>[^\s]+)");
-        let target_paths = try!(Regex::new(re.as_ref()))
+        let re = self.re_for_matching_missing_dir_line(r"(?P<path>[^\s]+)");
+        let re = match Regex::new(re.as_ref()) {
+            Ok(re) => re,
+            Err(_) => unreachable!("Mistake regular expression!!"),
+        };
+        let target_paths = re
             .captures_iter(&self.my_area)
             .map(|caps| match caps.name("path") {
                 Some(p) => p.to_string(),
-                None    => unreachable!("Mistake regular expression!!"),
+                None    => unreachable!("Mistake keyword for capturing!!"),
             })
-            .filter(|path| !Path::new(path).is_dir())
+            .filter(|path| !Path::new(path).join(WORKING_DIR_NAME).is_dir())
             .collect::<BTreeSet<String>>();
-        if target_paths.len() == 0 {
-            return Ok(self);
+
+        if target_paths.len() != 0 {
+            let re_core = target_paths
+                .iter()
+                .fold(String::new(), |core, path| core + "|" + path); // We want to use true "Iterator.reduce()".
+            let re_core = format!("({})", re_core.trim_left_matches('|'));
+            let re = self.re_for_matching_missing_dir_line(re_core);
+            let re = try!(Regex::new(re.as_ref()));
+            self.my_area = re.replace_all(&self.my_area, "");
         }
 
-        let re_core = target_paths
-            .iter()
-            .fold(String::new(), |core, path| core + "|" + path); // We want to use true "Iterator.reduce()".
-        let re_core = re_core.trim_left_matches('|');
-        let re = self.re_for_matching_line(format!("({})", re_core));
-        let re = try!(Regex::new(re.as_ref()));
-        self.my_area = re.replace_all(&self.my_area, "");
         Ok(self)
     }
 
@@ -316,11 +320,13 @@ fn discard_should_remove_lines_including_non_existing_dir() {
     };
 
     cron.my_area = format!("
+        cd /bin && {} command
+        cd /bin && {} command2
         cd /path/to/non/existing/dir && {} command
         cd /path/to/non/existing/dir && {} command2
         cd /path/to/really/non/existing/dir && {} command
         cd /path/to/really/non/existing/dir && {} command2
-    ", &cron.bin, &cron.bin, &cron.bin, &cron.bin);
+    ", &cron.bin, &cron.bin, &cron.bin, &cron.bin, &cron.bin, &cron.bin);
 
     let cron = cron.discard();
     assert!(cron.is_ok());
