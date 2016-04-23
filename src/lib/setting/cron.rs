@@ -16,6 +16,7 @@ use std::str;
 
 #[derive(Debug)]
 pub struct Cron {
+    bin    : String,
     upper  : String,
     my_area: String,
     lower  : String,
@@ -34,15 +35,15 @@ impl Cron {
             exec,
         )
     }
-    fn start_mark() -> String {
-        Self::base_mark("from this", Self::patrol())
+    fn start_mark<S: AsRef<str>>(current_exe: S) -> String {
+        Self::base_mark("from this", Self::patrol(current_exe))
     }
     fn end_mark() -> String {
         Self::base_mark("up to here", "")
     }
 
-    fn patrol() -> String {
-        format!("0 0 * * *\t{} patrol\n", ME)
+    fn patrol<S: AsRef<str>>(current_exe: S) -> String {
+        format!("0 0 * * *\t{} patrol\n", current_exe.as_ref())
     }
 
     fn escape_asterisk<S: AsRef<str>>(s: S) -> String {
@@ -55,6 +56,9 @@ impl Cron {
 
 
     pub fn read() -> Result<Self, CliError> {
+        let current_exe = try!(env::current_exe());
+        let current_exe = try!(current_exe.to_str().ok_or(CronError::new(CronErrorKind::BinExistsInInvalidDir)));
+
         print_with_tag(Tag::Info, "Read cron");
 
         let result = process::Command::new("crontab")
@@ -70,7 +74,7 @@ impl Cron {
 
         let areas = format!(
             "^(?P<upper>(.|\n)*){}(?P<my_area>(.|\n)*){}(?P<lower>(.|\n)*)$",
-            Self::escape_asterisk(Self::start_mark()),
+            Self::escape_asterisk(Self::start_mark(current_exe)),
             Self::end_mark(),
         );
         let re = match Regex::new(&areas) {
@@ -86,7 +90,12 @@ impl Cron {
             None => (contents, "", ""),
         };
 
-        Ok(Cron { upper: upper.to_string(), my_area: my_area.to_string(), lower: lower.to_string() })
+        Ok(Cron {
+            bin    : current_exe.to_string(),
+            upper  : upper      .to_string(),
+            my_area: my_area    .to_string(),
+            lower  : lower      .to_string(),
+        })
     }
 
 
@@ -97,7 +106,7 @@ impl Cron {
         let my_new_area = pairs
             .iter()
             .fold(String::new(), |area, &(time, command)| {
-                let line = format!("{}\tcd {} && {} {}\n", time, current_dir, ME, command);
+                let line = format!("{}\tcd {} && {} {}\n", time, current_dir, self.bin, command);
                 area + &line
             });
 
@@ -106,12 +115,12 @@ impl Cron {
     }
 
 
-    fn re_for_matching_line<S: AsRef<str>>(core: S) -> String {
-        format!(r".*cd\s+{}\s+&&\s+{}.*\n", core.as_ref(), ME)
+    fn re_for_matching_line<S: AsRef<str>>(&self, core: S) -> String {
+        format!(r".*cd\s+{}\s+&&\s+{}.*\n", core.as_ref(), self.bin)
     }
 
     pub fn delete<S: AsRef<str>>(&mut self, dir: S) {
-        let re = Self::re_for_matching_line(dir);
+        let re = self.re_for_matching_line(dir);
         let re = match Regex::new(re.as_ref()) {
             Ok(re) => re,
             Err(_) => unreachable!("Wrong to use delete()!!"),
@@ -120,7 +129,7 @@ impl Cron {
     }
 
     pub fn discard(mut self) -> Result<Self, RegexError> {
-        let re = Self::re_for_matching_line(r"(?P<path>[^\s]+)");
+        let re = self.re_for_matching_line(r"(?P<path>[^\s]+)");
         let target_paths = try!(Regex::new(re.as_ref()))
             .captures_iter(&self.my_area)
             .map(|caps| match caps.name("path") {
@@ -137,7 +146,7 @@ impl Cron {
             .iter()
             .fold(String::new(), |core, path| core + "|" + path); // We want to use true "Iterator.reduce()".
         let re_core = re_core.trim_left_matches('|');
-        let re = Self::re_for_matching_line(format!("({})", re_core));
+        let re = self.re_for_matching_line(format!("({})", re_core));
         let re = try!(Regex::new(re.as_ref()));
         self.my_area = re.replace_all(&self.my_area, "");
         Ok(self)
@@ -155,7 +164,7 @@ impl Cron {
             self.upper + &self.lower
         } else {
             self.upper
-                + &Self::start_mark()
+                + &Self::start_mark(&self.bin)
                 + &self.my_area
                 + &Self::end_mark()
                 + &self.lower
@@ -209,9 +218,10 @@ fn my_area_is_empty_should_return_true() {
 
     for empty in &empties {
         let cron = Cron {
-            upper: ""     .to_string(),
+            bin    : ""   .to_string(),
+            upper  : ""   .to_string(),
             my_area: empty.to_string(),
-            lower: ""     .to_string(),
+            lower  : ""   .to_string(),
         };
         assert!(cron.my_area_is_empty());
     }
@@ -240,6 +250,7 @@ fn my_area_is_empty_should_return_false() {
 
     for non_empty in &non_empties {
         let cron = Cron {
+            bin    : ""       .to_string(),
             upper  : ""       .to_string(),
             my_area: non_empty.to_string(),
             lower  : ""       .to_string(),
@@ -251,28 +262,29 @@ fn my_area_is_empty_should_return_false() {
 #[test]
 fn delete_should_success() {
     fn wrap_by_extra_content<S: AsRef<str>>(target: S) -> String {
-        let extra_content = "when cd path_to_extra && kic command\n";
+        let extra_content = "when cd path_to_extra && path_to_bin command\n";
         format!("{}{}{}", extra_content, target.as_ref(), extra_content)
     }
 
     let mut cron = Cron {
-        upper  : "upper" .to_string(),
-        my_area: "middle".to_string(),
-        lower  : "lower" .to_string(),
+        bin    : "path_to_bin".to_string(),
+        upper  : "upper"      .to_string(),
+        my_area: "middle"     .to_string(),
+        lower  : "lower"      .to_string(),
     };
 
     let dir = "path_to_dir";
 
     let areas = vec![
-        ("".to_string(), format!("cd {} && kic\n"             , dir)),
-        ("".to_string(), format!("when cd {} && kic\n"        , dir)),
-        ("".to_string(), format!("cd {} && kic command\n"     , dir)),
-        ("".to_string(), format!("when cd {} && kic command\n", dir)),
+        ("".to_string(), format!("cd {} && {}\n"             , dir, &cron.bin)),
+        ("".to_string(), format!("when cd {} && {}\n"        , dir, &cron.bin)),
+        ("".to_string(), format!("cd {} && {} command\n"     , dir, &cron.bin)),
+        ("".to_string(), format!("when cd {} && {} command\n", dir, &cron.bin)),
 
-        (wrap_by_extra_content(""), wrap_by_extra_content(format!("cd {} && kic\n"             , dir))),
-        (wrap_by_extra_content(""), wrap_by_extra_content(format!("when cd {} && kic\n"        , dir))),
-        (wrap_by_extra_content(""), wrap_by_extra_content(format!("cd {} && kic command\n"     , dir))),
-        (wrap_by_extra_content(""), wrap_by_extra_content(format!("when cd {} && kic command\n", dir))),
+        (wrap_by_extra_content(""), wrap_by_extra_content(format!("cd {} && {}\n"             , dir, &cron.bin))),
+        (wrap_by_extra_content(""), wrap_by_extra_content(format!("when cd {} && {}\n"        , dir, &cron.bin))),
+        (wrap_by_extra_content(""), wrap_by_extra_content(format!("cd {} && {} command\n"     , dir, &cron.bin))),
+        (wrap_by_extra_content(""), wrap_by_extra_content(format!("when cd {} && {} command\n", dir, &cron.bin))),
     ];
 
     for (correct, area) in areas.into_iter() {
@@ -285,9 +297,10 @@ fn delete_should_success() {
 #[should_panic(expect = "entered unreachable code")]
 fn delete_should_panic() {
     let mut cron = Cron {
-        upper  : "upper" .to_string(),
-        my_area: "middle".to_string(),
-        lower  : "lower" .to_string(),
+        bin    : "path_to_bin".to_string(),
+        upper  : "upper"      .to_string(),
+        my_area: "middle"     .to_string(),
+        lower  : "lower"      .to_string(),
     };
 
     cron.delete("() <= mistaken Regular Expression!");
@@ -296,9 +309,10 @@ fn delete_should_panic() {
 #[test]
 fn discard_should_remove_lines_including_non_existing_dir() {
     let mut cron = Cron {
-        upper  : "upper" .to_string(),
-        my_area: "middle".to_string(),
-        lower  : "lower" .to_string(),
+        bin    : "path_to_bin".to_string(),
+        upper  : "upper"      .to_string(),
+        my_area: "middle"     .to_string(),
+        lower  : "lower"      .to_string(),
     };
 
     cron.my_area = format!("
@@ -306,7 +320,7 @@ fn discard_should_remove_lines_including_non_existing_dir() {
         cd /path/to/non/existing/dir && {} command2
         cd /path/to/really/non/existing/dir && {} command
         cd /path/to/really/non/existing/dir && {} command2
-    ", ME, ME, ME, ME);
+    ", &cron.bin, &cron.bin, &cron.bin, &cron.bin);
 
     let cron = cron.discard();
     assert!(cron.is_ok());
@@ -315,14 +329,15 @@ fn discard_should_remove_lines_including_non_existing_dir() {
 #[test]
 fn discard_should_return_regex_err() {
     let mut cron = Cron {
-        upper  : "upper" .to_string(),
-        my_area: "middle".to_string(),
-        lower  : "lower" .to_string(),
+        bin    : "path_to_bin".to_string(),
+        upper  : "upper"      .to_string(),
+        my_area: "middle"     .to_string(),
+        lower  : "lower"      .to_string(),
     };
 
     cron.my_area = format!("
         cd /()/<=/mischief/by/bad/user && {} command
-    ", ME);
+    ", &cron.bin);
 
     let cron = cron.discard();
     assert!(cron.is_err());

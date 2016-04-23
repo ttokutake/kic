@@ -157,6 +157,7 @@ impl Error for ConfigError {
 
 #[derive(Debug, PartialEq)]
 pub enum CronErrorKind {
+    BinExistsInInvalidDir,
     InvalidCharacterCode,
     InvalidPath,
     FailedToWrite,
@@ -173,9 +174,10 @@ impl CronError {
 impl Display for CronError {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         write!(f, "{}", match self.kind {
-            CronErrorKind::InvalidCharacterCode => "The \"cron\" file consists of non-UTF-8 character code",
-            CronErrorKind::InvalidPath          => "The path to current directory include non-UTF-8 character code",
-            CronErrorKind::FailedToWrite        => "Failed to write new \"cron\" file"
+            CronErrorKind::BinExistsInInvalidDir => "The \"bin\" exists in directory whose path include non-UTF-8 charecter code",
+            CronErrorKind::InvalidCharacterCode  => "The \"cron\" file consists of non-UTF-8 character code",
+            CronErrorKind::InvalidPath           => "The path to current directory include non-UTF-8 character code",
+            CronErrorKind::FailedToWrite         => "Failed to write new \"cron\" file"
         })
     }
 }
