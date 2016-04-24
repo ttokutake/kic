@@ -286,7 +286,7 @@ impl UsageKind {
                 format!("{} current"          , self.common_usage()),
                 format!("{} clear"            , self.common_usage()),
             ],
-            UsageKind::Sweep => vec![format!("{} [indeed]", self.common_usage())],
+            UsageKind::Sweep => vec![format!("{} [all] [indeed]", self.common_usage())],
             UsageKind::Burn  => vec![format!("{} [indeed]", self.common_usage())],
             _ => vec![self.common_usage()],
         }
@@ -338,8 +338,10 @@ impl UsageKind {
                 ]
             },
             UsageKind::Sweep => vec![
-                "(none) # Sweep \"dust\"s fakely".to_string(),
-                "indeed # Sweep \"dust\"s indeed".to_string(),
+                "(none)     # Sweep fakely \"dust\"s"                                 .to_string(),
+                "indeed     # Sweep indeed \"dust\"s"                                 .to_string(),
+                "all        # Sweep fakely \"dust\"s including recently created files".to_string(),
+                "all indeed # Sweep indeed \"dust\"s including recently created files".to_string(),
             ],
             UsageKind::Burn => vec![
                 "(none) # Burn expired \"dust box\"s fakely".to_string(),
