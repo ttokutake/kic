@@ -12,9 +12,10 @@ use std::path::{Path, PathBuf};
 
 
 pub struct Storage {
-    now     : DateTime<Local>,
-    date    : String,
-    log_file: Option<String>,
+    now       : DateTime<Local>,
+    date      : String,
+    log_file  : Option<String>,
+    is_dry_run: bool,
 }
 
 impl Storage {
@@ -33,10 +34,10 @@ impl Storage {
     }
 
 
-    pub fn new() -> Self {
+    pub fn new(is_dry_run: bool) -> Self {
         let now  = Local::now();
         let date = now.format("%Y-%m-%d").to_string();
-        Storage { now: now, date: date, log_file: None }
+        Storage { now: now, date: date, log_file: None, is_dry_run: is_dry_run }
     }
 
 
@@ -103,7 +104,8 @@ impl Storage {
     pub fn squeeze_dusts<P: AsRef<Path>>(&self, paths_to_dust: Vec<P>) -> Result<(), IoError> {
         let path_to_dust_box = self.path_to_dust_box();
 
-        let message = format!("Move dusts to \"{}\"", path_to_dust_box.display());
+        let addition = if self.is_dry_run { " (dry-run mode)" } else { "" };
+        let message  = format!("Move dusts to \"{}\"{}", path_to_dust_box.display(), addition);
         try!(self.print_and_log(message));
 
         for path_to_dust in &paths_to_dust {
@@ -122,36 +124,12 @@ impl Storage {
             let message = format!("  => \"{}\"", path_to_dust.display());
             try!(self.print_and_log(message));
 
-            try!(fs::create_dir_all(&to));
+            if !self.is_dry_run {
+                try!(fs::create_dir_all(&to));
 
-            // forcedly overwrite if the file exists with same name.
-            match fs::rename(path_to_dust, path_buf![to, target_file]) {
-                Ok(_)  => (),
-                Err(e) => match e.kind() {
-                    IoErrorKind::PermissionDenied => try!(self.print_and_log("     Interrupted for permission")),
-                    _                             => return Err(e),
-                },
-            };
-        }
-
-        Ok(())
-    }
-
-    pub fn squeeze_empty_dirs_only<P: AsRef<Path>>(&self, paths_to_dir: Vec<P>) -> Result<(), IoError> {
-        let path_to_dust_box = self.path_to_dust_box();
-
-        let message = format!("Move empty dirs to \"{}\"", path_to_dust_box.display());
-        try!(self.print_and_log(message));
-
-        for path_to_dir in &paths_to_dir {
-            if is_empty_dir(path_to_dir) {
-                let path_to_dir = path_to_dir.as_ref();
-
-                let message = format!("  => \"{}\"", path_to_dir.display());
-                try!(self.print_and_log(message));
-
-                match fs::remove_dir(path_to_dir) {
-                    Ok(_)  => try!(fs::create_dir_all(path_buf![&path_to_dust_box, path_to_dir])),
+                // forcedly overwrite if the file exists with same name.
+                match fs::rename(path_to_dust, path_buf![to, target_file]) {
+                    Ok(_)  => (),
                     Err(e) => match e.kind() {
                         IoErrorKind::PermissionDenied => try!(self.print_and_log("     Interrupted for permission")),
                         _                             => return Err(e),
@@ -163,11 +141,42 @@ impl Storage {
         Ok(())
     }
 
+    pub fn squeeze_empty_dirs_only<P: AsRef<Path>>(&self, paths_to_dir: Vec<P>) -> Result<(), IoError> {
+        let path_to_dust_box = self.path_to_dust_box();
+
+        let addition = if self.is_dry_run { " (dry-run mode)" } else { "" };
+        let message  = format!("Move empty dirs to \"{}\"{}", path_to_dust_box.display(), addition);
+        try!(self.print_and_log(message));
+
+        for path_to_dir in &paths_to_dir {
+            if is_empty_dir(path_to_dir) {
+                let path_to_dir = path_to_dir.as_ref();
+
+                let message = format!("  => \"{}\"", path_to_dir.display());
+                try!(self.print_and_log(message));
+
+                if !self.is_dry_run {
+                    match fs::remove_dir(path_to_dir) {
+                        Ok(_)  => try!(fs::create_dir_all(path_buf![&path_to_dust_box, path_to_dir])),
+                        Err(e) => match e.kind() {
+                            IoErrorKind::PermissionDenied => try!(self.print_and_log("     Interrupted for permission")),
+                            _                             => return Err(e),
+                        },
+                    };
+                }
+            }
+        }
+
+        Ok(())
+    }
+
 
     pub fn delete_expired_boxes(&self, moratorium: Duration) -> Result<(), IoError> {
         let path_to_storage = Self::path();
 
-        try!(self.print_and_log("Delete expired dusts"));
+        let addition = if self.is_dry_run { " (dry-run mode)" } else { "" };
+        let message  = format!("Delete expired dusts{}", addition);
+        try!(self.print_and_log(message));
 
         let target_boxes = try!(ls(&path_to_storage))
             .into_iter()
@@ -181,7 +190,9 @@ impl Storage {
         for target_box in &target_boxes {
             let message = format!("  => \"{}\"", target_box.display());
             try!(self.print_and_log(message));
-            try!(fs::remove_dir_all(target_box));
+            if !self.is_dry_run {
+                try!(fs::remove_dir_all(target_box));
+            }
         };
 
         Ok(())
