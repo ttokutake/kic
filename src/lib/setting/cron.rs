@@ -113,12 +113,12 @@ impl Cron {
     }
 
 
-    fn re_for_matching_missing_dir_line<S: AsRef<str>>(&self, core: S) -> String {
+    fn re_for_matching_line<S: AsRef<str>>(&self, core: S) -> String {
         format!(r".*cd\s+{}\s+&&\s+{}.*\n", core.as_ref(), self.exe)
     }
 
     pub fn delete<S: AsRef<str>>(&mut self, dir: S) {
-        let re = self.re_for_matching_missing_dir_line(dir);
+        let re = self.re_for_matching_line(dir);
         let re = match Regex::new(re.as_ref()) {
             Ok(re) => re,
             Err(_) => unreachable!("Wrong to use delete()!!"),
@@ -127,7 +127,7 @@ impl Cron {
     }
 
     pub fn discard(mut self) -> Result<Self, RegexError> {
-        let re = self.re_for_matching_missing_dir_line(r"(?P<path>[^\s]+)");
+        let re = self.re_for_matching_line(r"(?P<path>[^\s]+)");
         let re = match Regex::new(re.as_ref()) {
             Ok(re) => re,
             Err(_) => unreachable!("Mistake regular expression!!"),
@@ -146,7 +146,7 @@ impl Cron {
                 .iter()
                 .fold(String::new(), |core, path| core + "|" + path); // We want to use true "Iterator.reduce()".
             let re_core = format!("({})", re_core.trim_left_matches('|'));
-            let re = self.re_for_matching_missing_dir_line(re_core);
+            let re = self.re_for_matching_line(re_core);
             let re = try!(Regex::new(re.as_ref()));
             self.my_area = re.replace_all(&self.my_area, "");
         }
@@ -271,7 +271,7 @@ fn my_area_is_empty_should_return_false() {
 
 #[test]
 fn delete_should_success() {
-    fn wrap_by_extra_content<S: AsRef<str>>(target: S) -> String {
+    fn wrap_by_extra<S: AsRef<str>>(target: S) -> String {
         let extra_content = "when cd path_to_extra && path_to_bin command\n";
         format!("{}{}{}", extra_content, target.as_ref(), extra_content)
     }
@@ -286,15 +286,19 @@ fn delete_should_success() {
     let dir = "path_to_dir";
 
     let areas = vec![
-        ("".to_string(), format!("cd {} && {}\n"             , dir, &cron.exe)),
-        ("".to_string(), format!("when cd {} && {}\n"        , dir, &cron.exe)),
-        ("".to_string(), format!("cd {} && {} command\n"     , dir, &cron.exe)),
-        ("".to_string(), format!("when cd {} && {} command\n", dir, &cron.exe)),
+        ("".to_string(), format!("cd {} && {}\n"                    , dir, &cron.exe)),
+        ("".to_string(), format!("when cd {} && {}\n"               , dir, &cron.exe)),
+        ("".to_string(), format!("cd {} && {} command\n"            , dir, &cron.exe)),
+        ("".to_string(), format!("when cd {} && {} command\n"       , dir, &cron.exe)),
+        ("".to_string(), format!("cd {} && {} command option\n"     , dir, &cron.exe)),
+        ("".to_string(), format!("when cd {} && {} command option\n", dir, &cron.exe)),
 
-        (wrap_by_extra_content(""), wrap_by_extra_content(format!("cd {} && {}\n"             , dir, &cron.exe))),
-        (wrap_by_extra_content(""), wrap_by_extra_content(format!("when cd {} && {}\n"        , dir, &cron.exe))),
-        (wrap_by_extra_content(""), wrap_by_extra_content(format!("cd {} && {} command\n"     , dir, &cron.exe))),
-        (wrap_by_extra_content(""), wrap_by_extra_content(format!("when cd {} && {} command\n", dir, &cron.exe))),
+        (wrap_by_extra(""), wrap_by_extra(format!("cd {} && {}\n"                    , dir, &cron.exe))),
+        (wrap_by_extra(""), wrap_by_extra(format!("when cd {} && {}\n"               , dir, &cron.exe))),
+        (wrap_by_extra(""), wrap_by_extra(format!("cd {} && {} command\n"            , dir, &cron.exe))),
+        (wrap_by_extra(""), wrap_by_extra(format!("when cd {} && {} command\n"       , dir, &cron.exe))),
+        (wrap_by_extra(""), wrap_by_extra(format!("cd {} && {} command option\n"     , dir, &cron.exe))),
+        (wrap_by_extra(""), wrap_by_extra(format!("when cd {} && {} command option\n", dir, &cron.exe))),
     ];
 
     for (correct, area) in areas.into_iter() {
