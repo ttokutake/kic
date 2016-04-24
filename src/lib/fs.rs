@@ -1,11 +1,14 @@
+extern crate chrono;
 extern crate walkdir;
 
+use self::chrono::{Duration, UTC};
 use self::walkdir::{DirEntry as WalkDirEntry, WalkDir, WalkDirIterator};
 
 use std::collections::BTreeSet;
 use std::ffi::OsString;
 use std::fs;
 use std::io::Error as IoError;
+use std::os::unix::fs::MetadataExt;
 use std::path::{MAIN_SEPARATOR, Path, PathBuf};
 use std::result::Result;
 
@@ -44,6 +47,17 @@ pub fn is_empty_dir<P: AsRef<Path>>(path: P) -> bool {
         Ok(rd) => rd.count() == 0,
         Err(_) => false,
     }
+}
+
+pub fn is_recently_accessed<P: AsRef<Path>>(p: P) -> bool {
+    let threshold = UTC::now() - Duration::minutes(10);
+
+    let accessed_time = match p.as_ref().metadata() {
+        Ok(m)  => m.atime(),
+        Err(_) => unreachable!("Wrong to use this function!!"),
+    };
+
+    accessed_time > threshold.timestamp()
 }
 
 fn is_hidden_name(file_name: &str) -> bool {

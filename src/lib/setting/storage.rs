@@ -15,7 +15,6 @@ pub struct Storage {
     now     : DateTime<Local>,
     date    : String,
     log_file: Option<String>,
-    all     : Option<bool>,
     indeed  : bool,
 }
 
@@ -35,10 +34,10 @@ impl Storage {
     }
 
 
-    pub fn new(all: Option<bool>, indeed: bool) -> Self {
+    pub fn new(indeed: bool) -> Self {
         let now  = Local::now();
         let date = now.format("%Y-%m-%d").to_string();
-        Storage { now: now, date: date, log_file: None, all: all, indeed: indeed }
+        Storage { now: now, date: date, log_file: None, indeed: indeed }
     }
 
 

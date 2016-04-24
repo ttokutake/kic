@@ -25,19 +25,20 @@ impl Command for Sweep {
             });
         let all = match &self.option1 {
             &Some(ref o) => match o.as_ref() {
-                "all"    => Some(true),
-                "indeed" => Some(false),
+                "all"    => true,
+                "indeed" => false,
                 _        => return Err(From::from(self.usage())),
             },
-            &None => Some(false),
+            &None => false,
         };
 
-        let storage = try!(Storage::new(all, indeed).create_box_with_log("sweep"));
+        let storage = try!(Storage::new(indeed).create_box_with_log("sweep"));
 
         let ignore = try!(Ignore::read());
 
         let target_files = walk_dir(MAIN_DIR)
             .difference(ignore.files())
+            .filter(|f| if !all && cfg!(unix) { !is_recently_accessed(f) } else { true })
             .cloned()
             .collect::<Vec<String>>();
         try!(storage.squeeze_dusts(target_files));

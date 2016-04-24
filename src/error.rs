@@ -338,10 +338,10 @@ impl UsageKind {
                 ]
             },
             UsageKind::Sweep => vec![
-                "(none)     # Sweep fakely \"dust\"s"                                 .to_string(),
-                "indeed     # Sweep indeed \"dust\"s"                                 .to_string(),
-                "all        # Sweep fakely \"dust\"s including recently updated files".to_string(),
-                "all indeed # Sweep indeed \"dust\"s including recently updated files".to_string(),
+                "(none)     # Sweep fakely \"dust\"s"                                  .to_string(),
+                "indeed     # Sweep indeed \"dust\"s"                                  .to_string(),
+                "all        # Sweep fakely \"dust\"s including recently accessed files".to_string(),
+                "all indeed # Sweep indeed \"dust\"s including recently accessed files".to_string(),
             ],
             UsageKind::Burn => vec![
                 "(none) # Burn expired \"dust box\"s fakely".to_string(),
