@@ -108,16 +108,16 @@ pub fn execute() -> Result<(), CliError> {
     };
 
     match command.as_ref() {
-        "version" => Version                                              .exec(need_help),
-        "init"    => Init                                                 .exec(need_help),
-        "config"  => Config::new(args.next(), args.next()   , args.next()).exec(need_help),
-        "ignore"  => Ignore::new(args.next(), args.collect()             ).exec(need_help),
-        "sweep"   => Sweep                                                .exec(need_help),
-        "burn"    => Burn                                                 .exec(need_help),
-        "start"   => Start                                                .exec(need_help),
-        "end"     => End                                                  .exec(need_help),
-        "destroy" => Destroy                                              .exec(need_help),
-        "patrol"  => Patrol                                               .exec(need_help),
+        "version" => Version                                           .exec(need_help),
+        "init"    => Init                                              .exec(need_help),
+        "config"  => Config::new(args.next(), args.next(), args.next()).exec(need_help),
+        "ignore"  => Ignore::new(args.next(), args.collect())          .exec(need_help),
+        "sweep"   => Sweep::new(args.next())                           .exec(need_help),
+        "burn"    => Burn::new(args.next())                            .exec(need_help),
+        "start"   => Start                                             .exec(need_help),
+        "end"     => End                                               .exec(need_help),
+        "destroy" => Destroy                                           .exec(need_help),
+        "patrol"  => Patrol                                            .exec(need_help),
         _         => Err(From::from(Usage::new(UsageKind::Nothing))),
     }
 }

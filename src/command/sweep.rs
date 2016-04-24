@@ -6,7 +6,9 @@ use lib::fs::*;
 use lib::setting::{Ignore, Storage};
 
 #[derive(Debug)]
-pub struct Sweep;
+pub struct Sweep {
+    option: Option<String>,
+}
 
 impl Command for Sweep {
     fn usage(&self) -> Usage {
@@ -14,7 +16,15 @@ impl Command for Sweep {
     }
 
     fn main(&self) -> Result<(), CliError> {
-        let storage = try!(Storage::new(true).create_box_with_log("sweep"));
+        let indeed = match &self.option {
+            &Some(ref option) => match option.as_ref() {
+                "indeed" => true,
+                _        => return Err(From::from(self.usage())),
+            },
+            &None => false,
+        };
+
+        let storage = try!(Storage::new(indeed).create_box_with_log("sweep"));
 
         let ignore = try!(Ignore::read());
 
@@ -28,5 +38,11 @@ impl Command for Sweep {
         try!(storage.squeeze_empty_dirs_only(all_dirs));
 
         Ok(())
+    }
+}
+
+impl Sweep {
+    pub fn new(option: Option<String>) -> Self {
+        Sweep { option: option }
     }
 }
