@@ -7,7 +7,8 @@ use lib::setting::{Ignore, Storage};
 
 #[derive(Debug)]
 pub struct Sweep {
-    option: Option<String>,
+    option1: Option<String>,
+    option2: Option<String>,
 }
 
 impl Command for Sweep {
@@ -16,15 +17,22 @@ impl Command for Sweep {
     }
 
     fn main(&self) -> Result<(), CliError> {
-        let indeed = match &self.option {
-            &Some(ref option) => match option.as_ref() {
-                "indeed" => true,
+        let indeed = [&self.option1, &self.option2]
+            .iter()
+            .any(|option| match option {
+                &&Some(ref o) => o == "indeed",
+                &&None        => false,
+            });
+        let all = match &self.option1 {
+            &Some(ref o) => match o.as_ref() {
+                "all"    => Some(true),
+                "indeed" => Some(false),
                 _        => return Err(From::from(self.usage())),
             },
-            &None => false,
+            &None => Some(false),
         };
 
-        let storage = try!(Storage::new(indeed).create_box_with_log("sweep"));
+        let storage = try!(Storage::new(all, indeed).create_box_with_log("sweep"));
 
         let ignore = try!(Ignore::read());
 
@@ -42,7 +50,7 @@ impl Command for Sweep {
 }
 
 impl Sweep {
-    pub fn new(option: Option<String>) -> Self {
-        Sweep { option: option }
+    pub fn new(option1: Option<String>, option2: Option<String>) -> Self {
+        Sweep { option1: option1, option2: option2 }
     }
 }
