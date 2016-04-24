@@ -14,7 +14,7 @@ impl Command for Start {
     fn main(&self) -> Result<(), CliError> {
         let cron = try!(Cron::read());
 
-        let pair_for_burn = ("0 0 * * *", "burn");
+        let pair_for_burn = ("0 0 * * *", "burn indeed");
 
         let config        = try!(Config::read());
         let day_and_month = match try!(config.get(ConfigKey::SweepPeriod)).as_ref() {
@@ -24,7 +24,7 @@ impl Command for Start {
         };
         let (hour, minute) = Config::to_hour_and_minute(try!(config.get(ConfigKey::SweepTime)));
         let when = format!("{} {} {}", minute, hour, day_and_month);
-        let pair_for_sweep = (&when as &str, "sweep");
+        let pair_for_sweep = (&when as &str, "sweep indeed");
 
         cron
             .update(&[pair_for_burn, pair_for_sweep])
