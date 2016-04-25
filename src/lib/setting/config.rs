@@ -232,33 +232,29 @@ impl Config {
         NaiveTime::from_str(format!("{}:00", value.as_ref()).as_ref())
     }
 
+    fn capture_moratorium<'a>(value: &'a str, allowed_units: &'a str) -> (Option<&'a str>, Option<&'a str>) {
+        let re = format!(r"^(?P<num>\d+)\s?(?P<unit>{})$", allowed_units);
+        match Regex::new(&re) {
+            Ok(re) => re
+                .captures(value)
+                .map_or((None, None), |caps| (caps.name("num"), caps.name("unit"))),
+            Err(_) => unreachable!("Wrong to use this function!!"),
+        }
+    }
+
     fn validate<CK: Borrow<ConfigKey>, S: AsRef<str>>(key: CK, value: S) -> Result<String, ConfigError> {
         let value = value.as_ref().trim();
 
         match *key.borrow() {
             ConfigKey::BurnMoratorium => {
-                let re = match Regex::new(r"^(?P<num>\d+)\s?(?P<unit>days?|weeks?)$") {
-                    Ok(re) => re,
-                    Err(_) => unreachable!("Mistake the regular expression!!"),
-                };
-                let pair = re
-                    .captures(value)
-                    .map_or((None, None), |caps| (caps.name("num"), caps.name("unit")));
-                let (num, unit) = match pair {
+                let (num, unit) = match Self::capture_moratorium(value, "days?|weeks?") {
                     (Some(num), Some(unit)) if num != "0" => (num, unit),
                     _                                     => return Err(ConfigError::new(ConfigErrorKind::BurnMoratorium)),
                 };
                 Ok(format!("{} {}", num, unit))
             },
             ConfigKey::SweepMoratorium => {
-                let re = match Regex::new(r"^(?P<num>\d+)\s?(?P<unit>minutes?|hours?|days?|weeks?)$") {
-                    Ok(re) => re,
-                    Err(_) => unreachable!("Mistake the regular expression!!"),
-                };
-                let pair = re
-                    .captures(value)
-                    .map_or((None, None), |caps| (caps.name("num"), caps.name("unit")));
-                let (num, unit) = match pair {
+                let (num, unit) = match Self::capture_moratorium(value, "minutes?|hours?|days?|weeks?") {
                     (Some(num), Some(unit)) => (num, unit),
                     _                       => return Err(ConfigError::new(ConfigErrorKind::SweepMoratorium))
                 };
