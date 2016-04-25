@@ -4,6 +4,7 @@ extern crate walkdir;
 use self::chrono::{Duration, UTC};
 use self::walkdir::{DirEntry as WalkDirEntry, WalkDir, WalkDirIterator};
 
+use std::borrow::Borrow;
 use std::collections::BTreeSet;
 use std::ffi::OsString;
 use std::fs;
@@ -49,8 +50,8 @@ pub fn is_empty_dir<P: AsRef<Path>>(path: P) -> bool {
     }
 }
 
-pub fn is_recently_accessed<P: AsRef<Path>>(p: P) -> bool {
-    let threshold = UTC::now() - Duration::minutes(10);
+pub fn is_recently_accessed<P: AsRef<Path>, D: Borrow<Duration>>(p: P, moratorium: D) -> bool {
+    let threshold = UTC::now() - *moratorium.borrow();
 
     let accessed_time = match p.as_ref().metadata() {
         Ok(m)  => m.atime(),

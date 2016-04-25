@@ -3,7 +3,7 @@ use super::Command;
 
 use constant::MAIN_DIR;
 use lib::fs::*;
-use lib::setting::{Ignore, Storage};
+use lib::setting::{Config, ConfigKey, Ignore, Storage};
 
 #[derive(Debug)]
 pub struct Sweep {
@@ -34,11 +34,15 @@ impl Command for Sweep {
 
         let storage = try!(Storage::new(indeed).create_box_with_log("sweep"));
 
+        let config     = try!(Config::read());
+        let moratorium = try!(config.get(ConfigKey::SweepMoratorium));
+        let moratorium = Config::to_duration(moratorium);
+
         let ignore = try!(Ignore::read());
 
         let target_files = walk_dir(MAIN_DIR)
             .difference(ignore.files())
-            .filter(|f| if !all && cfg!(unix) { !is_recently_accessed(f) } else { true })
+            .filter(|f| if !all && cfg!(unix) { !is_recently_accessed(f, &moratorium) } else { true })
             .cloned()
             .collect::<Vec<String>>();
         try!(storage.squeeze_dusts(target_files));

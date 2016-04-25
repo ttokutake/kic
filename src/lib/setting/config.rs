@@ -192,14 +192,16 @@ impl Config {
             _                       => unreachable!("Wrong to use to_duration()!!"),
         };
         let num = match num.parse::<u32>() {
-            Ok(u) if u > 0 => u as i64,
-            _              => unreachable!("Wrong to use to_duration()!!"),
+            Ok(u) => u as i64,
+            _     => unreachable!("Wrong to use to_duration()!!"),
         };
 
         match unit {
-            "day"  | "days"  => Duration::days(num),
-            "week" | "weeks" => Duration::weeks(num),
-            _                => unreachable!("Wrong to use to_duration()!!"),
+            "minute" | "minutes" => Duration::minutes(num),
+            "hour"   | "hours"   => Duration::hours(num),
+            "day"    | "days"    => Duration::days(num),
+            "week"   | "weeks"   => Duration::weeks(num),
+            _                    => unreachable!("Wrong to use to_duration()!!"),
         }
     }
 
@@ -573,15 +575,25 @@ mod tests {
     #[test]
     fn to_duration_should_return_duration() {
         let data_set = vec![
+            ("0 minute" , Duration::minutes(0)),
+            ("0 minutes", Duration::minutes(0)),
+            ("1 minute" , Duration::minutes(1)),
+            ("1 minutes", Duration::minutes(1)),
+
+            ("0 hour" , Duration::hours(0)),
+            ("0 hours", Duration::hours(0)),
+            ("1 hour" , Duration::hours(1)),
+            ("1 hours", Duration::hours(1)),
+
+            ("0 day" , Duration::days(0)),
+            ("0 days", Duration::days(0)),
             ("1 day" , Duration::days(1)),
             ("1 days", Duration::days(1)),
-            ("2 day" , Duration::days(2)),
-            ("2 days", Duration::days(2)),
 
+            ("0 week" , Duration::weeks(0)),
+            ("0 weeks", Duration::weeks(0)),
             ("1 week" , Duration::weeks(1)),
             ("1 weeks", Duration::weeks(1)),
-            ("2 week" , Duration::weeks(2)),
-            ("2 weeks", Duration::weeks(2)),
         ];
         for (input, correct) in data_set.into_iter() {
             assert_eq!(correct, Config::to_duration(input.to_string()));
@@ -590,12 +602,12 @@ mod tests {
     #[test]
     #[should_panic(expect = "entered unreachable code")]
     fn to_duration_should_panic_for_0_day() {
-        Config::to_duration("0 day".to_string());
+        Config::to_duration("-1 day".to_string());
     }
     #[test]
     #[should_panic(expect = "entered unreachable code")]
     fn to_duration_should_panic_for_0_week() {
-        Config::to_duration("0 week".to_string());
+        Config::to_duration("-1 week".to_string());
     }
     #[test]
     #[should_panic(expect = "entered unreachable code")]
