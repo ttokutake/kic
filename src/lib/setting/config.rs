@@ -17,12 +17,12 @@ use std::path::PathBuf;
 use std::str::FromStr;
 
 
-const CONFIG_KEY_BURN_AFTER      : &'static str = "burn.after";
+const CONFIG_KEY_BURN_MORATORIUM : &'static str = "burn.moratorium";
 const CONFIG_KEY_SWEEP_MORATORIUM: &'static str = "sweep.moratorium";
 const CONFIG_KEY_SWEEP_PERIOD    : &'static str = "sweep.period";
 const CONFIG_KEY_SWEEP_TIME      : &'static str = "sweep.time";
 
-const CONFIG_DEFAULT_VALUE_BURN_AFTER      : &'static str = "2 weeks";
+const CONFIG_DEFAULT_VALUE_BURN_MORATORIUM : &'static str = "2 weeks";
 const CONFIG_DEFAULT_VALUE_SWEEP_MORATORIUM: &'static str = "10 minutes";
 const CONFIG_DEFAULT_VALUE_SWEEP_PERIOD    : &'static str = "daily";
 const CONFIG_DEFAULT_VALUE_SWEEP_TIME      : &'static str = "00:00";
@@ -30,7 +30,7 @@ const CONFIG_DEFAULT_VALUE_SWEEP_TIME      : &'static str = "00:00";
 
 #[derive(Debug)]
 pub enum ConfigKey {
-    BurnAfter,
+    BurnMoratorium,
     SweepMoratorium,
     SweepPeriod,
     SweepTime,
@@ -39,7 +39,7 @@ pub enum ConfigKey {
 impl ConfigKey {
     pub fn from<S: AsRef<str>>(key: S) -> Result<ConfigKey, ConfigError> {
         match key.as_ref().trim() {
-            CONFIG_KEY_BURN_AFTER       => Ok(ConfigKey::BurnAfter),
+            CONFIG_KEY_BURN_MORATORIUM  => Ok(ConfigKey::BurnMoratorium),
             CONFIG_KEY_SWEEP_MORATORIUM => Ok(ConfigKey::SweepMoratorium),
             CONFIG_KEY_SWEEP_PERIOD     => Ok(ConfigKey::SweepPeriod),
             CONFIG_KEY_SWEEP_TIME       => Ok(ConfigKey::SweepTime),
@@ -49,7 +49,7 @@ impl ConfigKey {
 
     fn to_str(&self) -> &str {
         match *self {
-            ConfigKey::BurnAfter       => CONFIG_KEY_BURN_AFTER,
+            ConfigKey::BurnMoratorium  => CONFIG_KEY_BURN_MORATORIUM,
             ConfigKey::SweepMoratorium => CONFIG_KEY_SWEEP_MORATORIUM,
             ConfigKey::SweepPeriod     => CONFIG_KEY_SWEEP_PERIOD,
             ConfigKey::SweepTime       => CONFIG_KEY_SWEEP_TIME,
@@ -133,7 +133,7 @@ impl Config {
 
     pub fn default() -> Self {
         let mut editable = EditableToml(BTreeMap::new());
-        editable.overwrite(ConfigKey::BurnAfter      , CONFIG_DEFAULT_VALUE_BURN_AFTER      .to_string());
+        editable.overwrite(ConfigKey::BurnMoratorium , CONFIG_DEFAULT_VALUE_BURN_MORATORIUM .to_string());
         editable.overwrite(ConfigKey::SweepMoratorium, CONFIG_DEFAULT_VALUE_SWEEP_MORATORIUM.to_string());
         editable.overwrite(ConfigKey::SweepPeriod    , CONFIG_DEFAULT_VALUE_SWEEP_PERIOD    .to_string());
         editable.overwrite(ConfigKey::SweepTime      , CONFIG_DEFAULT_VALUE_SWEEP_TIME      .to_string());
@@ -172,7 +172,7 @@ impl Config {
         let result = self.toml
             .lookup(key.to_str())
             .ok_or(ConfigError::new(match *key {
-                ConfigKey::BurnAfter       => ConfigErrorKind::NotFoundBurnAfter,
+                ConfigKey::BurnMoratorium  => ConfigErrorKind::NotFoundBurnMoratorium,
                 ConfigKey::SweepMoratorium => ConfigErrorKind::NotFoundSweepMoratorium,
                 ConfigKey::SweepPeriod     => ConfigErrorKind::NotFoundSweepPeriod,
                 ConfigKey::SweepTime       => ConfigErrorKind::NotFoundSweepTime,
@@ -236,7 +236,7 @@ impl Config {
         let value = value.as_ref().trim();
 
         match *key.borrow() {
-            ConfigKey::BurnAfter => {
+            ConfigKey::BurnMoratorium => {
                 let re = match Regex::new(r"^(?P<num>\d+)\s?(?P<unit>days?|weeks?)$") {
                     Ok(re) => re,
                     Err(_) => unreachable!("Mistake the regular expression!!"),
@@ -246,7 +246,7 @@ impl Config {
                     .map_or((None, None), |caps| (caps.name("num"), caps.name("unit")));
                 let (num, unit) = match pair {
                     (Some(num), Some(unit)) if num != "0" => (num, unit),
-                    _                                     => return Err(ConfigError::new(ConfigErrorKind::BurnAfter)),
+                    _                                     => return Err(ConfigError::new(ConfigErrorKind::BurnMoratorium)),
                 };
                 Ok(format!("{} {}", num, unit))
             },
@@ -284,7 +284,7 @@ impl Config {
 #[test]
 fn config_key_to_pair_should_return_pair() {
     let keys = [
-        (ConfigKey::BurnAfter      , CONFIG_KEY_BURN_AFTER      ),
+        (ConfigKey::BurnMoratorium , CONFIG_KEY_BURN_MORATORIUM ),
         (ConfigKey::SweepMoratorium, CONFIG_KEY_SWEEP_MORATORIUM),
         (ConfigKey::SweepPeriod    , CONFIG_KEY_SWEEP_PERIOD    ),
         (ConfigKey::SweepTime      , CONFIG_KEY_SWEEP_TIME      ),
@@ -304,12 +304,12 @@ fn editable_toml_overwrite_should_add_value() {
     let v1 = "value1".to_string();
 
     let mut entry         = BTreeMap::new();
-    let key1              = ConfigKey::BurnAfter;
+    let key1              = ConfigKey::BurnMoratorium;
     let (first1, second1) = key1.to_pair();
     entry.insert(second1.to_string(), v1.clone());
     correct.insert(first1.to_string(), entry);
 
-    editable.overwrite(ConfigKey::BurnAfter, v1);
+    editable.overwrite(ConfigKey::BurnMoratorium, v1);
     let EditableToml(calculated) = editable.clone();
 
     assert_eq!(&correct, &calculated);
@@ -338,13 +338,13 @@ fn default_should_return_config() {
     let correct: Toml = format!(
         r#"
             [burn]
-            after = "{}"
+            moratorium = "{}"
             [sweep]
             moratorium = "{}"
             period = "{}"
             time   = "{}"
         "#,
-        CONFIG_DEFAULT_VALUE_BURN_AFTER,
+        CONFIG_DEFAULT_VALUE_BURN_MORATORIUM,
         CONFIG_DEFAULT_VALUE_SWEEP_MORATORIUM,
         CONFIG_DEFAULT_VALUE_SWEEP_PERIOD,
         CONFIG_DEFAULT_VALUE_SWEEP_TIME
@@ -400,9 +400,10 @@ mod tests {
     fn get_should_return_ok() {
         let config = Config::default();
 
-        assert!(config.get(ConfigKey::BurnAfter  ).is_ok());
-        assert!(config.get(ConfigKey::SweepPeriod).is_ok());
-        assert!(config.get(ConfigKey::SweepTime  ).is_ok());
+        assert!(config.get(ConfigKey::BurnMoratorium ).is_ok());
+        assert!(config.get(ConfigKey::SweepMoratorium).is_ok());
+        assert!(config.get(ConfigKey::SweepPeriod    ).is_ok());
+        assert!(config.get(ConfigKey::SweepTime      ).is_ok());
     }
 
     #[test]
@@ -436,9 +437,9 @@ mod tests {
 
         for (correct, input) in corrects_and_inputs.into_iter() {
             let config = Config::default()
-                .set(ConfigKey::BurnAfter, input)
+                .set(ConfigKey::BurnMoratorium, input)
                 .unwrap();
-            assert_eq!(correct, config.get(ConfigKey::BurnAfter).unwrap());
+            assert_eq!(correct, config.get(ConfigKey::BurnMoratorium).unwrap());
         }
 
         let raw_values = vec![
@@ -510,25 +511,25 @@ mod tests {
     #[test]
     fn set_should_return_err() {
         let data_set = vec![
-            (ConfigKey::BurnAfter, "-1day"   , ConfigError::new(ConfigErrorKind::BurnAfter)),
-            (ConfigKey::BurnAfter, "-1days"  , ConfigError::new(ConfigErrorKind::BurnAfter)),
-            (ConfigKey::BurnAfter, "-1 day"  , ConfigError::new(ConfigErrorKind::BurnAfter)),
-            (ConfigKey::BurnAfter, "-1 days" , ConfigError::new(ConfigErrorKind::BurnAfter)),
-            (ConfigKey::BurnAfter, "0day"    , ConfigError::new(ConfigErrorKind::BurnAfter)),
-            (ConfigKey::BurnAfter, "0days"   , ConfigError::new(ConfigErrorKind::BurnAfter)),
-            (ConfigKey::BurnAfter, "0 day"   , ConfigError::new(ConfigErrorKind::BurnAfter)),
-            (ConfigKey::BurnAfter, "0 days"  , ConfigError::new(ConfigErrorKind::BurnAfter)),
-            (ConfigKey::BurnAfter, "-1week"  , ConfigError::new(ConfigErrorKind::BurnAfter)),
-            (ConfigKey::BurnAfter, "-1weeks" , ConfigError::new(ConfigErrorKind::BurnAfter)),
-            (ConfigKey::BurnAfter, "-1 week" , ConfigError::new(ConfigErrorKind::BurnAfter)),
-            (ConfigKey::BurnAfter, "-1 weeks", ConfigError::new(ConfigErrorKind::BurnAfter)),
-            (ConfigKey::BurnAfter, "0week"   , ConfigError::new(ConfigErrorKind::BurnAfter)),
-            (ConfigKey::BurnAfter, "0weeks"  , ConfigError::new(ConfigErrorKind::BurnAfter)),
-            (ConfigKey::BurnAfter, "0 week"  , ConfigError::new(ConfigErrorKind::BurnAfter)),
-            (ConfigKey::BurnAfter, "0 weeks" , ConfigError::new(ConfigErrorKind::BurnAfter)),
-            (ConfigKey::BurnAfter, "1hour"   , ConfigError::new(ConfigErrorKind::BurnAfter)),
-            (ConfigKey::BurnAfter, "1month"  , ConfigError::new(ConfigErrorKind::BurnAfter)),
-            (ConfigKey::BurnAfter, "1year"   , ConfigError::new(ConfigErrorKind::BurnAfter)),
+            (ConfigKey::BurnMoratorium, "-1day"   , ConfigError::new(ConfigErrorKind::BurnMoratorium)),
+            (ConfigKey::BurnMoratorium, "-1days"  , ConfigError::new(ConfigErrorKind::BurnMoratorium)),
+            (ConfigKey::BurnMoratorium, "-1 day"  , ConfigError::new(ConfigErrorKind::BurnMoratorium)),
+            (ConfigKey::BurnMoratorium, "-1 days" , ConfigError::new(ConfigErrorKind::BurnMoratorium)),
+            (ConfigKey::BurnMoratorium, "0day"    , ConfigError::new(ConfigErrorKind::BurnMoratorium)),
+            (ConfigKey::BurnMoratorium, "0days"   , ConfigError::new(ConfigErrorKind::BurnMoratorium)),
+            (ConfigKey::BurnMoratorium, "0 day"   , ConfigError::new(ConfigErrorKind::BurnMoratorium)),
+            (ConfigKey::BurnMoratorium, "0 days"  , ConfigError::new(ConfigErrorKind::BurnMoratorium)),
+            (ConfigKey::BurnMoratorium, "-1week"  , ConfigError::new(ConfigErrorKind::BurnMoratorium)),
+            (ConfigKey::BurnMoratorium, "-1weeks" , ConfigError::new(ConfigErrorKind::BurnMoratorium)),
+            (ConfigKey::BurnMoratorium, "-1 week" , ConfigError::new(ConfigErrorKind::BurnMoratorium)),
+            (ConfigKey::BurnMoratorium, "-1 weeks", ConfigError::new(ConfigErrorKind::BurnMoratorium)),
+            (ConfigKey::BurnMoratorium, "0week"   , ConfigError::new(ConfigErrorKind::BurnMoratorium)),
+            (ConfigKey::BurnMoratorium, "0weeks"  , ConfigError::new(ConfigErrorKind::BurnMoratorium)),
+            (ConfigKey::BurnMoratorium, "0 week"  , ConfigError::new(ConfigErrorKind::BurnMoratorium)),
+            (ConfigKey::BurnMoratorium, "0 weeks" , ConfigError::new(ConfigErrorKind::BurnMoratorium)),
+            (ConfigKey::BurnMoratorium, "1hour"   , ConfigError::new(ConfigErrorKind::BurnMoratorium)),
+            (ConfigKey::BurnMoratorium, "1month"  , ConfigError::new(ConfigErrorKind::BurnMoratorium)),
+            (ConfigKey::BurnMoratorium, "1year"   , ConfigError::new(ConfigErrorKind::BurnMoratorium)),
 
             (ConfigKey::SweepMoratorium, "-1minute"  , ConfigError::new(ConfigErrorKind::SweepMoratorium)),
             (ConfigKey::SweepMoratorium, "-1minutes" , ConfigError::new(ConfigErrorKind::SweepMoratorium)),

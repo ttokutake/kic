@@ -23,7 +23,7 @@ impl Command for Burn {
         };
 
         let config         = try!(Config::read());
-        let raw_moratorium = try!(config.get(ConfigKey::BurnAfter));
+        let raw_moratorium = try!(config.get(ConfigKey::BurnMoratorium));
         let moratorium     = Config::to_duration(raw_moratorium);
 
         let storage = try!(Storage::new(indeed).create_box_with_log("burn"));
