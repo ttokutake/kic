@@ -12,7 +12,6 @@
 
 - `help`
 - `version`
-- `dry-run`
 - `init`
 - `config`
 - `ignore`
