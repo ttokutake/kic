@@ -189,11 +189,11 @@ impl Config {
         let mut value   = value.split(' ');
         let (num, unit) = match (value.next(), value.next()) {
             (Some(num), Some(unit)) => (num, unit),
-            _                       => unreachable!("Wrong to use to_duration()!!"),
+            _                       => unreachable!("Wrong to use this function!!"),
         };
         let num = match num.parse::<u32>() {
             Ok(u) => u as i64,
-            _     => unreachable!("Wrong to use to_duration()!!"),
+            _     => unreachable!("Wrong to use this function!!"),
         };
 
         match unit {
@@ -201,14 +201,14 @@ impl Config {
             "hour"   | "hours"   => Duration::hours(num),
             "day"    | "days"    => Duration::days(num),
             "week"   | "weeks"   => Duration::weeks(num),
-            _                    => unreachable!("Wrong to use to_duration()!!"),
+            _                    => unreachable!("Wrong to use this function!!"),
         }
     }
 
     pub fn to_hour_and_minute(value: String) -> (u32, u32) {
         let time = match Self::to_naive_time(value) {
             Ok(t)  => t,
-            Err(_) => unreachable!("Wrong to use to_hour_and_minute()!!"),
+            Err(_) => unreachable!("Wrong to use this function!!"),
         };
         (time.hour(), time.minute())
     }

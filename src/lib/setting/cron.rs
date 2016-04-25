@@ -121,7 +121,7 @@ impl Cron {
         let re = self.re_for_matching_line(dir);
         let re = match Regex::new(re.as_ref()) {
             Ok(re) => re,
-            Err(_) => unreachable!("Wrong to use delete()!!"),
+            Err(_) => unreachable!("Wrong to use this function!!"),
         };
         self.my_area = re.replace_all(&self.my_area, "");
     }

@@ -58,7 +58,7 @@ impl Storage {
     fn path_to_log(&self) -> PathBuf {
         let file_name = match &self.log_file {
             &Some(ref s) => s,
-            &None        => unreachable!("Wrong to use path_to_log()"),
+            &None        => unreachable!("Wrong to use this function!!"),
         };
         path_buf![self.path_to_box(), &file_name]
     }
