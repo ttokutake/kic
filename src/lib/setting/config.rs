@@ -284,9 +284,10 @@ impl Config {
 #[test]
 fn config_key_to_pair_should_return_pair() {
     let keys = [
-        (ConfigKey::BurnAfter  , CONFIG_KEY_BURN_AFTER  ),
-        (ConfigKey::SweepPeriod, CONFIG_KEY_SWEEP_PERIOD),
-        (ConfigKey::SweepTime  , CONFIG_KEY_SWEEP_TIME  ),
+        (ConfigKey::BurnAfter      , CONFIG_KEY_BURN_AFTER      ),
+        (ConfigKey::SweepMoratorium, CONFIG_KEY_SWEEP_MORATORIUM),
+        (ConfigKey::SweepPeriod    , CONFIG_KEY_SWEEP_PERIOD    ),
+        (ConfigKey::SweepTime      , CONFIG_KEY_SWEEP_TIME      ),
     ];
     for &(ref key, ref correct) in &keys {
         let (first, second) = key.to_pair();
@@ -440,6 +441,56 @@ mod tests {
             assert_eq!(correct, config.get(ConfigKey::BurnAfter).unwrap());
         }
 
+        let raw_values = vec![
+            "0minute"  .to_string(),
+            "0minutes" .to_string(),
+            "0 minute" .to_string(),
+            "0 minutes".to_string(),
+            "0hour"  .to_string(),
+            "0hours" .to_string(),
+            "0 hour" .to_string(),
+            "0 hours".to_string(),
+            "0day"  .to_string(),
+            "0days" .to_string(),
+            "0 day" .to_string(),
+            "0 days".to_string(),
+            "0week"  .to_string(),
+            "0weeks" .to_string(),
+            "0 week" .to_string(),
+            "0 weeks".to_string(),
+
+            format!("{}minute"  , u32::MAX),
+            format!("{}minutes" , u32::MAX),
+            format!("{} minute" , u32::MAX),
+            format!("{} minutes", u32::MAX),
+            format!("{}hour"  , u32::MAX),
+            format!("{}hours" , u32::MAX),
+            format!("{} hour" , u32::MAX),
+            format!("{} hours", u32::MAX),
+            format!("{}day"  , u32::MAX),
+            format!("{}days" , u32::MAX),
+            format!("{} day" , u32::MAX),
+            format!("{} days", u32::MAX),
+            format!("{}week"  , u32::MAX),
+            format!("{}weeks" , u32::MAX),
+            format!("{} week" , u32::MAX),
+            format!("{} weeks", u32::MAX),
+        ];
+        let corrects_and_inputs = raw_values
+            .into_iter()
+            .map(|i| {
+                let re = Regex::new(r"(?P<num>\d+)(?P<unit>[^\d\s]+)").unwrap();
+                (re.replace(i.as_ref(), "$num $unit"), i)
+            })
+            .collect::<Vec<(String, String)>>();
+
+        for (correct, input) in corrects_and_inputs.into_iter() {
+            let config = Config::default()
+                .set(ConfigKey::SweepMoratorium, input)
+                .unwrap();
+            assert_eq!(correct, config.get(ConfigKey::SweepMoratorium).unwrap());
+        }
+
         let raw_values = ["daily", "weekly"];
         for raw_value in &raw_values {
             let config = Config::default()
@@ -478,6 +529,25 @@ mod tests {
             (ConfigKey::BurnAfter, "1hour"   , ConfigError::new(ConfigErrorKind::BurnAfter)),
             (ConfigKey::BurnAfter, "1month"  , ConfigError::new(ConfigErrorKind::BurnAfter)),
             (ConfigKey::BurnAfter, "1year"   , ConfigError::new(ConfigErrorKind::BurnAfter)),
+
+            (ConfigKey::SweepMoratorium, "-1minute"  , ConfigError::new(ConfigErrorKind::SweepMoratorium)),
+            (ConfigKey::SweepMoratorium, "-1minutes" , ConfigError::new(ConfigErrorKind::SweepMoratorium)),
+            (ConfigKey::SweepMoratorium, "-1 minute" , ConfigError::new(ConfigErrorKind::SweepMoratorium)),
+            (ConfigKey::SweepMoratorium, "-1 minutes", ConfigError::new(ConfigErrorKind::SweepMoratorium)),
+            (ConfigKey::SweepMoratorium, "-1hour"    , ConfigError::new(ConfigErrorKind::SweepMoratorium)),
+            (ConfigKey::SweepMoratorium, "-1hours"   , ConfigError::new(ConfigErrorKind::SweepMoratorium)),
+            (ConfigKey::SweepMoratorium, "-1 hour"   , ConfigError::new(ConfigErrorKind::SweepMoratorium)),
+            (ConfigKey::SweepMoratorium, "-1 hours"  , ConfigError::new(ConfigErrorKind::SweepMoratorium)),
+            (ConfigKey::SweepMoratorium, "-1day"     , ConfigError::new(ConfigErrorKind::SweepMoratorium)),
+            (ConfigKey::SweepMoratorium, "-1days"    , ConfigError::new(ConfigErrorKind::SweepMoratorium)),
+            (ConfigKey::SweepMoratorium, "-1 day"    , ConfigError::new(ConfigErrorKind::SweepMoratorium)),
+            (ConfigKey::SweepMoratorium, "-1 days"   , ConfigError::new(ConfigErrorKind::SweepMoratorium)),
+            (ConfigKey::SweepMoratorium, "-1week"    , ConfigError::new(ConfigErrorKind::SweepMoratorium)),
+            (ConfigKey::SweepMoratorium, "-1weeks"   , ConfigError::new(ConfigErrorKind::SweepMoratorium)),
+            (ConfigKey::SweepMoratorium, "-1 week"   , ConfigError::new(ConfigErrorKind::SweepMoratorium)),
+            (ConfigKey::SweepMoratorium, "-1 weeks"  , ConfigError::new(ConfigErrorKind::SweepMoratorium)),
+            (ConfigKey::SweepMoratorium, "1month"    , ConfigError::new(ConfigErrorKind::SweepMoratorium)),
+            (ConfigKey::SweepMoratorium, "1year"     , ConfigError::new(ConfigErrorKind::SweepMoratorium)),
 
             (ConfigKey::SweepPeriod, "day"    , ConfigError::new(ConfigErrorKind::SweepPeriod)),
             (ConfigKey::SweepPeriod, "week"   , ConfigError::new(ConfigErrorKind::SweepPeriod)),
