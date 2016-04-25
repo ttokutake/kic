@@ -17,18 +17,21 @@ use std::path::PathBuf;
 use std::str::FromStr;
 
 
-const CONFIG_KEY_BURN_AFTER  : &'static str = "burn.after";
-const CONFIG_KEY_SWEEP_PERIOD: &'static str = "sweep.period";
-const CONFIG_KEY_SWEEP_TIME  : &'static str = "sweep.time";
+const CONFIG_KEY_BURN_AFTER      : &'static str = "burn.after";
+const CONFIG_KEY_SWEEP_MORATORIUM: &'static str = "sweep.moratorium";
+const CONFIG_KEY_SWEEP_PERIOD    : &'static str = "sweep.period";
+const CONFIG_KEY_SWEEP_TIME      : &'static str = "sweep.time";
 
-const CONFIG_DEFAULT_VALUE_BURN_AFTER  : &'static str = "2 weeks";
-const CONFIG_DEFAULT_VALUE_SWEEP_PERIOD: &'static str = "daily";
-const CONFIG_DEFAULT_VALUE_SWEEP_TIME  : &'static str = "00:00";
+const CONFIG_DEFAULT_VALUE_BURN_AFTER      : &'static str = "2 weeks";
+const CONFIG_DEFAULT_VALUE_SWEEP_MORATORIUM: &'static str = "10 minutes";
+const CONFIG_DEFAULT_VALUE_SWEEP_PERIOD    : &'static str = "daily";
+const CONFIG_DEFAULT_VALUE_SWEEP_TIME      : &'static str = "00:00";
 
 
 #[derive(Debug)]
 pub enum ConfigKey {
     BurnAfter,
+    SweepMoratorium,
     SweepPeriod,
     SweepTime,
 }
@@ -36,18 +39,20 @@ pub enum ConfigKey {
 impl ConfigKey {
     pub fn from<S: AsRef<str>>(key: S) -> Result<ConfigKey, ConfigError> {
         match key.as_ref().trim() {
-            CONFIG_KEY_BURN_AFTER   => Ok(ConfigKey::BurnAfter),
-            CONFIG_KEY_SWEEP_PERIOD => Ok(ConfigKey::SweepPeriod),
-            CONFIG_KEY_SWEEP_TIME   => Ok(ConfigKey::SweepTime),
-            _                       => Err(ConfigError::new(ConfigErrorKind::InvalidKey)),
+            CONFIG_KEY_BURN_AFTER       => Ok(ConfigKey::BurnAfter),
+            CONFIG_KEY_SWEEP_MORATORIUM => Ok(ConfigKey::SweepMoratorium),
+            CONFIG_KEY_SWEEP_PERIOD     => Ok(ConfigKey::SweepPeriod),
+            CONFIG_KEY_SWEEP_TIME       => Ok(ConfigKey::SweepTime),
+            _                           => Err(ConfigError::new(ConfigErrorKind::InvalidKey)),
         }
     }
 
     fn to_str(&self) -> &str {
         match *self {
-            ConfigKey::BurnAfter   => CONFIG_KEY_BURN_AFTER,
-            ConfigKey::SweepPeriod => CONFIG_KEY_SWEEP_PERIOD,
-            ConfigKey::SweepTime   => CONFIG_KEY_SWEEP_TIME,
+            ConfigKey::BurnAfter       => CONFIG_KEY_BURN_AFTER,
+            ConfigKey::SweepMoratorium => CONFIG_KEY_SWEEP_MORATORIUM,
+            ConfigKey::SweepPeriod     => CONFIG_KEY_SWEEP_PERIOD,
+            ConfigKey::SweepTime       => CONFIG_KEY_SWEEP_TIME,
         }
     }
 
@@ -128,9 +133,10 @@ impl Config {
 
     pub fn default() -> Self {
         let mut editable = EditableToml(BTreeMap::new());
-        editable.overwrite(ConfigKey::BurnAfter  , CONFIG_DEFAULT_VALUE_BURN_AFTER  .to_string());
-        editable.overwrite(ConfigKey::SweepPeriod, CONFIG_DEFAULT_VALUE_SWEEP_PERIOD.to_string());
-        editable.overwrite(ConfigKey::SweepTime  , CONFIG_DEFAULT_VALUE_SWEEP_TIME  .to_string());
+        editable.overwrite(ConfigKey::BurnAfter      , CONFIG_DEFAULT_VALUE_BURN_AFTER      .to_string());
+        editable.overwrite(ConfigKey::SweepMoratorium, CONFIG_DEFAULT_VALUE_SWEEP_MORATORIUM.to_string());
+        editable.overwrite(ConfigKey::SweepPeriod    , CONFIG_DEFAULT_VALUE_SWEEP_PERIOD    .to_string());
+        editable.overwrite(ConfigKey::SweepTime      , CONFIG_DEFAULT_VALUE_SWEEP_TIME      .to_string());
 
         Self::new(editable.to_toml())
     }
@@ -166,9 +172,10 @@ impl Config {
         let result = self.toml
             .lookup(key.to_str())
             .ok_or(ConfigError::new(match *key {
-                ConfigKey::BurnAfter   => ConfigErrorKind::NotFoundBurnAfter,
-                ConfigKey::SweepPeriod => ConfigErrorKind::NotFoundSweepPeriod,
-                ConfigKey::SweepTime   => ConfigErrorKind::NotFoundSweepTime,
+                ConfigKey::BurnAfter       => ConfigErrorKind::NotFoundBurnAfter,
+                ConfigKey::SweepMoratorium => ConfigErrorKind::NotFoundSweepMoratorium,
+                ConfigKey::SweepPeriod     => ConfigErrorKind::NotFoundSweepPeriod,
+                ConfigKey::SweepTime       => ConfigErrorKind::NotFoundSweepTime,
             }));
         let value = try!(result);
 
@@ -240,6 +247,20 @@ impl Config {
                 let (num, unit) = match pair {
                     (Some(num), Some(unit)) if num != "0" => (num, unit),
                     _                                     => return Err(ConfigError::new(ConfigErrorKind::BurnAfter)),
+                };
+                Ok(format!("{} {}", num, unit))
+            },
+            ConfigKey::SweepMoratorium => {
+                let re = match Regex::new(r"^(?P<num>\d+)\s?(?P<unit>minutes?|hours?|days?|weeks?)$") {
+                    Ok(re) => re,
+                    Err(_) => unreachable!("Mistake the regular expression!!"),
+                };
+                let pair = re
+                    .captures(value)
+                    .map_or((None, None), |caps| (caps.name("num"), caps.name("unit")));
+                let (num, unit) = match pair {
+                    (Some(num), Some(unit)) => (num, unit),
+                    _                       => return Err(ConfigError::new(ConfigErrorKind::SweepMoratorium))
                 };
                 Ok(format!("{} {}", num, unit))
             },
@@ -318,10 +339,12 @@ fn default_should_return_config() {
             [burn]
             after = "{}"
             [sweep]
+            moratorium = "{}"
             period = "{}"
             time   = "{}"
         "#,
         CONFIG_DEFAULT_VALUE_BURN_AFTER,
+        CONFIG_DEFAULT_VALUE_SWEEP_MORATORIUM,
         CONFIG_DEFAULT_VALUE_SWEEP_PERIOD,
         CONFIG_DEFAULT_VALUE_SWEEP_TIME
     )

@@ -120,9 +120,11 @@ pub enum ConfigErrorKind {
     InvalidKey,
     NonStringValue,
     NotFoundBurnAfter,
+    NotFoundSweepMoratorium,
     NotFoundSweepPeriod,
     NotFoundSweepTime,
     BurnAfter,
+    SweepMoratorium,
     SweepPeriod,
     SweepTime,
 }
@@ -138,15 +140,17 @@ impl ConfigError {
 impl Display for ConfigError {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         write!(f, "{}", match self.kind {
-            ConfigErrorKind::Something           => r#"Something went to wrong"#,
-            ConfigErrorKind::InvalidKey          => r#"Cannot set this key"#,
-            ConfigErrorKind::NonStringValue      => r#"Please set values as "String""#,
-            ConfigErrorKind::NotFoundBurnAfter   => r#"Please set [burn]after param"#,
-            ConfigErrorKind::NotFoundSweepPeriod => r#"Please set [sweep]period param"#,
-            ConfigErrorKind::NotFoundSweepTime   => r#"Please set [sweep]time param"#,
-            ConfigErrorKind::BurnAfter           => r#"Please set value like "3days" or "1week" as "[burn]after""#,
-            ConfigErrorKind::SweepPeriod         => r#"Please set "daily" or "weekly" as "[sweep]period""#,
-            ConfigErrorKind::SweepTime           => r#"Please set value from "00:00" to "23:59" as "[sweep]time""#,
+            ConfigErrorKind::Something               => r#"Something went to wrong"#,
+            ConfigErrorKind::InvalidKey              => r#"Cannot set this key"#,
+            ConfigErrorKind::NonStringValue          => r#"Please set values as "String""#,
+            ConfigErrorKind::NotFoundBurnAfter       => r#"Please set [burn]after param"#,
+            ConfigErrorKind::NotFoundSweepMoratorium => r#"Please set [sweep]moratorium param"#,
+            ConfigErrorKind::NotFoundSweepPeriod     => r#"Please set [sweep]period param"#,
+            ConfigErrorKind::NotFoundSweepTime       => r#"Please set [sweep]time param"#,
+            ConfigErrorKind::BurnAfter               => r#"Please set value like "3days" or "1week" as "[burn]after""#,
+            ConfigErrorKind::SweepMoratorium         => r#"Please set value like "10hours" or "1week" as "[sweep]moratorium""#,
+            ConfigErrorKind::SweepPeriod             => r#"Please set "daily" or "weekly" as "[sweep]period""#,
+            ConfigErrorKind::SweepTime               => r#"Please set value from "00:00" to "23:59" as "[sweep]time""#,
         })
     }
 }
