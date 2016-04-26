@@ -86,8 +86,8 @@ pub fn walk_dir<P: AsRef<Path>>(root: P) -> BTreeSet<String> {
         .collect::<BTreeSet<String>>()
 }
 
-pub fn potential_empty_dirs<P: AsRef<Path>>(root: P) -> Result<BTreeSet<PathBuf>, IoError> {
-    fn potential_empty_dirs(mut result: BTreeSet<PathBuf>, mut target_dirs: VecDeque<PathBuf>) -> Result<BTreeSet<PathBuf>, IoError> {
+pub fn potentially_empty_dirs<P: AsRef<Path>>(root: P) -> Result<BTreeSet<PathBuf>, IoError> {
+    fn potentially_empty_dirs(mut result: BTreeSet<PathBuf>, mut target_dirs: VecDeque<PathBuf>) -> Result<BTreeSet<PathBuf>, IoError> {
         match target_dirs.pop_front() {
             None => Ok(result),
             Some(mut target_dir) => {
@@ -131,7 +131,7 @@ pub fn potential_empty_dirs<P: AsRef<Path>>(root: P) -> Result<BTreeSet<PathBuf>
                 let mut dirs = dirs.into_iter().collect::<VecDeque<PathBuf>>();
                 target_dirs.append(&mut dirs);
 
-                potential_empty_dirs(result, target_dirs)
+                potentially_empty_dirs(result, target_dirs)
             },
         }
     }
@@ -143,7 +143,7 @@ pub fn potential_empty_dirs<P: AsRef<Path>>(root: P) -> Result<BTreeSet<PathBuf>
     result.insert(root.clone());
     target_dirs.push_back(root);
 
-    potential_empty_dirs(result, target_dirs)
+    potentially_empty_dirs(result, target_dirs)
 }
 
 pub fn dirs_ordered_by_descending_depth<P: AsRef<Path>>(root: P) -> Vec<PathBuf> {
