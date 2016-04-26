@@ -104,8 +104,7 @@ pub fn potential_empty_dirs<P: AsRef<Path>>(root: P) -> Result<BTreeSet<PathBuf>
                     );
                 if include_file {
                     loop {
-                        result.remove(&target_dir);
-                        if !target_dir.pop(){
+                        if !(result.remove(&target_dir) && target_dir.pop()) {
                             break;
                         }
                     }
