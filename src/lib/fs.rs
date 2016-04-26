@@ -97,11 +97,7 @@ pub fn potentially_empty_dirs<P: AsRef<Path>>(root: P) -> Result<BTreeSet<PathBu
 
                 let include_file = entries
                     .iter()
-                    .any(|entry| entry
-                        .file_type()
-                        .map(|t| t.is_file())
-                        .unwrap_or(true)
-                    );
+                    .any(|e| e.file_type().ok().map_or(true, |t| t.is_file()));
                 if include_file {
                     loop {
                         if !(result.remove(&target_dir) && target_dir.pop()) {
@@ -111,18 +107,9 @@ pub fn potentially_empty_dirs<P: AsRef<Path>>(root: P) -> Result<BTreeSet<PathBu
                 }
 
                 let dirs = entries
-                    .into_iter()
-                    .filter_map(|entry| {
-                        let is_dir = entry
-                            .file_type()
-                            .map(|t| t.is_dir())
-                            .unwrap_or(false);
-                        if is_dir {
-                            Some(entry.path())
-                        } else {
-                            None
-                        }
-                    })
+                    .iter()
+                    .filter(|e| e.file_type().ok().map_or(false, |t| t.is_dir()))
+                    .map(|e| e.path())
                     .collect::<BTreeSet<PathBuf>>();
                 for dir in dirs.clone().into_iter() {
                     result.insert(dir);
