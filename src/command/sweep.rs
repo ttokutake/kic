@@ -32,7 +32,8 @@ impl Command for Sweep {
             &None => false,
         };
 
-        let storage = try!(Storage::new(indeed).create_box_with_log("sweep"));
+        let storage = Storage::new("sweep", indeed);
+        try!(storage.create_box());
 
         let config     = try!(Config::read());
         let moratorium = try!(config.get(ConfigKey::SweepMoratorium));

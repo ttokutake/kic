@@ -14,7 +14,7 @@ use std::path::{Path, PathBuf};
 pub struct Storage {
     now     : DateTime<Local>,
     date    : String,
-    log_file: Option<String>,
+    log_file: String,
     indeed  : bool,
 }
 
@@ -34,70 +34,33 @@ impl Storage {
     }
 
 
-    pub fn new(indeed: bool) -> Self {
+    pub fn new<S: AsRef<str>>(file_name: S, indeed: bool) -> Self {
         let now  = Local::now();
         let date = now.format("%Y-%m-%d").to_string();
-        Storage { now: now, date: date, log_file: None, indeed: indeed }
+        Storage { now: now, date: date, log_file: format!("{}.log", file_name.as_ref()), indeed: indeed }
     }
 
 
     fn path_to_box(&self) -> PathBuf {
-        path_buf![Storage::path(), &self.date]
+        path_buf![Self::path(), &self.date]
     }
 
     fn path_to_dust_box(&self) -> PathBuf {
         path_buf![self.path_to_box(), "dusts"]
     }
 
-    fn create_box(&self) -> Result<(), IoError> {
+    fn path_to_log(&self) -> PathBuf {
+        path_buf![self.path_to_box(), &self.log_file]
+    }
+
+    pub fn create_box(&self) -> Result<(), IoError> {
         print_with_tag(Tag::Info, format!(r#"Create "{}" directory in "{}""#, self.date, Self::path().display()));
 
-        fs::create_dir_all(self.path_to_dust_box())
-    }
+        try!(fs::create_dir_all(self.path_to_dust_box()));
 
-    fn path_to_log(&self) -> PathBuf {
-        let file_name = match &self.log_file {
-            &Some(ref s) => s,
-            &None        => unreachable!("Wrong to use this function!!"),
-        };
-        path_buf![self.path_to_box(), &file_name]
-    }
+        print_with_tag(Tag::Info, format!(r#"Create "{}" file in "{}""#, self.log_file, self.path_to_box().display()));
 
-    fn write_log<S: AsRef<str>>(&self, content: S) -> Result<usize, IoError> {
-        let file = OpenOptions::new()
-            .create(true)
-            .append(true)
-            .open(self.path_to_log());
-        let mut file = try!(file);
-
-        file.write(format!("{}\n", content.as_ref()).as_bytes())
-    }
-
-    fn start_mark_for_log(&self) -> String {
-        let datetime = self.now.format("%H:%M:%S").to_string();
-        format!(
-            "############
-# {} #
-############",
-            datetime,
-        )
-    }
-
-    fn create_log_file(mut self, file_name: &str) -> Result<Self, IoError> {
-        let file_name = format!("{}.log", file_name);
-
-        print_with_tag(Tag::Info, format!(r#"Create "{}" file in "{}""#, file_name, self.path_to_box().display()));
-
-        self.log_file = Some(file_name);
-
-        try!(self.write_log(self.start_mark_for_log()));
-
-        Ok(self)
-    }
-
-    pub fn create_box_with_log(self, file_name: &str) -> Result<Self, IoError> {
-        try!(self.create_box());
-        self.create_log_file(file_name)
+        self.write_log(self.start_mark_for_log()).map(|_| ())
     }
 
 
@@ -199,13 +162,28 @@ impl Storage {
     }
 
 
+    fn start_mark_for_log(&self) -> String {
+        let datetime = self.now.format("%H:%M:%S").to_string();
+        format!(
+            "############
+# {} #
+############",
+            datetime,
+        )
+    }
+
+    fn write_log<S: AsRef<str>>(&self, content: S) -> Result<usize, IoError> {
+        let file = OpenOptions::new()
+            .create(true)
+            .append(true)
+            .open(self.path_to_log());
+        let mut file = try!(file);
+
+        file.write(format!("{}\n", content.as_ref()).as_bytes())
+    }
+
     fn print_and_log<S: AsRef<str>>(&self, message: S) -> Result<(), IoError> {
         print_with_tag(Tag::Info, message.as_ref());
-
-        if self.log_file.is_some() {
-            try!(self.write_log(message));
-        }
-
-        Ok(())
+        self.write_log(message).map(|_| ())
     }
 }
