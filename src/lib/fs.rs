@@ -5,9 +5,9 @@ use self::chrono::{Duration, UTC};
 use self::walkdir::{DirEntry as WalkDirEntry, WalkDir, WalkDirIterator};
 
 use std::borrow::Borrow;
-use std::collections::BTreeSet;
+use std::collections::{BTreeSet, VecDeque};
 use std::ffi::OsString;
-use std::fs;
+use std::fs::{self, DirEntry};
 use std::io::Error as IoError;
 use std::os::unix::fs::MetadataExt;
 use std::path::{MAIN_SEPARATOR, Path, PathBuf};
@@ -84,6 +84,67 @@ pub fn walk_dir<P: AsRef<Path>>(root: P) -> BTreeSet<String> {
         .into_iter()
         .filter_map(|e| e.path().to_str().map(trim_current_dir_prefix))
         .collect::<BTreeSet<String>>()
+}
+
+pub fn potential_empty_dirs<P: AsRef<Path>>(root: P) -> Result<BTreeSet<PathBuf>, IoError> {
+    fn potential_empty_dirs(mut result: BTreeSet<PathBuf>, mut target_dirs: VecDeque<PathBuf>) -> Result<BTreeSet<PathBuf>, IoError> {
+        match target_dirs.pop_front() {
+            None => Ok(result),
+            Some(mut target_dir) => {
+                let entries = try!(fs::read_dir(&target_dir))
+                    .filter_map(Result::ok)
+                    .collect::<Vec<DirEntry>>();
+
+                let include_file = entries
+                    .iter()
+                    .any(|entry| entry
+                        .file_type()
+                        .map(|t| t.is_file())
+                        .unwrap_or(true)
+                    );
+                if include_file {
+                    loop {
+                        result.remove(&target_dir);
+                        if !target_dir.pop(){
+                            break;
+                        }
+                    }
+                }
+
+                let dirs = entries
+                    .into_iter()
+                    .filter_map(|entry| {
+                        let is_dir = entry
+                            .file_type()
+                            .map(|t| t.is_dir())
+                            .unwrap_or(false);
+                        if is_dir {
+                            Some(entry.path())
+                        } else {
+                            None
+                        }
+                    })
+                    .collect::<BTreeSet<PathBuf>>();
+                for dir in dirs.clone().into_iter() {
+                    result.insert(dir);
+                }
+
+                let mut dirs = dirs.into_iter().collect::<VecDeque<PathBuf>>();
+                target_dirs.append(&mut dirs);
+
+                potential_empty_dirs(result, target_dirs)
+            },
+        }
+    }
+
+    let mut result     : BTreeSet<PathBuf> = BTreeSet::new();
+    let mut target_dirs: VecDeque<PathBuf> = VecDeque::new();
+
+    let root = root.as_ref().to_path_buf();
+    result.insert(root.clone());
+    target_dirs.push_back(root);
+
+    potential_empty_dirs(result, target_dirs)
 }
 
 pub fn dirs_ordered_by_descending_depth<P: AsRef<Path>>(root: P) -> Vec<PathBuf> {
