@@ -345,6 +345,27 @@ mod tests {
     }
 
     #[test]
+    fn potentially_empty_dirs_should_return_btree_set() {
+        let helper = Helper::new("potentially_empty_dirs_BTreeSet");
+        helper.create_dirs_and_files();
+
+        let mut correct = BTreeSet::new();
+
+        correct.insert(helper.path_to_d3());
+        assert_eq!(correct, potentially_empty_dirs(helper.path_to_d1()));
+
+        fs::remove_file(helper.path_to_f2()).ok();
+        correct.insert(helper.path_to_d2());
+        assert_eq!(correct, potentially_empty_dirs(helper.path_to_d1()));
+
+        fs::remove_file(helper.path_to_f1()).ok();
+        correct.insert(helper.path_to_d1());
+        assert_eq!(correct, potentially_empty_dirs(helper.path_to_d1()));
+
+        helper.remove_dirs_and_files();
+    }
+
+    #[test]
     fn dirs_ordered_by_descending_depth_should_return_vec() {
         let helper = Helper::new("dirs_ordered_by_descending_depth_Vec");
         helper.create_dirs_and_files();
