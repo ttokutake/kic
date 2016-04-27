@@ -43,13 +43,6 @@ pub fn ls<P: AsRef<Path>>(path: P) -> Result<Vec<String>, IoError> {
     Ok(dirs)
 }
 
-pub fn is_empty_dir<P: AsRef<Path>>(path: P) -> bool {
-    match fs::read_dir(path) {
-        Ok(rd) => rd.count() == 0,
-        Err(_) => false,
-    }
-}
-
 pub fn is_recently_accessed<P: AsRef<Path>, D: Borrow<Duration>>(p: P, moratorium: D) -> bool {
     let threshold = UTC::now() - *moratorium.borrow();
 
@@ -61,11 +54,20 @@ pub fn is_recently_accessed<P: AsRef<Path>, D: Borrow<Duration>>(p: P, moratoriu
     accessed_time > threshold.timestamp()
 }
 
-fn is_hidden_name(file_name: &str) -> bool {
+fn is_hidden_name<S: AsRef<str>>(file_name: S) -> bool {
+    let file_name = file_name.as_ref();
     file_name.starts_with(".") && file_name.len() > 1 && file_name != ".."
 }
 
-fn is_hidden(entry: &WalkDirEntry) -> bool {
+fn is_hidden_for_std(entry: &DirEntry) -> bool {
+    entry
+        .file_name()
+        .into_string()
+        .ok()
+        .map_or(false, is_hidden_name)
+}
+
+fn is_hidden_for_walkdir(entry: &WalkDirEntry) -> bool {
     entry
         .file_name()
         .to_str()
@@ -75,7 +77,7 @@ fn is_hidden(entry: &WalkDirEntry) -> bool {
 pub fn walk_dir<P: AsRef<Path>>(root: P) -> BTreeSet<String> {
     let walker = WalkDir::new(root)
         .into_iter()
-        .filter_entry(|e| !is_hidden(e))
+        .filter_entry(|e| !is_hidden_for_walkdir(e))
         .filter_map(Result::ok)
         .filter(|e| !e.file_type().is_dir())
         .collect::<Vec<WalkDirEntry>>();
@@ -100,11 +102,11 @@ pub fn potentially_empty_dirs<P: AsRef<Path>>(root: P) -> BTreeSet<PathBuf> {
                         .collect::<Vec<DirEntry>>(),
                     Err(_) => Vec::new(),
                 };
-                let include_file = entries
+                let include_file_or_hidden_dir = entries
                     .iter()
-                    .any(|e| e.file_type().ok().map_or(true, |t| t.is_file()));
+                    .any(|e| e.file_type().ok().map_or(true, |t| t.is_file()) || is_hidden_for_std(e));
 
-                if ignore || include_file {
+                if ignore || include_file_or_hidden_dir {
                     loop {
                         if !(result.remove(&target_dir) && target_dir.pop()) {
                             break;
@@ -114,7 +116,7 @@ pub fn potentially_empty_dirs<P: AsRef<Path>>(root: P) -> BTreeSet<PathBuf> {
 
                 let dirs = entries
                     .iter()
-                    .filter(|e| e.file_type().ok().map_or(false, |t| t.is_dir()))
+                    .filter(|e| e.file_type().ok().map_or(false, |t| t.is_dir()) && !is_hidden_for_std(e))
                     .map(|e| e.path())
                     .collect::<BTreeSet<PathBuf>>();
                 for dir in dirs.clone().into_iter() {
@@ -137,26 +139,6 @@ pub fn potentially_empty_dirs<P: AsRef<Path>>(root: P) -> BTreeSet<PathBuf> {
     target_dirs.push_back(root);
 
     potentially_empty_dirs(result, target_dirs)
-}
-
-pub fn dirs_ordered_by_descending_depth<P: AsRef<Path>>(root: P) -> Vec<PathBuf> {
-    let mut walker = WalkDir::new(root)
-        .into_iter()
-        .filter_entry(|e| !is_hidden(e))
-        .filter_entry(|e| e.file_type().is_dir())
-        .filter_map(Result::ok)
-        .collect::<Vec<WalkDirEntry>>();
-
-    walker.sort_by(|l, r| {
-        let l_depth = &l.depth();
-        let r_depth = &r.depth();
-        r_depth.cmp(l_depth)
-    });
-
-    walker
-        .into_iter()
-        .map(|e| e.path().to_path_buf())
-        .collect::<Vec<PathBuf>>()
 }
 
 
@@ -311,26 +293,6 @@ mod tests {
     }
 
     #[test]
-    fn is_empty_dir_should_return_true() {
-        let helper = Helper::new("is_empty_dir_true");
-        helper.create_dirs_and_files();
-
-        assert!(is_empty_dir(helper.path_to_d3()));
-
-        helper.remove_dirs_and_files();
-    }
-    #[test]
-    fn is_empty_dir_should_return_false() {
-        let helper = Helper::new("is_empty_dir_false");
-        helper.create_dirs_and_files();
-
-        assert!(!is_empty_dir(helper.path_to_d1()));
-        assert!(!is_empty_dir(helper.path_to_d2()));
-
-        helper.remove_dirs_and_files();
-    }
-
-    #[test]
     fn walk_dir_should_return_b_tree_set() {
         let helper = Helper::new("walk_dir_BTreeSet");
         helper.create_dirs_and_files();
@@ -361,18 +323,6 @@ mod tests {
         fs::remove_file(helper.path_to_f1()).ok();
         correct.insert(helper.path_to_d1());
         assert_eq!(correct, potentially_empty_dirs(helper.path_to_d1()));
-
-        helper.remove_dirs_and_files();
-    }
-
-    #[test]
-    fn dirs_ordered_by_descending_depth_should_return_vec() {
-        let helper = Helper::new("dirs_ordered_by_descending_depth_Vec");
-        helper.create_dirs_and_files();
-
-        let correct = vec![helper.path_to_d3(), helper.path_to_d2(), helper.path_to_d1()];
-
-        assert_eq!(correct, dirs_ordered_by_descending_depth(helper.path_to_d1()));
 
         helper.remove_dirs_and_files();
     }

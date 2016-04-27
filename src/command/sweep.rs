@@ -48,8 +48,8 @@ impl Command for Sweep {
             .collect::<Vec<String>>();
         try!(storage.squeeze_dusts(target_files));
 
-        let all_dirs = dirs_ordered_by_descending_depth(MAIN_DIR);
-        try!(storage.squeeze_empty_dirs_only(all_dirs));
+        let potentially_empty_dirs = potentially_empty_dirs(MAIN_DIR);
+        try!(storage.squeeze_dirs(potentially_empty_dirs));
 
         Ok(())
     }

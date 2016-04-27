@@ -6,6 +6,7 @@ use self::chrono::offset::TimeZone;
 use constant::STORAGE_DIR_NAME;
 use lib::fs::*;
 use lib::io::*;
+use std::collections::BTreeSet;
 use std::fs::{self, OpenOptions};
 use std::io::{Error as IoError, ErrorKind as IoErrorKind, Write};
 use std::path::{Path, PathBuf};
@@ -104,7 +105,7 @@ impl Storage {
         Ok(())
     }
 
-    pub fn squeeze_empty_dirs_only<P: AsRef<Path>>(&self, paths_to_dir: Vec<P>) -> Result<(), IoError> {
+    pub fn squeeze_dirs<P: AsRef<Path>>(&self, paths_to_dir: BTreeSet<P>) -> Result<(), IoError> {
         let path_to_dust_box = self.path_to_dust_box();
 
         let addition = if self.indeed { "" } else { " (dry-run mode)" };
@@ -112,21 +113,20 @@ impl Storage {
         try!(self.print_and_log(message));
 
         for path_to_dir in &paths_to_dir {
-            if is_empty_dir(path_to_dir) {
-                let path_to_dir = path_to_dir.as_ref();
+            let path_to_dir = path_to_dir.as_ref();
 
-                let message = format!("  => \"{}\"", path_to_dir.display());
-                try!(self.print_and_log(message));
+            let message = format!("  => \"{}\"", path_to_dir.display());
+            try!(self.print_and_log(message));
 
-                if self.indeed {
-                    match fs::remove_dir(path_to_dir) {
-                        Ok(_)  => try!(fs::create_dir_all(path_buf![&path_to_dust_box, path_to_dir])),
-                        Err(e) => match e.kind() {
-                            IoErrorKind::PermissionDenied => try!(self.print_and_log("     Interrupted for permission")),
-                            _                             => return Err(e),
-                        },
-                    };
-                }
+            if self.indeed {
+                match fs::remove_dir_all(path_to_dir) {
+                    Ok(_)  => try!(fs::create_dir_all(path_buf![&path_to_dust_box, path_to_dir])),
+                    Err(e) => match e.kind() {
+                        IoErrorKind::PermissionDenied => try!(self.print_and_log("     Interrupted for permission")),
+                        IoErrorKind::NotFound         => (),
+                        _                             => return Err(e),
+                    },
+                };
             }
         }
 
