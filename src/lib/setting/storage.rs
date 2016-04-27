@@ -141,7 +141,7 @@ impl Storage {
         let message  = format!("Delete expired dusts{}", addition);
         try!(self.print_and_log(message));
 
-        let target_boxes = try!(ls(&path_to_storage))
+        let target_boxes = try!(la(&path_to_storage))
             .into_iter()
             .filter(|date| match Local.datetime_from_str(format!("{} 00:00:00", date).as_ref(), "%Y-%m-%d %H:%M:%S") {
                 Ok(created_date) => created_date + moratorium < self.now,

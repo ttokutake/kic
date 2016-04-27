@@ -6,7 +6,6 @@ use self::walkdir::{DirEntry as WalkDirEntry, WalkDir, WalkDirIterator};
 
 use std::borrow::Borrow;
 use std::collections::{BTreeSet, VecDeque};
-use std::ffi::OsString;
 use std::fs::{self, DirEntry};
 use std::io::Error as IoError;
 use std::os::unix::fs::MetadataExt;
@@ -32,13 +31,19 @@ pub fn trim_current_dir_prefix<S: AsRef<str>>(path_name: S) -> String {
         .to_string()
 }
 
-pub fn ls<P: AsRef<Path>>(path: P) -> Result<Vec<String>, IoError> {
+fn into_string<D: Borrow<DirEntry>>(entry: D) -> Option<String> {
+    entry
+        .borrow()
+        .file_name()
+        .into_string()
+        .ok()
+}
+
+pub fn la<P: AsRef<Path>>(path: P) -> Result<Vec<String>, IoError> {
     let dirs = try!(fs::read_dir(path));
     let dirs = dirs
         .filter_map(Result::ok)
-        .map(|d| d.file_name())
-        .map(OsString::into_string)
-        .filter_map(Result::ok)
+        .filter_map(into_string)
         .collect::<Vec<String>>();
     Ok(dirs)
 }
@@ -60,11 +65,7 @@ fn is_hidden_name<S: AsRef<str>>(file_name: S) -> bool {
 }
 
 fn is_hidden_for_std(entry: &DirEntry) -> bool {
-    entry
-        .file_name()
-        .into_string()
-        .ok()
-        .map_or(false, is_hidden_name)
+    into_string(entry).map_or(false, is_hidden_name)
 }
 
 fn is_hidden_for_walkdir(entry: &WalkDirEntry) -> bool {
@@ -185,17 +186,27 @@ mod tests {
         d1: String,
         d2: String,
         d3: String,
+        d4: String,
+        d5: String,
+        d6: String,
         f1: String,
         f2: String,
+        f3: String,
+        f4: String,
     }
     impl Helper {
         fn new(suffix: &str) -> Self {
             Helper {
-                d1: format!("directory1_{}", suffix),
-                d2: format!("directory2_{}", suffix),
-                d3: format!("directory3_{}", suffix),
-                f1: format!("file1_{}"     , suffix),
-                f2: format!("file2_{}"     , suffix),
+                d1: format!("directory1_{}" , suffix),
+                d2: format!("directory2_{}" , suffix),
+                d3: format!("directory3_{}" , suffix),
+                d4: format!("directory4_{}" , suffix),
+                d5: format!("directory5_{}" , suffix),
+                d6: format!(".directory6_{}", suffix),
+                f1: format!("file1_{}"      , suffix),
+                f2: format!("file2_{}"      , suffix),
+                f3: format!("file3_{}"      , suffix),
+                f4: format!(".file4_{}"     , suffix),
             }
         }
 
@@ -208,12 +219,27 @@ mod tests {
         fn path_to_d3(&self) -> PathBuf {
             self.path_to_d2().join(&self.d3)
         }
+        fn path_to_d4(&self) -> PathBuf {
+            self.path_to_d3().join(&self.d4)
+        }
+        fn path_to_d5(&self) -> PathBuf {
+            self.path_to_d1().join(&self.d5)
+        }
+        fn path_to_d6(&self) -> PathBuf {
+            self.path_to_d1().join(&self.d6)
+        }
 
         fn path_to_f1(&self) -> PathBuf {
             self.path_to_d1().join(&self.f1)
         }
         fn path_to_f2(&self) -> PathBuf {
             self.path_to_d2().join(&self.f2)
+        }
+        fn path_to_f3(&self) -> PathBuf {
+            self.path_to_d3().join(&self.f3)
+        }
+        fn path_to_f4(&self) -> PathBuf {
+            self.path_to_d5().join(&self.f4)
         }
 
         fn remove_dirs_and_files(&self) {
@@ -223,11 +249,15 @@ mod tests {
         fn create_dirs_and_files(&self) {
             self.remove_dirs_and_files();
 
-            fs::create_dir_all(self.path_to_d3()).ok();
+            fs::create_dir_all(self.path_to_d4()).ok();
+            fs::create_dir_all(self.path_to_d5()).ok();
+            fs::create_dir_all(self.path_to_d6()).ok();
 
             let mut f = File::create(self.path_to_f1()).unwrap();
             f.write("\n".as_ref()).ok();
             fs::copy(self.path_to_f1(), self.path_to_f2()).ok();
+            fs::copy(self.path_to_f1(), self.path_to_f3()).ok();
+            fs::copy(self.path_to_f1(), self.path_to_f4()).ok();
         }
 
         fn to_string_forcely(path: PathBuf) -> String {
@@ -279,15 +309,18 @@ mod tests {
     }
 
     #[test]
-    fn ls_should_return_ok() {
-        let helper = Helper::new("ls_Ok");
+    fn la_should_return_ok() {
+        let helper = Helper::new("la_Ok");
         helper.create_dirs_and_files();
 
         let empty_vec: Vec<String> = Vec::new();
 
-        assert_eq!(vec![helper.d2.clone(), helper.f1.clone()], ls(helper.path_to_d1()).unwrap());
-        assert_eq!(vec![helper.d3.clone(), helper.f2.clone()], ls(helper.path_to_d2()).unwrap());
-        assert_eq!(empty_vec                                 , ls(helper.path_to_d3()).unwrap());
+        assert_eq!(vec![helper.f1.clone(), helper.d5.clone(), helper.d2.clone(), helper.d6.clone()], la(helper.path_to_d1()).unwrap());
+        assert_eq!(vec![helper.d3.clone(), helper.f2.clone()]                                      , la(helper.path_to_d2()).unwrap());
+        assert_eq!(vec![helper.d4.clone(), helper.f3.clone()]                                      , la(helper.path_to_d3()).unwrap());
+        assert_eq!(empty_vec                                                                       , la(helper.path_to_d4()).unwrap());
+        assert_eq!(vec![helper.f4.clone()]                                                         , la(helper.path_to_d5()).unwrap());
+        assert_eq!(empty_vec                                                                       , la(helper.path_to_d6()).unwrap());
 
         helper.remove_dirs_and_files();
     }
@@ -300,6 +333,7 @@ mod tests {
         let mut correct = BTreeSet::new();
         correct.insert(Helper::to_string_forcely(helper.path_to_f1()));
         correct.insert(Helper::to_string_forcely(helper.path_to_f2()));
+        correct.insert(Helper::to_string_forcely(helper.path_to_f3()));
 
         assert_eq!(correct, walk_dir(helper.path_to_d1()));
 
@@ -311,18 +345,23 @@ mod tests {
         let helper = Helper::new("potentially_empty_dirs_BTreeSet");
         helper.create_dirs_and_files();
 
+        let root = helper.path_to_d1();
         let mut correct = BTreeSet::new();
 
+        correct.insert(helper.path_to_d4());
+        assert_eq!(correct, potentially_empty_dirs(&root));
+
+        fs::remove_file(helper.path_to_f3()).ok();
         correct.insert(helper.path_to_d3());
-        assert_eq!(correct, potentially_empty_dirs(helper.path_to_d1()));
+        assert_eq!(correct, potentially_empty_dirs(&root));
 
         fs::remove_file(helper.path_to_f2()).ok();
         correct.insert(helper.path_to_d2());
-        assert_eq!(correct, potentially_empty_dirs(helper.path_to_d1()));
+        assert_eq!(correct, potentially_empty_dirs(&root));
 
-        fs::remove_file(helper.path_to_f1()).ok();
-        correct.insert(helper.path_to_d1());
-        assert_eq!(correct, potentially_empty_dirs(helper.path_to_d1()));
+        fs::remove_file(helper.path_to_f4()).ok();
+        correct.insert(helper.path_to_d5());
+        assert_eq!(correct, potentially_empty_dirs(&root));
 
         helper.remove_dirs_and_files();
     }
