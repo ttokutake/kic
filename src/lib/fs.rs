@@ -86,19 +86,25 @@ pub fn walk_dir<P: AsRef<Path>>(root: P) -> BTreeSet<String> {
         .collect::<BTreeSet<String>>()
 }
 
-pub fn potentially_empty_dirs<P: AsRef<Path>>(root: P) -> Result<BTreeSet<PathBuf>, IoError> {
-    fn potentially_empty_dirs(mut result: BTreeSet<PathBuf>, mut target_dirs: VecDeque<PathBuf>) -> Result<BTreeSet<PathBuf>, IoError> {
+pub fn potentially_empty_dirs<P: AsRef<Path>>(root: P) -> BTreeSet<PathBuf> {
+    fn potentially_empty_dirs(mut result: BTreeSet<PathBuf>, mut target_dirs: VecDeque<PathBuf>) -> BTreeSet<PathBuf> {
         match target_dirs.pop_front() {
-            None => Ok(result),
+            None => result,
             Some(mut target_dir) => {
-                let entries = try!(fs::read_dir(&target_dir))
-                    .filter_map(Result::ok)
-                    .collect::<Vec<DirEntry>>();
+                let read_result = fs::read_dir(&target_dir);
+                let ignore      = read_result.is_err();
 
+                let entries = match read_result {
+                    Ok(rd) => rd
+                        .filter_map(Result::ok)
+                        .collect::<Vec<DirEntry>>(),
+                    Err(_) => Vec::new(),
+                };
                 let include_file = entries
                     .iter()
                     .any(|e| e.file_type().ok().map_or(true, |t| t.is_file()));
-                if include_file {
+
+                if ignore || include_file {
                     loop {
                         if !(result.remove(&target_dir) && target_dir.pop()) {
                             break;
