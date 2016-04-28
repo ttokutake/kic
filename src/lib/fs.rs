@@ -310,17 +310,25 @@ mod tests {
 
     #[test]
     fn la_should_return_ok() {
+        fn to_btree_set(vec: Vec<String>) -> BTreeSet<String> {
+            vec.into_iter().collect::<BTreeSet<String>>()
+        }
+
         let helper = Helper::new("la_Ok");
         helper.create_dirs_and_files();
 
-        let empty_vec: Vec<String> = Vec::new();
+        let empty_btree_set: BTreeSet<String> = BTreeSet::new();
 
-        assert_eq!(vec![helper.f1.clone(), helper.d5.clone(), helper.d2.clone(), helper.d6.clone()], la(helper.path_to_d1()).unwrap());
-        assert_eq!(vec![helper.d3.clone(), helper.f2.clone()]                                      , la(helper.path_to_d2()).unwrap());
-        assert_eq!(vec![helper.d4.clone(), helper.f3.clone()]                                      , la(helper.path_to_d3()).unwrap());
-        assert_eq!(empty_vec                                                                       , la(helper.path_to_d4()).unwrap());
-        assert_eq!(vec![helper.f4.clone()]                                                         , la(helper.path_to_d5()).unwrap());
-        assert_eq!(empty_vec                                                                       , la(helper.path_to_d6()).unwrap());
+        let correct = to_btree_set(vec![helper.d2.clone(), helper.d5.clone(), helper.d6.clone(), helper.f1.clone()]);
+        assert_eq!(correct, to_btree_set(la(helper.path_to_d1()).unwrap()));
+        let correct = to_btree_set(vec![helper.d3.clone(), helper.f2.clone()]);
+        assert_eq!(correct, to_btree_set(la(helper.path_to_d2()).unwrap()));
+        let correct = to_btree_set(vec![helper.d4.clone(), helper.f3.clone()]);
+        assert_eq!(correct        , to_btree_set(la(helper.path_to_d3()).unwrap()));
+        assert_eq!(empty_btree_set, to_btree_set(la(helper.path_to_d4()).unwrap()));
+        let correct = to_btree_set(vec![helper.f4.clone()]);
+        assert_eq!(correct        , to_btree_set(la(helper.path_to_d5()).unwrap()));
+        assert_eq!(empty_btree_set, to_btree_set(la(helper.path_to_d6()).unwrap()));
 
         helper.remove_dirs_and_files();
     }
