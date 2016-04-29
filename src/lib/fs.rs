@@ -270,10 +270,6 @@ mod tests {
             fs::copy(self.path_to_f1(), self.path_to_f3()).ok();
             fs::copy(self.path_to_f1(), self.path_to_f4()).ok();
         }
-
-        fn to_string_forcely(path: PathBuf) -> String {
-            path.to_str().unwrap().to_string()
-        }
     }
 
 
@@ -376,9 +372,10 @@ mod tests {
         helper.create_dirs_and_files();
 
         let mut correct = BTreeSet::new();
-        correct.insert(Helper::to_string_forcely(helper.path_to_f1()));
-        correct.insert(Helper::to_string_forcely(helper.path_to_f2()));
-        correct.insert(Helper::to_string_forcely(helper.path_to_f3()));
+        let files = [helper.path_to_f1(), helper.path_to_f2(), helper.path_to_f3()];
+        for file in &files {
+            correct.insert(file.to_str().unwrap().to_string());
+        }
 
         assert_eq!(correct, walk_dir(helper.path_to_d1()));
 
@@ -391,25 +388,36 @@ mod tests {
         helper.create_dirs_and_files();
 
         let root = helper.path_to_d1();
+
         let mut correct = BTreeSet::new();
-
         correct.insert(helper.path_to_d4());
-        assert_eq!(correct, potentially_empty_dirs(&root, Vec::new()));
+        let mut ignored_files = Vec::new();
+        let data_set = vec![
+            (helper.path_to_d3(), helper.path_to_f3()),
+            (helper.path_to_d2(), helper.path_to_f2()),
+            (helper.path_to_d5(), helper.path_to_f4()),
+        ];
+        for (part_of_correct, ignored_file) in data_set.into_iter() {
+            correct.insert(part_of_correct);
+            ignored_files.push(ignored_file);
+            assert_eq!(correct, potentially_empty_dirs(&root, ignored_files.clone()));
+        }
 
-        correct.insert(helper.path_to_d3());
-        assert_eq!(correct, potentially_empty_dirs(&root, vec![helper.path_to_f3()]));
-        fs::remove_file(helper.path_to_f3()).ok();
-        assert_eq!(correct, potentially_empty_dirs(&root, Vec::new()));
-
-        correct.insert(helper.path_to_d2());
-        assert_eq!(correct, potentially_empty_dirs(&root, vec![helper.path_to_f2()]));
-        fs::remove_file(helper.path_to_f2()).ok();
-        assert_eq!(correct, potentially_empty_dirs(&root, Vec::new()));
-
-        correct.insert(helper.path_to_d5());
-        assert_eq!(correct, potentially_empty_dirs(&root, vec![helper.path_to_f4()]));
-        fs::remove_file(helper.path_to_f4()).ok();
-        assert_eq!(correct, potentially_empty_dirs(&root, Vec::new()));
+        correct.clear();
+        correct.insert(helper.path_to_d4());
+        let data_set = vec![
+            (helper.path_to_d4(), None),
+            (helper.path_to_d3(), Some(helper.path_to_f3())),
+            (helper.path_to_d2(), Some(helper.path_to_f2())),
+            (helper.path_to_d5(), Some(helper.path_to_f4())),
+        ];
+        for (part_of_correct, removed_file) in data_set.into_iter() {
+            correct.insert(part_of_correct);
+            if let Some(file) = removed_file {
+                fs::remove_file(file).ok();
+            }
+            assert_eq!(correct, potentially_empty_dirs(&root, Vec::new()));
+        }
 
         helper.remove_dirs_and_files();
     }
