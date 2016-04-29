@@ -6,6 +6,7 @@ use self::chrono::offset::TimeZone;
 use constant::STORAGE_DIR_NAME;
 use lib::fs::*;
 use lib::io::*;
+use std::borrow::Borrow;
 use std::collections::BTreeSet;
 use std::fs::{self, OpenOptions};
 use std::io::{Error as IoError, ErrorKind as IoErrorKind, Write};
@@ -65,14 +66,14 @@ impl Storage {
     }
 
 
-    pub fn squeeze_dusts<P: AsRef<Path>>(&self, paths_to_dust: Vec<P>) -> Result<(), IoError> {
+    pub fn squeeze_dusts<P: AsRef<Path>, V: Borrow<Vec<P>>>(&self, paths_to_dust: V) -> Result<(), IoError> {
         let path_to_dust_box = self.path_to_dust_box();
 
         let addition = if self.indeed { "" } else { " (dry-run mode)" };
         let message  = format!("Move dusts to \"{}\"{}", path_to_dust_box.display(), addition);
         try!(self.print_and_log(message));
 
-        for path_to_dust in &paths_to_dust {
+        for path_to_dust in paths_to_dust.borrow() {
             let path_to_dust = path_to_dust.as_ref();
             let target_file  = match path_to_dust.file_name() {
                 Some(f) => f,

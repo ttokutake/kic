@@ -4,6 +4,7 @@ use super::Command;
 use constant::MAIN_DIR;
 use lib::fs::*;
 use lib::setting::{Config, ConfigKey, Ignore, Storage};
+use std::path::{Path, PathBuf};
 
 #[derive(Debug)]
 pub struct Sweep {
@@ -46,9 +47,17 @@ impl Command for Sweep {
             .filter(|f| if !all && cfg!(unix) { !is_recently_accessed(f, &moratorium) } else { true })
             .cloned()
             .collect::<Vec<String>>();
-        try!(storage.squeeze_dusts(target_files));
+        try!(storage.squeeze_dusts(&target_files));
 
-        let potentially_empty_dirs = potentially_empty_dirs(MAIN_DIR);
+        let ignored_files = if indeed {
+            Vec::new()
+        } else {
+            target_files
+                .iter()
+                .map(|f| Path::new(&add_current_dir_prefix(f)).to_path_buf())
+                .collect::<Vec<PathBuf>>()
+        };
+        let potentially_empty_dirs = potentially_empty_dirs(MAIN_DIR, ignored_files);
         try!(storage.squeeze_dirs(potentially_empty_dirs));
 
         Ok(())

@@ -22,6 +22,16 @@ macro_rules! path_buf {
 }
 
 
+pub fn add_current_dir_prefix<S: AsRef<str>>(path_name: S) -> String {
+    let path_name = path_name.as_ref();
+
+    if path_name.starts_with(".") {
+        path_name.to_string()
+    } else {
+        format!(".{}{}", MAIN_SEPARATOR, path_name)
+    }
+}
+
 pub fn trim_current_dir_prefix<S: AsRef<str>>(path_name: S) -> String {
     let pattern = format!(".{}", MAIN_SEPARATOR);
 
@@ -89,8 +99,8 @@ pub fn walk_dir<P: AsRef<Path>>(root: P) -> BTreeSet<String> {
         .collect::<BTreeSet<String>>()
 }
 
-pub fn potentially_empty_dirs<P: AsRef<Path>>(root: P) -> BTreeSet<PathBuf> {
-    fn potentially_empty_dirs(mut result: BTreeSet<PathBuf>, mut target_dirs: VecDeque<PathBuf>) -> BTreeSet<PathBuf> {
+pub fn potentially_empty_dirs<P: AsRef<Path>>(root: P, ignored_entries: Vec<PathBuf>) -> BTreeSet<PathBuf> {
+    fn potentially_empty_dirs(mut result: BTreeSet<PathBuf>, mut target_dirs: VecDeque<PathBuf>, ignored_entries: Vec<PathBuf>) -> BTreeSet<PathBuf> {
         match target_dirs.pop_front() {
             None => result,
             Some(mut target_dir) => {
@@ -105,6 +115,7 @@ pub fn potentially_empty_dirs<P: AsRef<Path>>(root: P) -> BTreeSet<PathBuf> {
                 };
                 let include_file_or_hidden_dir = entries
                     .iter()
+                    .filter(|e| ignored_entries.iter().all(|ie| *ie != e.path()))
                     .any(|e| e.file_type().ok().map_or(true, |t| t.is_file()) || is_hidden_for_std(e));
 
                 if ignore || include_file_or_hidden_dir {
@@ -127,7 +138,7 @@ pub fn potentially_empty_dirs<P: AsRef<Path>>(root: P) -> BTreeSet<PathBuf> {
                 let mut dirs = dirs.into_iter().collect::<VecDeque<PathBuf>>();
                 target_dirs.append(&mut dirs);
 
-                potentially_empty_dirs(result, target_dirs)
+                potentially_empty_dirs(result, target_dirs, ignored_entries)
             },
         }
     }
@@ -139,7 +150,7 @@ pub fn potentially_empty_dirs<P: AsRef<Path>>(root: P) -> BTreeSet<PathBuf> {
     result.insert(root.clone());
     target_dirs.push_back(root);
 
-    potentially_empty_dirs(result, target_dirs)
+    potentially_empty_dirs(result, target_dirs, ignored_entries)
 }
 
 
@@ -357,19 +368,19 @@ mod tests {
         let mut correct = BTreeSet::new();
 
         correct.insert(helper.path_to_d4());
-        assert_eq!(correct, potentially_empty_dirs(&root));
+        assert_eq!(correct, potentially_empty_dirs(&root, Vec::new()));
 
         fs::remove_file(helper.path_to_f3()).ok();
         correct.insert(helper.path_to_d3());
-        assert_eq!(correct, potentially_empty_dirs(&root));
+        assert_eq!(correct, potentially_empty_dirs(&root, Vec::new()));
 
         fs::remove_file(helper.path_to_f2()).ok();
         correct.insert(helper.path_to_d2());
-        assert_eq!(correct, potentially_empty_dirs(&root));
+        assert_eq!(correct, potentially_empty_dirs(&root, Vec::new()));
 
         fs::remove_file(helper.path_to_f4()).ok();
         correct.insert(helper.path_to_d5());
-        assert_eq!(correct, potentially_empty_dirs(&root));
+        assert_eq!(correct, potentially_empty_dirs(&root, Vec::new()));
 
         helper.remove_dirs_and_files();
     }
