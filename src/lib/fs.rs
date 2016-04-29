@@ -317,18 +317,18 @@ mod tests {
         let helper = Helper::new("la_Ok");
         helper.create_dirs_and_files();
 
-        let empty_btree_set: BTreeSet<String> = BTreeSet::new();
+        let data_set = vec![
+            (vec![helper.d2.clone(), helper.d5.clone(), helper.d6.clone(), helper.f1.clone()], helper.path_to_d1()),
+            (vec![helper.d3.clone(), helper.f2.clone()]                                      , helper.path_to_d2()),
+            (vec![helper.d4.clone(), helper.f3.clone()]                                      , helper.path_to_d3()),
+            (Vec::new()                                                                      , helper.path_to_d4()),
+            (vec![helper.f4.clone()]                                                         , helper.path_to_d5()),
+            (Vec::new()                                                                      , helper.path_to_d6()),
+        ];
 
-        let correct = to_btree_set(vec![helper.d2.clone(), helper.d5.clone(), helper.d6.clone(), helper.f1.clone()]);
-        assert_eq!(correct, to_btree_set(la(helper.path_to_d1()).unwrap()));
-        let correct = to_btree_set(vec![helper.d3.clone(), helper.f2.clone()]);
-        assert_eq!(correct, to_btree_set(la(helper.path_to_d2()).unwrap()));
-        let correct = to_btree_set(vec![helper.d4.clone(), helper.f3.clone()]);
-        assert_eq!(correct        , to_btree_set(la(helper.path_to_d3()).unwrap()));
-        assert_eq!(empty_btree_set, to_btree_set(la(helper.path_to_d4()).unwrap()));
-        let correct = to_btree_set(vec![helper.f4.clone()]);
-        assert_eq!(correct        , to_btree_set(la(helper.path_to_d5()).unwrap()));
-        assert_eq!(empty_btree_set, to_btree_set(la(helper.path_to_d6()).unwrap()));
+        for (correct, target_dir) in data_set.into_iter() {
+            assert_eq!(to_btree_set(correct), to_btree_set(la(target_dir).unwrap()));
+        }
 
         helper.remove_dirs_and_files();
     }
