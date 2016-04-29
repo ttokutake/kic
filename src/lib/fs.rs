@@ -22,10 +22,10 @@ macro_rules! path_buf {
 }
 
 
-pub fn add_current_dir_prefix<S: AsRef<str>>(path_name: S) -> String {
+pub fn supply_current_dir_prefix<S: AsRef<str>>(path_name: S) -> String {
     let path_name = path_name.as_ref();
 
-    if path_name.starts_with(".") {
+    if path_name.starts_with(".") || path_name.starts_with("/") {
         path_name.to_string()
     } else {
         format!(".{}{}", MAIN_SEPARATOR, path_name)
@@ -290,6 +290,32 @@ mod tests {
     }
 
     #[test]
+    fn supply_current_dir_prefix_should_return_added() {
+        let path_names = [
+            ("./a"  , "a"  ),
+            ("./a/" , "a/" ),
+            ("./a/b", "a/b"),
+        ];
+        for &(correct, input) in &path_names {
+            assert_eq!(correct.to_string(), supply_current_dir_prefix(input));
+        }
+    }
+    #[test]
+    fn supply_current_dir_prefix_should_return_as_it_is() {
+        let path_names = [
+            "/",
+            "/a",
+            ".",
+            "./",
+            "./a",
+            "././a",
+        ];
+        for path_name in &path_names {
+            assert_eq!(path_name.to_string(), supply_current_dir_prefix(path_name))
+        }
+    }
+
+    #[test]
     fn trim_current_dir_prefix_should_return_trimmed() {
         let path_names = [
             (""   , "./"    ),
@@ -299,7 +325,7 @@ mod tests {
             ("a/" , "./a/"  ),
             ("a/b", "./a/b" ),
         ];
-        for &(ref correct, ref input) in &path_names {
+        for &(correct, input) in &path_names {
             assert_eq!(correct.to_string(), trim_current_dir_prefix(input));
         }
     }

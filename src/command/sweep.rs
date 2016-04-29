@@ -54,7 +54,7 @@ impl Command for Sweep {
         } else {
             target_files
                 .iter()
-                .map(|f| Path::new(&add_current_dir_prefix(f)).to_path_buf())
+                .map(|f| Path::new(&supply_current_dir_prefix(f)).to_path_buf())
                 .collect::<Vec<PathBuf>>()
         };
         let potentially_empty_dirs = potentially_empty_dirs(MAIN_DIR, ignored_files);
