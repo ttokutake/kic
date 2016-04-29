@@ -396,16 +396,19 @@ mod tests {
         correct.insert(helper.path_to_d4());
         assert_eq!(correct, potentially_empty_dirs(&root, Vec::new()));
 
-        fs::remove_file(helper.path_to_f3()).ok();
         correct.insert(helper.path_to_d3());
+        assert_eq!(correct, potentially_empty_dirs(&root, vec![helper.path_to_f3()]));
+        fs::remove_file(helper.path_to_f3()).ok();
         assert_eq!(correct, potentially_empty_dirs(&root, Vec::new()));
 
-        fs::remove_file(helper.path_to_f2()).ok();
         correct.insert(helper.path_to_d2());
+        assert_eq!(correct, potentially_empty_dirs(&root, vec![helper.path_to_f2()]));
+        fs::remove_file(helper.path_to_f2()).ok();
         assert_eq!(correct, potentially_empty_dirs(&root, Vec::new()));
 
-        fs::remove_file(helper.path_to_f4()).ok();
         correct.insert(helper.path_to_d5());
+        assert_eq!(correct, potentially_empty_dirs(&root, vec![helper.path_to_f4()]));
+        fs::remove_file(helper.path_to_f4()).ok();
         assert_eq!(correct, potentially_empty_dirs(&root, Vec::new()));
 
         helper.remove_dirs_and_files();
