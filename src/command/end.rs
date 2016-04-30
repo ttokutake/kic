@@ -11,6 +11,7 @@ impl Command for End {
         return Usage::new(UsageKind::End);
     }
 
+    #[cfg(unix)]
     fn main(&self) -> Result<(), CliError> {
         let mut cron = try!(Cron::read());
 
@@ -18,5 +19,9 @@ impl Command for End {
         cron.delete(current_dir);
 
         cron.set()
+    }
+    #[cfg(windows)]
+    fn main(&self) -> Result<(), CliError> {
+        unimplemented!();
     }
 }

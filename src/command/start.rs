@@ -11,6 +11,7 @@ impl Command for Start {
         return Usage::new(UsageKind::Start);
     }
 
+    #[cfg(unix)]
     fn main(&self) -> Result<(), CliError> {
         let cron = try!(Cron::read());
 
@@ -29,5 +30,9 @@ impl Command for Start {
         cron
             .update(&[pair_for_burn, pair_for_sweep])
             .and_then(|new_cron| new_cron.set())
+    }
+    #[cfg(windows)]
+    fn main(&self) -> Result<(), CliError> {
+        unimplemented!();
     }
 }
