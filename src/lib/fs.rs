@@ -9,7 +9,7 @@ use std::collections::{BTreeSet, VecDeque};
 use std::fs::{self, DirEntry};
 use std::io::Error as IoError;
 use std::os::unix::fs::MetadataExt;
-use std::path::{MAIN_SEPARATOR, Path, PathBuf};
+use std::path::{Component, MAIN_SEPARATOR, Path, PathBuf};
 use std::result::Result;
 
 
@@ -61,10 +61,12 @@ impl DirEntryExt for WalkDirEntry {
 pub fn supply_current_dir_prefix<S: AsRef<str>>(path_name: S) -> String {
     let path_name = path_name.as_ref();
 
-    if path_name.starts_with(".") || path_name.starts_with("/") {
-        path_name.to_string()
-    } else {
-        format!(".{}{}", MAIN_SEPARATOR, path_name)
+    match Path::new(path_name).components().next() {
+        Some(entry) => match entry {
+            Component::CurDir | Component::RootDir | Component::Prefix(_) => path_name.to_string(),
+            _                                                             => format!(".{}{}", MAIN_SEPARATOR, path_name),
+        },
+        None => unreachable!("Wrong to use this function!!"),
     }
 }
 
@@ -317,6 +319,11 @@ mod tests {
         for path_name in &path_names {
             assert_eq!(path_name.to_string(), supply_current_dir_prefix(path_name))
         }
+    }
+    #[test]
+    #[should_panic(expect = "entered unreachable code")]
+    fn supply_current_dir_prefix_should_panic() {
+        supply_current_dir_prefix("");
     }
 
     #[test]
