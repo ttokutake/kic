@@ -14,9 +14,14 @@ impl Command for Patrol {
         return Usage::new(UsageKind::Patrol);
     }
 
+    #[cfg(unix)]
     fn main(&self) -> Result<(), CliError> {
         let cron = try!(Cron::read());
         let cron = try!(cron.discard());
         cron.set()
+    }
+    #[cfg(windows)]
+    fn main(&self) -> Result<(), CliError> {
+        unimplemented!();
     }
 }
