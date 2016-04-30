@@ -12,7 +12,7 @@ fn main() {
         let error_code = match why {
             CliError::Essential(_) | CliError::RunningPlace(_) => {
                 print_with_tag(Tag::Warning, why);
-                if let Err(e) = command::clean_up_cron() {
+                if let Err(e) = command::clean_up() {
                     print_with_tag(Tag::Error, e);
                 }
                 1

@@ -122,7 +122,7 @@ pub fn execute() -> Result<(), CliError> {
     }
 }
 
-pub fn clean_up_cron() -> Result<(), CliError> {
+pub fn clean_up() -> Result<(), CliError> {
     // This is temporary "if" for avoiding the error except for "unix".
     if cfg!(unix) {
         End.main()

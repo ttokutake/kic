@@ -17,6 +17,6 @@ impl Command for Destroy {
 
         try!(Self::run_after_confirmation(message, || setting::delete_working_dir()));
 
-        super::clean_up_cron()
+        super::clean_up()
     }
 }
