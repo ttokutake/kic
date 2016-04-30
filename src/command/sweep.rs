@@ -44,7 +44,7 @@ impl Command for Sweep {
 
         let target_files = walk_dir(MAIN_DIR)
             .difference(ignore.files())
-            .filter(|f| if !all && cfg!(unix) { !is_recently_accessed(f, &moratorium) } else { true })
+            .filter(|f| if all { true } else { !is_recently_accessed(f, &moratorium) })
             .cloned()
             .collect::<Vec<String>>();
         try!(storage.squeeze_dusts(&target_files));

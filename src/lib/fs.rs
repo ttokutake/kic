@@ -49,6 +49,7 @@ pub fn la<P: AsRef<Path>>(path: P) -> Result<Vec<String>, IoError> {
     Ok(dirs)
 }
 
+#[cfg(unix)]
 pub fn is_recently_accessed<P: AsRef<Path>, D: Borrow<Duration>>(p: P, moratorium: D) -> bool {
     let threshold = UTC::now() - *moratorium.borrow();
 
@@ -58,6 +59,10 @@ pub fn is_recently_accessed<P: AsRef<Path>, D: Borrow<Duration>>(p: P, moratoriu
     };
 
     accessed_time > threshold.timestamp()
+}
+#[cfg(windows)]
+pub fn is_recently_accessed<P: AsRef<Path>, D: Borrow<Duration>>(_p: P, _moratorium: D) -> bool {
+    false
 }
 
 fn is_hidden_name<S: AsRef<str>>(file_name: S) -> bool {
