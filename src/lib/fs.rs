@@ -22,6 +22,42 @@ macro_rules! path_buf {
 }
 
 
+fn is_hidden_name(file_name: &str) -> bool {
+    file_name.starts_with(".") && file_name.len() > 1 && file_name != ".."
+}
+
+trait DirEntryExt {
+    fn file_name_string(&self) -> Option<String> {
+        unimplemented!();
+    }
+
+    fn is_hidden(&self) -> bool;
+}
+impl DirEntryExt for DirEntry {
+    fn file_name_string(&self) -> Option<String> {
+        self
+            .file_name()
+            .into_string()
+            .ok()
+    }
+
+    fn is_hidden(&self) -> bool {
+        self
+            .file_name()
+            .to_str()
+            .map_or(false, is_hidden_name)
+    }
+}
+impl DirEntryExt for WalkDirEntry {
+    fn is_hidden(&self) -> bool {
+        self
+            .file_name()
+            .to_str()
+            .map_or(false, is_hidden_name)
+    }
+}
+
+
 pub fn supply_current_dir_prefix<S: AsRef<str>>(path_name: S) -> String {
     let path_name = path_name.as_ref();
 
@@ -32,19 +68,11 @@ pub fn supply_current_dir_prefix<S: AsRef<str>>(path_name: S) -> String {
     }
 }
 
-fn into_string<D: Borrow<DirEntry>>(entry: D) -> Option<String> {
-    entry
-        .borrow()
-        .file_name()
-        .into_string()
-        .ok()
-}
-
 pub fn la<P: AsRef<Path>>(path: P) -> Result<Vec<String>, IoError> {
     let dirs = try!(fs::read_dir(path));
     let dirs = dirs
         .filter_map(Result::ok)
-        .filter_map(into_string)
+        .filter_map(|e| e.file_name_string())
         .collect::<Vec<String>>();
     Ok(dirs)
 }
@@ -65,26 +93,10 @@ pub fn is_recently_accessed<P: AsRef<Path>, D: Borrow<Duration>>(_p: P, _morator
     false
 }
 
-fn is_hidden_name<S: AsRef<str>>(file_name: S) -> bool {
-    let file_name = file_name.as_ref();
-    file_name.starts_with(".") && file_name.len() > 1 && file_name != ".."
-}
-
-fn is_hidden_for_std(entry: &DirEntry) -> bool {
-    into_string(entry).map_or(false, is_hidden_name)
-}
-
-fn is_hidden_for_walkdir(entry: &WalkDirEntry) -> bool {
-    entry
-        .file_name()
-        .to_str()
-        .map_or(false, is_hidden_name)
-}
-
 pub fn walk_dir<P: AsRef<Path>>(root: P) -> BTreeSet<String> {
     let walker = WalkDir::new(root)
         .into_iter()
-        .filter_entry(|e| !is_hidden_for_walkdir(e))
+        .filter_entry(|e| !e.is_hidden())
         .filter_map(Result::ok)
         .filter(|e| !e.file_type().is_dir())
         .collect::<Vec<WalkDirEntry>>();
@@ -112,7 +124,7 @@ pub fn potentially_empty_dirs<P: AsRef<Path>>(root: P, ignored_entries: Vec<Path
                 let include_file_or_hidden_dir = entries
                     .iter()
                     .filter(|e| ignored_entries.iter().all(|ie| *ie != e.path()))
-                    .any(|e| e.file_type().ok().map_or(true, |t| t.is_file()) || is_hidden_for_std(e));
+                    .any(|e| e.file_type().ok().map_or(true, |t| t.is_file()) || e.is_hidden());
 
                 if ignore || include_file_or_hidden_dir {
                     loop {
@@ -124,7 +136,7 @@ pub fn potentially_empty_dirs<P: AsRef<Path>>(root: P, ignored_entries: Vec<Path
 
                 let dirs = entries
                     .iter()
-                    .filter(|e| e.file_type().ok().map_or(false, |t| t.is_dir()) && !is_hidden_for_std(e))
+                    .filter(|e| e.file_type().ok().map_or(false, |t| t.is_dir()) && !e.is_hidden())
                     .map(|e| e.path())
                     .collect::<BTreeSet<PathBuf>>();
                 for dir in dirs.clone().into_iter() {
