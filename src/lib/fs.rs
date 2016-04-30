@@ -32,15 +32,6 @@ pub fn supply_current_dir_prefix<S: AsRef<str>>(path_name: S) -> String {
     }
 }
 
-pub fn trim_current_dir_prefix<S: AsRef<str>>(path_name: S) -> String {
-    let pattern = format!(".{}", MAIN_SEPARATOR);
-
-    path_name
-        .as_ref()
-        .trim_left_matches(&pattern)
-        .to_string()
-}
-
 fn into_string<D: Borrow<DirEntry>>(entry: D) -> Option<String> {
     entry
         .borrow()
@@ -95,7 +86,7 @@ pub fn walk_dir<P: AsRef<Path>>(root: P) -> BTreeSet<String> {
 
     walker
         .into_iter()
-        .filter_map(|e| e.path().to_str().map(trim_current_dir_prefix))
+        .filter_map(|e| e.path().to_str().map(|p| p.to_string()))
         .collect::<BTreeSet<String>>()
 }
 
@@ -308,36 +299,6 @@ mod tests {
         ];
         for path_name in &path_names {
             assert_eq!(path_name.to_string(), supply_current_dir_prefix(path_name))
-        }
-    }
-
-    #[test]
-    fn trim_current_dir_prefix_should_return_trimmed() {
-        let path_names = [
-            (""   , "./"    ),
-            (""   , "././"  ),
-            (""   , "./././"),
-            ("a"  , "./a"   ),
-            ("a/" , "./a/"  ),
-            ("a/b", "./a/b" ),
-        ];
-        for &(correct, input) in &path_names {
-            assert_eq!(correct.to_string(), trim_current_dir_prefix(input));
-        }
-    }
-    #[test]
-    fn trim_current_dir_prefix_should_return_as_it_is() {
-        let path_names = [
-            "",
-            "/",
-            "/a",
-            "/a/b",
-            "a",
-            "a/",
-            "a/b",
-        ];
-        for path_name in &path_names {
-            assert_eq!(path_name.to_string(), trim_current_dir_prefix(path_name));
         }
     }
 

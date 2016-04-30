@@ -74,7 +74,7 @@ impl Ignore {
     pub fn add(mut self, paths: &Vec<String>) -> Self {
         let paths_to_be_added = paths
             .iter()
-            .map(trim_current_dir_prefix)
+            .map(supply_current_dir_prefix)
             .filter(|p| Path::new(p).is_file())
             .collect::<BTreeSet<String>>();
 
@@ -90,7 +90,7 @@ impl Ignore {
     pub fn remove(mut self, paths: &Vec<String>) -> Self {
         let paths_to_be_removed = paths
             .iter()
-            .map(trim_current_dir_prefix)
+            .map(supply_current_dir_prefix)
             .collect::<BTreeSet<String>>();
 
         self.files = self
@@ -106,10 +106,10 @@ impl Ignore {
 
 #[test]
 fn remove_should_remove_specified_files() {
-    let f1 = "a"  .to_string();
-    let f2 = "b"  .to_string();
-    let f3 = "c/d".to_string();
-    let f4 = "c/e".to_string();
+    let f1 = "./a"  .to_string();
+    let f2 = "./b"  .to_string();
+    let f3 = "./c/d".to_string();
+    let f4 = "./c/e".to_string();
 
     let mut files = BTreeSet::new();
     files.insert(f1.clone());
