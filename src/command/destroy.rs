@@ -15,8 +15,9 @@ impl Command for Destroy {
     fn main(&self) -> Result<(), CliError> {
         let message = format!("Do you want to clear all files related to \"{}\"?", ME);
 
-        try!(Self::run_after_confirmation(message, || setting::delete_working_dir()));
-
-        super::clean_up()
+        Self::run_after_confirmation(message, || {
+            try!(setting::delete_working_dir());
+            super::clean_up()
+        })
     }
 }

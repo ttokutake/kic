@@ -26,7 +26,6 @@ use lib::io::*;
 use lib::setting;
 use std::env;
 use std::fmt::Display;
-use std::io::Error as IoError;
 
 trait Command {
     fn allow_to_check_current_dir(&self) -> bool { true }
@@ -78,7 +77,7 @@ trait Command {
     }
 
     fn run_after_confirmation<D: Display, F>(message: D, danger_exec: F) -> Result<(), CliError>
-        where Self: Sized, F: FnOnce() -> Result<(), IoError>
+        where Self: Sized, F: FnOnce() -> Result<(), CliError>
     {
         echo(format_with_tag(Tag::Caution, format!("{} [yes/no]: ", message)));
 

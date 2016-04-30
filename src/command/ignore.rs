@@ -65,12 +65,12 @@ impl Ignore {
     fn ignore_current_files() -> Result<(), CliError> {
         let message = "Do you want to preserve current state?";
 
-        Self::run_after_confirmation(message, || setting::Ignore::default().create())
+        Self::run_after_confirmation(message, || setting::Ignore::default().create().map_err(|e| From::from(e)))
     }
 
     fn clear_ignore_file() -> Result<(), CliError> {
         let message = format!("Do you want to clear \"{}\"?", IGNORE_FILE_NAME);
 
-        Self::run_after_confirmation(message, || setting::Ignore::new().create())
+        Self::run_after_confirmation(message, || setting::Ignore::new().create().map_err(|e| From::from(e)))
     }
 }

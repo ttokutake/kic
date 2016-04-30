@@ -53,6 +53,6 @@ impl Config {
     fn init(&self) -> Result<(), CliError> {
         let message = format!("Do you want to initialize \"{}\"?", CONFIG_FILE_NAME);
 
-        Self::run_after_confirmation(message,|| setting::Config::default().create())
+        Self::run_after_confirmation(message,|| setting::Config::default().create().map_err(|e| From::from(e)))
     }
 }
