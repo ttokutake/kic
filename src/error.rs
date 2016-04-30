@@ -298,22 +298,22 @@ impl UsageKind {
 
     fn description(&self) -> &str {
         match *self {
-            UsageKind::Nothing => "Keep your directories clean!",
-            UsageKind::Help    => "Display usage for each command.",
-            UsageKind::Version => "Display the version of this software.",
-            UsageKind::Init    => "Register current directory.",
-            UsageKind::Config  => "Change parameter.",
-            UsageKind::Ignore  => "Change \"non-dust\" file's list.",
-            UsageKind::Sweep   => "Sweep \"dust\" files and empty directories in current directory.",
-            UsageKind::Burn    => "Burn \"sweeped\" files.",
-            UsageKind::Start   => "Register with \"cron\" for autonomous operation.",
-            UsageKind::End     => "Unregister from \"cron\".",
-            UsageKind::Destroy => "Unregister current directory.",
-            UsageKind::Patrol  => "Keep \"cron\" file clean.",
+            UsageKind::Nothing => "Keep your directories clean",
+            UsageKind::Help    => "Display usage for each command",
+            UsageKind::Version => "Display the version of this software",
+            UsageKind::Init    => "Register current directory",
+            UsageKind::Config  => "Change parameter",
+            UsageKind::Ignore  => "Change \"non-dust\" file's list",
+            UsageKind::Sweep   => "Sweep \"dust\" files and empty directories in current directory",
+            UsageKind::Burn    => "Burn \"sweeped\" files",
+            UsageKind::Start   => "Register with \"cron\" for autonomous operation",
+            UsageKind::End     => "Unregister from \"cron\"",
+            UsageKind::Destroy => "Unregister current directory",
+            UsageKind::Patrol  => "Keep \"cron\" file clean",
         }
     }
 
-    fn sub_descriptions(&self) -> Vec<String> {
+    fn sub_commands(&self) -> Vec<String> {
         match *self {
             UsageKind::Nothing => vec![
                 format!("{}{}", "help    # ", UsageKind::Help   .description()),
@@ -354,6 +354,18 @@ impl UsageKind {
             _ => Vec::new(),
         }
     }
+
+    fn optional_items(&self) -> (&str, Vec<&str>) {
+        match *self {
+            UsageKind::Config => ("Keys", vec![
+                r#"burn.moratorium  # Moratorium to delete directories in "warehouse""#,
+                r#"sweep.moratorium # Moratorium to Move "dust"s to "warehouse""#,
+                r#"sweep.period     # Period to Move "dust"s by autonomous "sweep""#,
+                r#"sweep.time       # Time to Move "dust"s by autonomous "sweep""#,
+            ]),
+            _ => ("", Vec::new()),
+        }
+    }
 }
 
 #[derive(Debug, PartialEq)]
@@ -375,17 +387,22 @@ impl Usage {
 
         let main = format!("Usage:\n{}\nDescription:\n    {}\n", usage, self.kind.description());
 
-        let sub_description = self.kind
-            .sub_descriptions()
-            .iter()
-            .fold(String::new(), |message, line| {
-                message + "    " + line + "\n"
-            });
+        let sub_commands = Self::create_area("Command", self.kind.sub_commands());
 
-        if sub_description.is_empty() {
-            main
+        let (header, items) = self.kind.optional_items();
+        let optional_area   = Self::create_area(header, items);
+
+        main + &sub_commands + &optional_area
+    }
+
+    fn create_area<S: AsRef<str>>(header: &str, items: Vec<S>) -> String {
+        if items.is_empty() {
+            "".to_string()
         } else {
-            format!("{}{}{}", main, "\nCommand:\n", sub_description)
+            format!("\n{}:\n{}", header, items
+                .iter()
+                .fold(String::new(), |body, item| body + "    " + item.as_ref() + "\n")
+            )
         }
     }
 }
