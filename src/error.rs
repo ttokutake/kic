@@ -301,15 +301,15 @@ impl UsageKind {
             UsageKind::Nothing => "Keep your directories clean",
             UsageKind::Help    => "Display usage for each command",
             UsageKind::Version => "Display the version of this software",
-            UsageKind::Init    => "Register current directory",
-            UsageKind::Config  => "Change parameter",
-            UsageKind::Ignore  => "Change \"non-dust\" file's list",
-            UsageKind::Sweep   => "Sweep \"dust\" files and empty directories in current directory",
-            UsageKind::Burn    => "Burn \"sweeped\" files",
-            UsageKind::Start   => "Register with \"cron\" for autonomous operation",
-            UsageKind::End     => "Unregister from \"cron\"",
-            UsageKind::Destroy => "Unregister current directory",
-            UsageKind::Patrol  => "Keep \"cron\" file clean",
+            UsageKind::Init    => "Register current directory, i.e. create \".kic\" directory",
+            UsageKind::Config  => "Change \"config.toml\" file's contents",
+            UsageKind::Ignore  => "Change \"ignore\" file's contents",
+            UsageKind::Sweep   => "Move dust files and empty directories into \"warehouse\" directory",
+            UsageKind::Burn    => "Delete expired directories in \"warehouse\" directory",
+            UsageKind::Start   => "Start autonomous \"sweep\" and \"burn\" (UNIX-like: cron, Windows: ?)",
+            UsageKind::End     => "End autonomous \"sweep\" and \"burn\" (UNIX-like: cron, Windows: ?)",
+            UsageKind::Destroy => "Unregister current directory, i.e. delete \".kic\" directory",
+            UsageKind::Patrol  => "Keep your \"cron\" file clean (UNIX-like only)",
         }
     }
 
@@ -329,27 +329,24 @@ impl UsageKind {
                 format!("{}{}", "patrol  # ", UsageKind::Patrol .description()),
             ],
             UsageKind::Config => vec![
-                "set  # Set parameter"       .to_string(),
-                "init # Initialize configure".to_string(),
+                "set  # Set parameters related to \"sweep\" and \"burn\" commands".to_string(),
+                "init # Initialize \"config.toml\" file"                          .to_string(),
             ],
-            UsageKind::Ignore => {
-                let file_expression = "\"non-dust\" file's list";
-                vec![
-                    format!("add     # Add specified files to {}"        , file_expression),
-                    format!("remove  # Remove specified files from {}"   , file_expression),
-                    format!("current # Replace {} with current all files", file_expression),
-                    format!("clear   # Clear {}"                         , file_expression),
-                ]
-            },
+            UsageKind::Ignore => vec![
+                "add     # Add files which will be ignored to \"ignore\" file"                        .to_string(),
+                "remove  # Remove files which have been ignored from \"ignore\" file"                 .to_string(),
+                "current # Replace \"ignore\" file with one which register current all files"         .to_string(),
+                "clear   # Clear \"ignore\" file, i.e. all files will be aimed from \"sweep\" command".to_string(),
+            ],
             UsageKind::Sweep => vec![
-                "(none)     # Sweep fakely \"dust\"s"                                  .to_string(),
-                "indeed     # Sweep indeed \"dust\"s"                                  .to_string(),
-                "all        # Sweep fakely \"dust\"s including recently accessed files".to_string(),
-                "all indeed # Sweep indeed \"dust\"s including recently accessed files".to_string(),
+                "(none)     # Move fakely dust files into \"warehouse\""                                  .to_string(),
+                "indeed     # Move indeed dust files into \"warehouse\""                                  .to_string(),
+                "all        # Move fakely dust files into \"warehouse\" including recently accessed files".to_string(),
+                "all indeed # Move indeed dust files into \"warehouse\" including recently accessed files".to_string(),
             ],
             UsageKind::Burn => vec![
-                "(none) # Burn expired \"dust box\"s fakely".to_string(),
-                "indeed # Burn expired \"dust box\"s indeed".to_string(),
+                "(none) # Delete expired directories in \"warehouse\" fakely".to_string(),
+                "indeed # Delete expired directories in \"warehouse\" indeed".to_string(),
             ],
             _ => Vec::new(),
         }
@@ -359,7 +356,7 @@ impl UsageKind {
         match *self {
             UsageKind::Config => ("Keys", vec![
                 r#"burn.moratorium  # Moratorium to delete directories in "warehouse""#,
-                r#"sweep.moratorium # Moratorium to Move "dust"s to "warehouse""#,
+                r#"sweep.moratorium # Moratorium to Move "dust"s into "warehouse""#,
                 r#"sweep.period     # Period to Move "dust"s by autonomous "sweep""#,
                 r#"sweep.time       # Time to Move "dust"s by autonomous "sweep""#,
             ]),
