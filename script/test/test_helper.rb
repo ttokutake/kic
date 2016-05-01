@@ -15,21 +15,18 @@ def initialize_kic!
   raise 'Failed to initialize.' if $? != 0
 end
 
-def destroy_kic!
-  if Dir.exists?('.kic') then
-    `
-      expect -c '
-        set timeout 5
-        spawn cargo run destroy
-        expect {
-          default { exit 1 }
-          -regexp "\\\\\\[yes/no\\\\\\]:\\\\s*$"
-        }
-        send "yes\\n"
-        expect eof
-      '
-    `
-    raise 'Failed to destroy.' if $? != 0
-  end
+def destroy_kic!(input = 'yes')
+  `
+    expect -c '
+      set timeout 5
+      spawn cargo run destroy
+      expect {
+        default { exit 1 }
+        -regexp "\\\\\\[yes/no\\\\\\]:\\\\s*$"
+      }
+      send "#{input}\\n"
+      expect eof
+    '
+  `
+  raise 'Failed to destroy.' if $? != 0
 end
-

@@ -9,14 +9,20 @@ class TestInitAndDestroy < Test::Unit::TestCase
   end
 
   def teardown
-    destroy_kic!
+    if base_dir_exists?
+      destroy_kic!
+    end
+  end
+
+  def base_dir_exists?
+    Dir.exists?(BASE_DIR)
   end
 
   def test_basic_init_and_destroy
-    assert !Dir.exists?(BASE_DIR)
+    assert !base_dir_exists?
 
     initialize_kic!
-    assert Dir .exists?(BASE_DIR)
+    assert base_dir_exists?
     assert Dir .exists?(STORAGE_DIR)
     assert File.exists?(CONFIG_FILE)
     assert File.exists?(IGNORE_FILE)
@@ -25,7 +31,7 @@ class TestInitAndDestroy < Test::Unit::TestCase
     assert !Dir.exists?(BASE_DIR)
   end
 
-  def test_init_should_not_delete_existing_config_and_ignore
+  def test_init_should_not_delete_existing_config_and_ignore_file
     initialize_kic!
 
     File.open(CONFIG_FILE, 'w').close
@@ -33,5 +39,12 @@ class TestInitAndDestroy < Test::Unit::TestCase
     initialize_kic!
     assert File.zero?(CONFIG_FILE)
     assert File.zero?(IGNORE_FILE)
+  end
+
+  def test_destroy_should_be_interrupted
+    initialize_kic!
+
+    destroy_kic! 'no'
+    assert base_dir_exists?
   end
 end
