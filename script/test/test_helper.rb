@@ -2,9 +2,9 @@ require 'test/unit'
 
 
 BASE_DIR    = '.kic'
-STORAGE_DIR = "#{BASE_DIR}/warehouse"
-CONFIG_FILE = "#{BASE_DIR}/config.toml"
-IGNORE_FILE = "#{BASE_DIR}/ignore"
+STORAGE_DIR = File.join(BASE_DIR, 'warehouse')
+CONFIG_FILE = File.join(BASE_DIR, 'config.toml')
+IGNORE_FILE = File.join(BASE_DIR, 'ignore')
 
 
 def build!
