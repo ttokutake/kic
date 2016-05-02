@@ -11,7 +11,7 @@ class TestInitAndDestroy < TestWithBuild
     Dir.exists?(BASE_DIR)
   end
 
-  def test_basic_init_and_destroy
+  def test_basic_setup
     assert !base_dir_exists?
 
     initialize_kic!
