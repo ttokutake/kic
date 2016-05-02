@@ -1,13 +1,6 @@
-require 'test/unit'
 require_relative 'test_helper'
 
-class TestInitAndDestroy < Test::Unit::TestCase
-  class << self
-    def startup
-      build!
-    end
-  end
-
+class TestInitAndDestroy < TestWithBuild
   def teardown
     if base_dir_exists?
       destroy_kic!
