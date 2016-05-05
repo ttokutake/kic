@@ -10,8 +10,8 @@ IGNORE_FILE = File.join(BASE_DIR, 'ignore')
 def build!
   `cargo build`
   raise 'Build failed.' if $? != 0
-  `cargo test`
-  raise 'Whitebox tests failed.' if $? != 0
+  #`cargo test`
+  #raise 'Whitebox tests failed.' if $? != 0
 end
 
 def initialize_kic!
