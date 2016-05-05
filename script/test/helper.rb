@@ -17,13 +17,17 @@ def build!
 end
 
 def initialize_kic!
-  `#{BIN} init`
+  exec('init')
   raise 'Failed to initialize.' if $? != 0
 end
 
 def destroy_kic!(input = 'yes')
   exec_with_stdin('destroy', input)
   raise 'Failed to destroy.' if $? != 0
+end
+
+def exec(command)
+  `#{BIN} #{command}`
 end
 
 def exec_with_stdin(command, input = 'yes')

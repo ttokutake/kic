@@ -2,7 +2,8 @@ require_relative 'helper'
 require          'toml'
 
 class TestConfig < TestWithBasicSetup
-  @@command_set = "#{BIN} config set"
+  @@command_set  = "config set"
+  @@command_init = 'config init'
 
   @@initial_toml = {
     'burn'  => {'moratorium' => '2 weeks'},
@@ -20,7 +21,7 @@ class TestConfig < TestWithBasicSetup
       'key_only',
     ]
     args.each do |arg|
-      output = `#{@@command_set} #{arg}`
+      output = exec("#{@@command_set} #{arg}")
       assert_not_equal $?, 0
       assert_true      output.include?('Usage:')
     end
@@ -35,7 +36,7 @@ class TestConfig < TestWithBasicSetup
     }
     kvs.each do |key, values|
       values.each do |value|
-        `#{@@command_set} #{key} #{value}`
+        exec("#{@@command_set} #{key} #{value}")
         assert_equal $?, 0
       end
     end
@@ -50,7 +51,7 @@ class TestConfig < TestWithBasicSetup
     }
     kvs.each do |key, values|
       values.each do |value|
-        output = `#{@@command_set} #{key} #{value}`
+        output = exec("#{@@command_set} #{key} #{value}")
         assert_not_equal $?, 0
         assert_true      output.include?('ERROR:')
       end
@@ -59,12 +60,14 @@ class TestConfig < TestWithBasicSetup
 
   def test_config_init_should_remake_config_file
     File.open(CONFIG_FILE, 'w').close
-    exec_with_stdin('config init')
-    p result
+    exec_with_stdin(@@command_init)
     toml = TOML.load_file(CONFIG_FILE)
     assert_equal @@initial_toml, toml
   end
 
   def test_config_init_should_be_interrupted
+    File.open(CONFIG_FILE, 'w').close
+    exec_with_stdin(@@command_init, 'no')
+    assert_true File.zero?(CONFIG_FILE)
   end
 end
