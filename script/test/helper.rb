@@ -1,6 +1,8 @@
 require 'test/unit'
 
 
+BIN = File.join(__dir__, '..', '..', 'target', 'debug', 'kic')
+
 BASE_DIR    = '.kic'
 STORAGE_DIR = File.join(BASE_DIR, 'warehouse')
 CONFIG_FILE = File.join(BASE_DIR, 'config.toml')
@@ -15,7 +17,7 @@ def build!
 end
 
 def initialize_kic!
-  `cargo run init`
+  `#{BIN} init`
   raise 'Failed to initialize.' if $? != 0
 end
 
@@ -23,7 +25,7 @@ def destroy_kic!(input = 'yes')
   `
     expect -c '
       set timeout 5
-      spawn cargo run destroy
+      spawn #{BIN} destroy
       expect {
         default { exit 1 }
         -regexp "\\\\\\[yes/no\\\\\\]:\\\\s*$"

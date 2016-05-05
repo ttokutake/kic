@@ -2,7 +2,7 @@ require_relative 'helper'
 require          'toml'
 
 class TestConfig < TestWithBasicSetup
-  @@set_command = 'cargo run config set'
+  @@set_command = "#{BIN} config set"
 
   @@initial_toml = {
     'burn'  => {'moratorium' => '2 weeks'},
