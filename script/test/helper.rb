@@ -22,10 +22,15 @@ def initialize_kic!
 end
 
 def destroy_kic!(input = 'yes')
+  exec_with_stdin('destroy', input)
+  raise 'Failed to destroy.' if $? != 0
+end
+
+def exec_with_stdin(command, input = 'yes')
   `
     expect -c '
       set timeout 5
-      spawn #{BIN} destroy
+      spawn #{BIN} #{command}
       expect {
         default { exit 1 }
         -regexp "\\\\\\[yes/no\\\\\\]:\\\\s*$"
@@ -34,7 +39,6 @@ def destroy_kic!(input = 'yes')
       expect eof
     '
   `
-  raise 'Failed to destroy.' if $? != 0
 end
 
 

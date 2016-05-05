@@ -2,7 +2,7 @@ require_relative 'helper'
 require          'toml'
 
 class TestConfig < TestWithBasicSetup
-  @@set_command = "#{BIN} config set"
+  @@command_set = "#{BIN} config set"
 
   @@initial_toml = {
     'burn'  => {'moratorium' => '2 weeks'},
@@ -20,7 +20,7 @@ class TestConfig < TestWithBasicSetup
       'key_only',
     ]
     args.each do |arg|
-      output = `#{@@set_command} #{arg}`
+      output = `#{@@command_set} #{arg}`
       assert_not_equal $?, 0
       assert_true      output.include?('Usage:')
     end
@@ -35,7 +35,7 @@ class TestConfig < TestWithBasicSetup
     }
     kvs.each do |key, values|
       values.each do |value|
-        `#{@@set_command} #{key} #{value}`
+        `#{@@command_set} #{key} #{value}`
         assert_equal $?, 0
       end
     end
@@ -43,14 +43,14 @@ class TestConfig < TestWithBasicSetup
 
   def test_config_set_should_display_error
     kvs = {
-      'burn.moratorium'  => ['day', 'week'],
-      'sweep.moratorium' => ['minute', 'hour', 'day', 'week'],
+      'burn.moratorium'  => ['1second', '1minute', '1hour', '0day', '0week', '1month'],
+      'sweep.moratorium' => ['1second', '-1minute', '-1hour', '-1day', '-1week', '1month'],
       'sweep.period'     => ['hourly', 'monthly'],
       'sweep.time'       => ['24:00', '00:00:00'],
     }
     kvs.each do |key, values|
       values.each do |value|
-        output = `#{@@set_command} #{key} #{value}`
+        output = `#{@@command_set} #{key} #{value}`
         assert_not_equal $?, 0
         assert_true      output.include?('ERROR:')
       end
@@ -58,5 +58,13 @@ class TestConfig < TestWithBasicSetup
   end
 
   def test_config_init_should_remake_config_file
+    File.open(CONFIG_FILE, 'w').close
+    exec_with_stdin('config init')
+    p result
+    toml = TOML.load_file(CONFIG_FILE)
+    assert_equal @@initial_toml, toml
+  end
+
+  def test_config_init_should_be_interrupted
   end
 end
