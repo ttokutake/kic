@@ -31,6 +31,11 @@ class TestIgnore < TestWithBasicSetup
   end
 
   def test_config_current_should_replace_ignore_file_with_new_one_mirroring_current_directory_tree
+    initial_ignore = File.open(IGNORE_FILE, &:read)
+
+    File.open(IGNORE_FILE, 'w').close
+    exec_with_stdin(@@command_current)
+    assert_equal initial_ignore, File.open(IGNORE_FILE, &:read)
   end
 
   def test_config_clear_should_delete_all_contents_from_ignore_file

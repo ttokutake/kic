@@ -37,7 +37,7 @@ class TestConfig < TestWithBasicSetup
     kvs.each do |key, values|
       values.each do |value|
         exec("#{@@command_set} #{key} #{value}")
-        assert_equal $?, 0
+        assert_equal 0, $?
       end
     end
   end
@@ -52,7 +52,7 @@ class TestConfig < TestWithBasicSetup
     kvs.each do |key, values|
       values.each do |value|
         output = exec("#{@@command_set} #{key} #{value}")
-        assert_not_equal $?, 0
+        assert_not_equal 0, $?
         assert_true      output.include?('ERROR:')
       end
     end
