@@ -19,9 +19,13 @@ class TestIgnore < TestWithBasicSetup
       [['dir1', 'dir2'], 'file3'],
     ]
     file_names.each do |dir_names, file_name|
-      path = File.join(dir_names)
-      FileUtils.mkdir_p(path) unless path.empty?
-      file = path.empty? ? file_name : File.join(path, file_name)
+      file = if dir_names.empty?
+        file_name
+      else
+        path = File.join(dir_names)
+        FileUtils.mkdir_p(path)
+        File.join(path, file_name)
+      end
       FileUtils.touch(file)
 
       exec("#{@@command_add} #{file}")
@@ -34,6 +38,17 @@ class TestIgnore < TestWithBasicSetup
   end
 
   def test_config_add_should_not_append_non_existing_file_to_ignore_file
+    file = 'non_existing_file'
+    dir  = 'empty_dir'
+    FileUtils.mkdir(dir)
+
+    [file, dir].each do |path|
+      exec("#{@@command_add} #{path}")
+      contents = File.open(IGNORE_FILE, &:read)
+      assert_false contents.include?(File.join('.', path))
+    end
+
+    FileUtils.rmdir(dir)
   end
 
   def test_config_remove_should_display_usage
