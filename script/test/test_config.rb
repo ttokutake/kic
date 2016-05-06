@@ -2,7 +2,7 @@ require_relative 'helper'
 require          'toml'
 
 class TestConfig < TestWithBasicSetup
-  @@command_set  = "config set"
+  @@command_set  = 'config set'
   @@command_init = 'config init'
 
   @@initial_toml = {
@@ -31,8 +31,8 @@ class TestConfig < TestWithBasicSetup
     kvs = {
       'burn.moratorium'  => ['1day', '7days', '1week', '4weeks'],
       'sweep.moratorium' => ['0minute', '60minutes', '0hour', '24hours', '0day', '7days', '0week', '4weeks'],
-      "sweep.period"     => ['daily', 'weekly'],
-      "sweep.time"       => ['00:00', '23:59'],
+      'sweep.period'     => ['daily', 'weekly'],
+      'sweep.time'       => ['00:00', '23:59'],
     }
     kvs.each do |key, values|
       values.each do |value|
