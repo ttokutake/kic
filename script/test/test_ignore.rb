@@ -39,5 +39,7 @@ class TestIgnore < TestWithBasicSetup
   end
 
   def test_config_clear_should_delete_all_contents_from_ignore_file
+    exec_with_stdin(@@command_clear)
+    assert_true File.zero?(IGNORE_FILE)
   end
 end
