@@ -21,9 +21,9 @@ class TestConfig < TestWithBasicSetup
       'key_only',
     ]
     args.each do |arg|
-      output = exec("#{@@command_set} #{arg}")
-      assert_not_equal $?, 0
-      assert_true      output.include?('Usage:')
+      exit_status, is_usage = output_usage?("#{@@command_set} #{arg}")
+      assert_not_equal 0, exit_status
+      assert_true      is_usage
     end
   end
 

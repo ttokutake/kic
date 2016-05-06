@@ -45,6 +45,11 @@ def exec_with_stdin(command, input = 'yes')
   `
 end
 
+def output_usage?(command)
+  output = exec(command)
+  [$?, output.start_with?('Usage:')]
+end
+
 
 class TestWithBuild < Test::Unit::TestCase
   class << self

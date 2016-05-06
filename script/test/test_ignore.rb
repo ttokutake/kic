@@ -7,6 +7,9 @@ class TestIgnore < TestWithBasicSetup
   @@command_clear   = 'ignore clear'
 
   def test_config_add_should_display_usage
+    exit_status, is_usage = output_usage?(@@command_add)
+    assert_not_equal 0, exit_status
+    assert_true      is_usage
   end
 
   def test_config_add_should_append_existing_file_to_ignore_file
@@ -16,6 +19,9 @@ class TestIgnore < TestWithBasicSetup
   end
 
   def test_config_remove_should_display_usage
+    exit_status, is_usage = output_usage?(@@command_remove)
+    assert_not_equal 0, exit_status
+    assert_true      is_usage
   end
 
   def test_config_remove_should_delete_existing_file_from_ignore_file
