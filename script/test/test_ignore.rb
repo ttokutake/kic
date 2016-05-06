@@ -13,6 +13,24 @@ class TestIgnore < TestWithBasicSetup
   end
 
   def test_config_add_should_append_existing_file_to_ignore_file
+    file_names = [
+      [[              ], 'file1'],
+      [['dir1'        ], 'file2'],
+      [['dir1', 'dir2'], 'file3'],
+    ]
+    file_names.each do |dir_names, file_name|
+      path = File.join(dir_names)
+      FileUtils.mkdir_p(path) unless path.empty?
+      file = path.empty? ? file_name : File.join(path, file_name)
+      FileUtils.touch(file)
+
+      exec("#{@@command_add} #{file}")
+      contents = File.open(IGNORE_FILE, &:read)
+      assert_true contents.include?(File.join('.', file))
+
+      FileUtils.rm(file)
+      FileUtils.remove_entry(dir_names.first) unless dir_names.empty?
+    end
   end
 
   def test_config_add_should_not_append_non_existing_file_to_ignore_file
