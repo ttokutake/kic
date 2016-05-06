@@ -57,10 +57,7 @@ class TestIgnore < TestWithBasicSetup
     assert_true      is_usage
   end
 
-  def test_config_remove_should_delete_existing_file_from_ignore_file
-  end
-
-  def test_config_remove_should_delete_non_existing_file_from_ignore_file
+  def test_config_remove_should_delete_file_from_ignore_file
   end
 
   def test_config_current_should_replace_ignore_file_with_new_one_mirroring_current_directory_tree
