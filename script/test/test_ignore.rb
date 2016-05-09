@@ -43,9 +43,13 @@ class TestIgnore < TestWithBasicSetup
     FileUtils.mkdir(dir)
 
     [file, dir].each do |path|
+      path_with_current_dir = File.join('.', path)
+      contents = File.open(IGNORE_FILE, &:read)
+      assert_false contents.include?(path_with_current_dir)
+
       exec("#{@@command_add} #{path}")
       contents = File.open(IGNORE_FILE, &:read)
-      assert_false contents.include?(File.join('.', path))
+      assert_false contents.include?(path_with_current_dir)
     end
 
     FileUtils.rmdir(dir)
@@ -59,14 +63,18 @@ class TestIgnore < TestWithBasicSetup
 
   def test_config_remove_should_delete_file_from_ignore_file
     files = [
-      'non_existing_file',
-      'blackbox_test.sh',
+      ['non_existing_file', false],
+      ['blackbox_test.sh' , true ],
     ]
 
-    files.each do |file|
+    files.each do |file, exists_in|
+      path = File.join('.', file)
+      contents = File.open(IGNORE_FILE, &:read)
+      assert_equal exists_in, contents.include?(path)
+
       exec("#{@@command_remove} #{file}")
       contents = File.open(IGNORE_FILE, &:read)
-      assert_false contents.include?(File.join('.', file))
+      assert_false contents.include?(path)
     end
   end
 
