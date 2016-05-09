@@ -58,6 +58,16 @@ class TestIgnore < TestWithBasicSetup
   end
 
   def test_config_remove_should_delete_file_from_ignore_file
+    files = [
+      'non_existing_file',
+      'blackbox_test.sh',
+    ]
+
+    files.each do |file|
+      exec("#{@@command_remove} #{file}")
+      contents = File.open(IGNORE_FILE, &:read)
+      assert_false contents.include?(File.join('.', file))
+    end
   end
 
   def test_config_current_should_replace_ignore_file_with_new_one_mirroring_current_directory_tree
