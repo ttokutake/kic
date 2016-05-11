@@ -35,51 +35,60 @@ class TestSweep < TestWithBasicSetup
   end
 
   def test_sweep_should_delete_dust_files
+    not_dusts      = [@f1, @f2, @f3]
+    non_empty_dirs = [@d1, @d2]
+
     result = exec(@@command_sweep)
-    assert_false result.include?(enclose(@f1))
-    assert_false result.include?(enclose(@f2))
-    assert_false result.include?(enclose(@f3))
-    assert_false result.include?(enclose(@d1))
-    assert_false result.include?(enclose(@d2))
-    assert_true  result.include?(enclose(@d3))
+    (not_dusts + non_empty_dirs).each do |not_dust|
+      assert_false result.include?(enclose(not_dust))
+    end
+    assert_true result.include?(enclose(@d3))
 
     exec(@@command_sweep_indeed)
     assert_true File.exist?(DUST_BOX)
-    assert_true File.exist?(File.join(DUST_BOX, @d3))
+    assert_true  File.exist?(File.join(DUST_BOX, @d3))
+    assert_false File.exist?(@d3)
+    non_empty_dirs.each do |non_empty_dir|
+      assert_true File.exist?(File.join(DUST_BOX, non_empty_dir))
+      assert_true File.exist?(non_empty_dir)
+    end
+    not_dusts.each do |not_dust|
+      assert_false File.exist?(File.join(DUST_BOX, not_dust))
+      assert_true  File.exist?(not_dust)
+    end
+  end
 
+  def test_sweep_should_delete_dust_files_without_moratorium
     exec('config set sweep.moratorium 0minute')
+
+    dusts = [@f1, @f2, @f3, @d1, @d2, @d3]
+
     result = exec(@@command_sweep)
-    assert_true result.include?(enclose(@f1))
-    assert_true result.include?(enclose(@f2))
-    assert_true result.include?(enclose(@f3))
-    assert_true result.include?(enclose(@d1))
-    assert_true result.include?(enclose(@d2))
+    dusts.each do |dust|
+      assert_true result.include?(enclose(dust))
+    end
 
     exec(@@command_sweep_indeed)
     assert_true File.exist?(DUST_BOX)
-    assert_true File.exist?(File.join(DUST_BOX, @f1))
-    assert_true File.exist?(File.join(DUST_BOX, @f2))
-    assert_true File.exist?(File.join(DUST_BOX, @f3))
-    assert_true File.exist?(File.join(DUST_BOX, @d1))
-    assert_true File.exist?(File.join(DUST_BOX, @d2))
+    dusts.each do |dust|
+      assert_true  File.exist?(File.join(DUST_BOX, dust))
+      assert_false File.exist?(dust)
+    end
   end
 
   def test_sweep_all_should_delete_dust_files_with_recently_accessed_files
+    dusts = [@f1, @f2, @f3, @d1, @d2, @d3]
+
     result = exec(@@command_sweep_all)
-    assert_true result.include?(enclose(@f1))
-    assert_true result.include?(enclose(@f2))
-    assert_true result.include?(enclose(@f3))
-    assert_true result.include?(enclose(@d1))
-    assert_true result.include?(enclose(@d2))
-    assert_true result.include?(enclose(@d3))
+    dusts.each do |dust|
+      assert_true result.include?(enclose(dust))
+    end
 
     result = exec(@@command_sweep_all_indeed)
     assert_true File.exist?(DUST_BOX)
-    assert_true File.exist?(File.join(DUST_BOX, @f1))
-    assert_true File.exist?(File.join(DUST_BOX, @f2))
-    assert_true File.exist?(File.join(DUST_BOX, @f3))
-    assert_true File.exist?(File.join(DUST_BOX, @d1))
-    assert_true File.exist?(File.join(DUST_BOX, @d2))
-    assert_true File.exist?(File.join(DUST_BOX, @d3))
+    dusts.each do |dust|
+      assert_true  File.exist?(File.join(DUST_BOX, dust))
+      assert_false File.exist?(dust)
+    end
   end
 end
