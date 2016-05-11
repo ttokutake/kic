@@ -8,6 +8,10 @@ STORAGE_DIR = File.join(BASE_DIR, 'warehouse')
 CONFIG_FILE = File.join(BASE_DIR, 'config.toml')
 IGNORE_FILE = File.join(BASE_DIR, 'ignore')
 
+NOW = Time.now
+
+DUST_BOX = File.join(STORAGE_DIR, NOW.strftime('%Y-%m-%d'), 'dusts')
+
 
 def build!
   `cargo build`
