@@ -58,7 +58,7 @@ impl Command for Sweep {
                 .collect::<Vec<PathBuf>>()
         };
         let potentially_empty_dirs = potentially_empty_dirs(MAIN_DIR, ignored_files);
-        try!(storage.squeeze_dirs(potentially_empty_dirs));
+        try!(storage.squeeze_empty_dirs(potentially_empty_dirs));
 
         Ok(())
     }

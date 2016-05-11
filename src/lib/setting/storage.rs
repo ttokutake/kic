@@ -106,7 +106,14 @@ impl Storage {
         Ok(())
     }
 
-    pub fn squeeze_dirs<P: AsRef<Path>>(&self, paths_to_dir: BTreeSet<P>) -> Result<(), IoError> {
+    pub fn squeeze_empty_dirs<P: AsRef<Path>>(&self, paths_to_dir: BTreeSet<P>) -> Result<(), IoError> {
+        let mut paths_to_dir = paths_to_dir
+            .iter()
+            .map(|p| p.as_ref())
+            .collect::<Vec<&Path>>();
+        paths_to_dir.sort();
+        paths_to_dir.reverse();
+
         let path_to_dust_box = self.path_to_dust_box();
 
         let addition = if self.indeed { "" } else { " (dry-run mode)" };
@@ -114,17 +121,14 @@ impl Storage {
         try!(self.print_and_log(message));
 
         for path_to_dir in &paths_to_dir {
-            let path_to_dir = path_to_dir.as_ref();
-
             let message = format!("  => \"{}\"", path_to_dir.display());
             try!(self.print_and_log(message));
 
             if self.indeed {
-                match fs::remove_dir_all(path_to_dir) {
+                match fs::remove_dir(path_to_dir) {
                     Ok(_)  => try!(fs::create_dir_all(path_buf![&path_to_dust_box, path_to_dir])),
                     Err(e) => match e.kind() {
                         IoErrorKind::PermissionDenied => try!(self.print_and_log("     Interrupted for permission")),
-                        IoErrorKind::NotFound         => (),
                         _                             => return Err(e),
                     },
                 };
