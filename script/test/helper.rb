@@ -1,4 +1,10 @@
+require 'date'
 require 'test/unit'
+
+
+def path_to_box(time)
+  File.join(STORAGE_DIR, time.strftime('%Y-%m-%d'))
+end
 
 
 BIN = File.join(__dir__, '..', '..', 'target', 'debug', 'kic')
@@ -8,9 +14,10 @@ STORAGE_DIR = File.join(BASE_DIR, 'warehouse')
 CONFIG_FILE = File.join(BASE_DIR, 'config.toml')
 IGNORE_FILE = File.join(BASE_DIR, 'ignore')
 
-NOW = Time.now
+TODAY = Date.today
 
-DUST_BOX = File.join(STORAGE_DIR, NOW.strftime('%Y-%m-%d'), 'dusts')
+BOX      = path_to_box(TODAY)
+DUST_BOX = File.join(BOX, 'dusts')
 
 
 def build!
