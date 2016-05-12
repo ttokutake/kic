@@ -1,10 +1,10 @@
 require_relative 'helper'
 
 class TestSweep < TestWithBasicSetup
-  @@command_sweep            = "sweep"
-  @@command_sweep_indeed     = "sweep indeed"
-  @@command_sweep_all        = "sweep all"
-  @@command_sweep_all_indeed = "sweep all indeed"
+  @@command_sweep            = 'sweep'
+  @@command_sweep_indeed     = 'sweep indeed'
+  @@command_sweep_all        = 'sweep all'
+  @@command_sweep_all_indeed = 'sweep all indeed'
 
   def setup
     super
@@ -44,7 +44,7 @@ class TestSweep < TestWithBasicSetup
     '"' + str + '"'
   end
 
-  def test_sweep_should_delete_dust_files
+  def test_sweep_should_move_dust_files_to_dust_box
     not_dusts        = [@f1, @f2, @f3, @f4, @f5]
     non_empty_dirs   = [@d1, @d2]
     dirs_with_hidden = [@d4, @d5]
@@ -69,7 +69,7 @@ class TestSweep < TestWithBasicSetup
     end
   end
 
-  def test_sweep_should_delete_dust_files_without_moratorium
+  def test_sweep_should_move_dust_files_without_moratorium_to_dust_box
     exec('config set sweep.moratorium 0minute')
 
     dusts     = [@f1, @f2, @f3, @d1, @d2, @d3]
@@ -95,7 +95,7 @@ class TestSweep < TestWithBasicSetup
     end
   end
 
-  def test_sweep_all_should_delete_dust_files_with_recently_accessed_files
+  def test_sweep_all_should_move_dust_files_with_recently_accessed_files_to_dust_box
     dusts = [@f1, @f2, @f3, @d1, @d2, @d3]
     not_dusts = [@f4, @f5, @d4, @d5]
 
