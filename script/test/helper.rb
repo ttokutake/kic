@@ -7,7 +7,8 @@ def path_to_box(time)
 end
 
 
-BIN = File.join(__dir__, '..', '..', 'target', 'debug', 'kic')
+BIN_RELATIVE = File.join(__dir__, '..', '..', 'target', 'debug', 'kic')
+BIN          = File.expand_path(BIN_RELATIVE)
 
 BASE_DIR    = '.kic'
 STORAGE_DIR = File.join(BASE_DIR, 'warehouse')
@@ -23,8 +24,6 @@ DUST_BOX = File.join(BOX, 'dusts')
 def build!
   `cargo build`
   raise 'Build failed.' if $? != 0
-  #`cargo test`
-  #raise 'Whitebox tests failed.' if $? != 0
 end
 
 def initialize_kic!
@@ -35,6 +34,20 @@ end
 def destroy_kic!(input = 'yes')
   exec_with_stdin('destroy', input)
   raise 'Failed to destroy.' if $? != 0
+end
+
+def register_with_cron!
+  exec('start')
+  raise 'Failed to register with "cron"' if $? != 0
+end
+
+def unregister_from_cron!
+  exec('end')
+  raise 'Failed to unregister from "cron"' if $? != 0
+end
+
+def get_cron_contents
+  `crontab -l`
 end
 
 def exec(command)
