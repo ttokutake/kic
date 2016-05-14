@@ -3,7 +3,7 @@ pub const VERSION: &'static str = env!("CARGO_PKG_VERSION");
 
 pub const MAIN_DIR: &'static str = ".";
 
-#[cfg(target_os="linux")]
+#[cfg(not(target_os="macos"))]
 pub const BANNED_DIRS: [&'static str; 20] = [
     "/",
     "/bin",
