@@ -29,6 +29,19 @@ class TestCron < TestWithBasicSetup
     end
   end
 
+  def leave_invalid_commands_in_cron
+    dir_name = 'new_dir'
+
+    Dir.mkdir(dir_name)
+    Dir.chdir(dir_name)
+    initialize_kic!
+    register_with_cron!
+    confirm_registered_line(get_cron_contents, Dir.pwd)
+
+    Dir.chdir(PWD)
+    FileUtils.remove_entry(dir_name)
+  end
+
   def test_basic_cron_setup
     original = get_cron_contents
 
@@ -44,17 +57,21 @@ class TestCron < TestWithBasicSetup
   def test_patrol_should_delete_invalid_lines
     original = get_cron_contents
 
-    dir_name = 'new_dir'
-    Dir.mkdir(dir_name)
-    Dir.chdir(dir_name)
-    initialize_kic!
-    register_with_cron!
-    confirm_registered_line(get_cron_contents, Dir.pwd)
-
-    Dir.chdir(PWD)
-    FileUtils.remove_entry(dir_name)
+    leave_invalid_commands_in_cron
 
     exec(@@command_patrol)
     assert_equal original, get_cron_contents
+  end
+
+  def test_patrol_should_delete_invalid_lines_without_deleting_valid_lines
+    register_with_cron!
+    correct = get_cron_contents
+    unregister_from_cron!
+
+    leave_invalid_commands_in_cron
+
+    register_with_cron!
+    exec(@@command_patrol)
+    assert_equal correct, get_cron_contents
   end
 end
