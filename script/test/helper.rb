@@ -43,18 +43,7 @@ def exec(command)
 end
 
 def exec_with_stdin(command, input = 'yes')
-  `
-    expect -c '
-      set timeout 5
-      spawn #{BIN} #{command}
-      expect {
-        default { exit 1 }
-        -regexp "\\\\\\[yes/no\\\\\\]:\\\\s*$"
-      }
-      send "#{input}\\n"
-      expect eof
-    '
-  `
+  `echo '#{input}' | #{BIN} #{command}`
 end
 
 def output_usage?(command)

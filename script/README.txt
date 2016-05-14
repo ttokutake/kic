@@ -3,11 +3,6 @@
 ## Preliminary
 
 - UNIX-like environment only.
-- Please install "expect" on your machine.
-  - Debian
-  ```bash
-  $ sudo apt-get install expect
-  ```
 - Please install Ruby by using [rbenv](https://github.com/rbenv/rbenv#installation).
   - Required Ruby version is described in [.ruby-version](https://github.com/ttokutake/kic/blob/master/script/.ruby-version) file.
 - Please install gem "bundler".
