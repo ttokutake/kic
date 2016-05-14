@@ -5,10 +5,15 @@ mod lib;
 
 use error::CliError;
 use lib::io::*;
+use std::env;
 use std::process;
 
 fn main() {
-    if let Err(why) = command::execute() {
+    let args = env::args()
+        .skip(1)
+        .collect::<Vec<String>>();
+
+    if let Err(why) = command::execute(args) {
         let error_code = match why {
             CliError::Essential(_) | CliError::RunningPlace(_) => {
                 print_with_tag(Tag::Warning, why);

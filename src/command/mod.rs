@@ -91,11 +91,7 @@ trait Command {
     }
 }
 
-pub fn execute() -> Result<(), CliError> {
-    let args = env::args()
-        .skip(1)
-        .collect::<Vec<String>>();
-
+pub fn execute(args: Vec<String>) -> Result<(), CliError> {
     let mut args = args.into_iter();
 
     let command = try!(args.next().ok_or(Usage::new(UsageKind::Nothing)));
