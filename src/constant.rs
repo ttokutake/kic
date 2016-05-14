@@ -3,6 +3,7 @@ pub const VERSION: &'static str = env!("CARGO_PKG_VERSION");
 
 pub const MAIN_DIR: &'static str = ".";
 
+#[cfg(target_os="linux")]
 pub const BANNED_DIRS: [&'static str; 20] = [
     "/",
     "/bin",
@@ -24,6 +25,29 @@ pub const BANNED_DIRS: [&'static str; 20] = [
     "/sys",
     "/usr",
     "/var",
+];
+#[cfg(target_os="macos")]
+pub const BANNED_DIRS: [&'static str; 20] = [
+    "/",
+    "/Applications",
+    "/System",
+    "/bin",
+    "/etc",
+    "/net",
+    "/sbin",
+    "/var",
+    "/Library",
+    "/Users",
+    "/cores",
+    "/home",
+    "/opt",
+    "/tmp",
+    "/Network",
+    "/Volumes",
+    "/dev",
+    "/installer.failurerequests",
+    "/private",
+    "/usr",
 ];
 
 pub const WORKING_DIR_NAME: &'static str = ".kic";
