@@ -38,20 +38,6 @@ def destroy_kic!(input = 'yes')
   raise 'Failed to destroy.' if $? != 0
 end
 
-def register_with_cron!
-  exec('start')
-  raise 'Failed to register with "cron"' if $? != 0
-end
-
-def unregister_from_cron!
-  exec('end')
-  raise 'Failed to unregister from "cron"' if $? != 0
-end
-
-def get_cron_contents
-  `crontab -l`
-end
-
 def exec(command)
   `#{BIN} #{command}`
 end

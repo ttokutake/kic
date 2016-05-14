@@ -7,4 +7,4 @@ bundle exec ruby $my_dir/test/test_config.rb
 bundle exec ruby $my_dir/test/test_ignore.rb
 bundle exec ruby $my_dir/test/test_sweep.rb
 bundle exec ruby $my_dir/test/test_burn.rb
-bundle exec ruby $my_dir/test/test_start_and_end.rb
+bundle exec ruby $my_dir/test/test_cron.rb
