@@ -7,6 +7,8 @@ def path_to_box(time)
 end
 
 
+PWD = Dir.pwd
+
 BIN_RELATIVE = File.join(__dir__, '..', '..', 'target', 'debug', 'kic')
 BIN          = File.expand_path(BIN_RELATIVE)
 
