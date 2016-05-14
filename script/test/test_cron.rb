@@ -5,6 +5,9 @@ class TestCron < TestWithBasicSetup
   @@command_end    = 'end'
   @@command_patrol = 'patrol'
 
+  @@command_sweep_indeed = 'sweep indeed'
+  @@command_burn_indeed  = 'burn indeed'
+
   def register_with_cron!
     exec(@@command_start)
     raise 'Failed to register with "cron"' if $? != 0
@@ -20,8 +23,8 @@ class TestCron < TestWithBasicSetup
   end
 
   def confirm_registered_line(contents, pwd)
-    ['sweep indeed', 'burn indeed'].each do |command|
-      r = /cd #{pwd}.*#{BIN} #{command}\s*\n/
+    [@@command_sweep_indeed, @@command_burn_indeed].each do |command|
+      r = /cd #{pwd} && #{BIN} #{command}\n/
       assert r.match(contents)
     end
   end
@@ -31,7 +34,7 @@ class TestCron < TestWithBasicSetup
 
     register_with_cron!
     contents = get_cron_contents
-    assert_true contents.include?("#{BIN} patrol")
+    assert_true contents.include?("#{BIN} #{@@command_patrol}")
     confirm_registered_line(contents, PWD)
 
     unregister_from_cron!
