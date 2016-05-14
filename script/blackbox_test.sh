@@ -2,9 +2,15 @@
 
 my_dir=$(dirname ${BASH_SOURCE:-$0})
 
-bundle exec ruby $my_dir/test/test_init_and_destroy.rb
-bundle exec ruby $my_dir/test/test_config.rb
-bundle exec ruby $my_dir/test/test_ignore.rb
-bundle exec ruby $my_dir/test/test_sweep.rb
-bundle exec ruby $my_dir/test/test_burn.rb
-bundle exec ruby $my_dir/test/test_cron.rb
+test_file_names="
+  test_init_and_destroy
+  test_config
+  test_ignore
+  test_sweep
+  test_burn
+  test_cron
+"
+
+for test_file_name in $test_file_names; do
+  bundle exec ruby $my_dir/test/${test_file_name}.rb
+done
