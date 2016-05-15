@@ -130,10 +130,10 @@ fn remove_should_remove_specified_entries() {
 
     entries.remove(&e1);
     let ignore = ignore.remove(&vec![e1]);
-    assert_eq!(&entries, ignore.entries());
+    assert_eq!(&entries, &ignore.entries);
 
     entries.remove(&e3);
     entries.remove(&e4);
     let ignore = ignore.remove(&vec![e3, e4]);
-    assert_eq!(&entries, ignore.entries());
+    assert_eq!(&entries, &ignore.entries);
 }
