@@ -41,10 +41,12 @@ impl Command for Sweep {
         let moratorium = Config::to_duration(moratorium);
 
         let ignore = try!(Ignore::read());
+        let (ignored_dirs, ignored_files) = ignore.dirs_and_files();
 
         let target_files = walk_dir(MAIN_DIR)
-            .difference(ignore.entries())
+            .difference(&ignored_files)
             .filter(|f| if all { true } else { !is_recently_accessed(f, &moratorium) })
+            .filter(|f| !ignored_dirs.iter().any(|d| f.starts_with(d)))
             .cloned()
             .collect::<Vec<String>>();
         try!(storage.squeeze_dusts(&target_files));

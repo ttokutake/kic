@@ -22,7 +22,7 @@ impl Ignore {
     }
 
 
-    fn to_string(entries: Vec<String>) -> String {
+    fn to_string(entries: BTreeSet<String>) -> String {
         entries
             .iter()
             .fold(String::new(), |contents, entry| contents + entry + "\n")
@@ -31,14 +31,12 @@ impl Ignore {
     pub fn create(self) -> Result<(), IoError> {
         print_with_tag(Tag::Info, format!("Create \"{}\" file", IGNORE_FILE_NAME));
 
-        let (dirs, files): (Vec<String>, Vec<String>) = self.entries
-            .into_iter()
-            .partition(|s| Path::new(s).is_dir());
+        let (dirs, files) = self.dirs_and_files();
 
         let files = files
             .into_iter()
             .filter(|f| !dirs.iter().any(|d| f.starts_with(d)))
-            .collect::<Vec<String>>();
+            .collect::<BTreeSet<String>>();
 
         super::create_setting_file(Self::path(), Self::to_string(dirs) + &Self::to_string(files))
     }
@@ -75,8 +73,10 @@ impl Ignore {
     }
 
 
-    pub fn entries(&self) -> &BTreeSet<String> {
-        &self.entries
+    pub fn dirs_and_files(self) -> (BTreeSet<String>, BTreeSet<String>) {
+        self.entries
+            .into_iter()
+            .partition(|s| Path::new(s).is_dir())
     }
 
 
@@ -88,8 +88,7 @@ impl Ignore {
             .map(supply_dir_suffix)
             .collect::<BTreeSet<String>>();
 
-        self.entries = self
-            .entries()
+        self.entries = self.entries
             .union(&paths_to_be_added)
             .cloned()
             .collect::<BTreeSet<String>>();
@@ -104,8 +103,7 @@ impl Ignore {
             .map(supply_dir_suffix)
             .collect::<BTreeSet<String>>();
 
-        self.entries = self
-            .entries()
+        self.entries = self.entries
             .difference(&paths_to_be_removed)
             .cloned()
             .collect::<BTreeSet<String>>();
