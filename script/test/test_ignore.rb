@@ -38,18 +38,15 @@ class TestIgnore < TestWithBasicSetup
   end
 
   def test_config_add_should_not_append_non_existing_file_to_ignore_file
-    dir  = 'non_existing_dir'
     file = 'non_existing_file'
 
-    [file, dir + file].each do |path|
-      path_with_current_dir = File.join('.', path)
-      contents = File.open(IGNORE_FILE, &:read)
-      assert_false contents.include?(path_with_current_dir)
+    path_with_current_dir = File.join('.', file)
+    contents = File.open(IGNORE_FILE, &:read)
+    assert_false contents.include?(path_with_current_dir)
 
-      exec("#{@@command_add} #{path}")
-      contents = File.open(IGNORE_FILE, &:read)
-      assert_false contents.include?(path_with_current_dir)
-    end
+    exec("#{@@command_add} #{file}")
+    contents = File.open(IGNORE_FILE, &:read)
+    assert_false contents.include?(path_with_current_dir)
   end
 
   def test_config_remove_should_display_usage
