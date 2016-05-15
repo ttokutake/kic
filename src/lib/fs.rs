@@ -70,14 +70,11 @@ pub fn supply_current_dir_prefix<S: AsRef<str>>(path_name: S) -> String {
     }
 }
 
-pub fn supply_dir_suffix<S: AsRef<str>>(path_name: S) -> String {
-    let path_name = path_name.as_ref();
-
-    if Path::new(path_name).is_dir() && !path_name.ends_with(MAIN_SEPARATOR) {
-        format!("{}{}", path_name, MAIN_SEPARATOR)
-    } else {
-        path_name.to_string()
-    }
+pub fn trim_end_separator<S: AsRef<str>>(path_name: S) -> String {
+    path_name
+        .as_ref()
+        .trim_right_matches(MAIN_SEPARATOR)
+        .to_string()
 }
 
 pub fn la<P: AsRef<Path>>(path: P) -> Result<Vec<String>, IoError> {
@@ -334,6 +331,30 @@ mod tests {
     #[should_panic(expect = "entered unreachable code")]
     fn supply_current_dir_prefix_should_panic() {
         supply_current_dir_prefix("");
+    }
+
+    #[test]
+    fn trim_end_separator_should_return_trimmed() {
+        let path_names = [
+            ("a"  , "a/"   ),
+            ("a"  , "a//"  ),
+            ("./a", "./a/" ),
+            ("./a", "./a//"),
+        ];
+        for &(correct, input) in &path_names {
+            assert_eq!(correct.to_string(), trim_end_separator(input));
+        }
+    }
+    #[test]
+    fn trim_end_separator_should_return_as_it_is() {
+        let path_names = [
+            "a",
+            "./a",
+            "./a/b",
+        ];
+        for path_name in &path_names {
+            assert_eq!(path_name.to_string(), trim_end_separator(path_name));
+        }
     }
 
     #[test]

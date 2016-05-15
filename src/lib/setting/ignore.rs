@@ -85,7 +85,7 @@ impl Ignore {
             .iter()
             .filter(|p| Path::new(p).exists())
             .map(supply_current_dir_prefix)
-            .map(supply_dir_suffix)
+            .map(trim_end_separator)
             .collect::<BTreeSet<String>>();
 
         self.entries = self.entries
@@ -100,7 +100,7 @@ impl Ignore {
         let paths_to_be_removed = paths
             .iter()
             .map(supply_current_dir_prefix)
-            .map(supply_dir_suffix)
+            .map(trim_end_separator)
             .collect::<BTreeSet<String>>();
 
         self.entries = self.entries
