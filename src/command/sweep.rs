@@ -49,7 +49,7 @@ impl Command for Sweep {
             .collect::<Vec<String>>();
         try!(storage.squeeze_dusts(&target_files));
 
-        let ignored_files = if indeed {
+        let phantom_files = if indeed {
             Vec::new()
         } else {
             target_files
@@ -57,10 +57,8 @@ impl Command for Sweep {
                 .map(|f| Path::new(f).to_path_buf())
                 .collect::<Vec<PathBuf>>()
         };
-        let potentially_empty_dirs = potentially_empty_dirs(MAIN_DIR, ignored_files);
-        try!(storage.squeeze_empty_dirs(potentially_empty_dirs));
-
-        Ok(())
+        let potentially_empty_dirs = potentially_empty_dirs(MAIN_DIR, phantom_files);
+        storage.squeeze_empty_dirs(potentially_empty_dirs).map_err(|e| From::from(e))
     }
 }
 

@@ -119,8 +119,8 @@ pub fn walk_dir<P: AsRef<Path>>(root: P) -> BTreeSet<String> {
         .collect::<BTreeSet<String>>()
 }
 
-pub fn potentially_empty_dirs<P: AsRef<Path>>(root: P, ignored_entries: Vec<PathBuf>) -> BTreeSet<PathBuf> {
-    fn potentially_empty_dirs(mut result: BTreeSet<PathBuf>, mut target_dirs: VecDeque<PathBuf>, ignored_entries: Vec<PathBuf>) -> BTreeSet<PathBuf> {
+pub fn potentially_empty_dirs<P: AsRef<Path>>(root: P, phantom_entries: Vec<PathBuf>) -> BTreeSet<PathBuf> {
+    fn potentially_empty_dirs(mut result: BTreeSet<PathBuf>, mut target_dirs: VecDeque<PathBuf>, phantom_entries: Vec<PathBuf>) -> BTreeSet<PathBuf> {
         match target_dirs.pop_front() {
             None => result,
             Some(mut target_dir) => {
@@ -135,7 +135,7 @@ pub fn potentially_empty_dirs<P: AsRef<Path>>(root: P, ignored_entries: Vec<Path
                 };
                 let include_file_or_hidden_dir = entries
                     .iter()
-                    .filter(|e| ignored_entries.iter().all(|ie| *ie != e.path()))
+                    .filter(|e| phantom_entries.iter().all(|pe| *pe != e.path()))
                     .any(|e| e.file_type().ok().map_or(true, |t| t.is_file()) || e.is_hidden());
 
                 if ignore || include_file_or_hidden_dir {
@@ -158,7 +158,7 @@ pub fn potentially_empty_dirs<P: AsRef<Path>>(root: P, ignored_entries: Vec<Path
                 let mut dirs = dirs.into_iter().collect::<VecDeque<PathBuf>>();
                 target_dirs.append(&mut dirs);
 
-                potentially_empty_dirs(result, target_dirs, ignored_entries)
+                potentially_empty_dirs(result, target_dirs, phantom_entries)
             },
         }
     }
@@ -170,7 +170,7 @@ pub fn potentially_empty_dirs<P: AsRef<Path>>(root: P, ignored_entries: Vec<Path
     result.insert(root.clone());
     target_dirs.push_back(root);
 
-    potentially_empty_dirs(result, target_dirs, ignored_entries)
+    potentially_empty_dirs(result, target_dirs, phantom_entries)
 }
 
 
@@ -386,16 +386,16 @@ mod tests {
 
         let mut correct = BTreeSet::new();
         correct.insert(helper.path_to_d4());
-        let mut ignored_files = Vec::new();
+        let mut phantom_files = Vec::new();
         let data_set = vec![
             (helper.path_to_d3(), helper.path_to_f3()),
             (helper.path_to_d2(), helper.path_to_f2()),
             (helper.path_to_d5(), helper.path_to_f4()),
         ];
-        for (part_of_correct, ignored_file) in data_set.into_iter() {
+        for (part_of_correct, phantom_file) in data_set.into_iter() {
             correct.insert(part_of_correct);
-            ignored_files.push(ignored_file);
-            assert_eq!(correct, potentially_empty_dirs(&root, ignored_files.clone()));
+            phantom_files.push(phantom_file);
+            assert_eq!(correct, potentially_empty_dirs(&root, phantom_files.clone()));
         }
 
         correct.clear();
