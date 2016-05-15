@@ -76,6 +76,7 @@ impl Ignore {
     pub fn dirs_and_files(self) -> (BTreeSet<String>, BTreeSet<String>) {
         self.entries
             .into_iter()
+            .filter(|s| Path::new(s).exists())
             .partition(|s| Path::new(s).is_dir())
     }
 
