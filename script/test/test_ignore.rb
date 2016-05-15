@@ -37,6 +37,15 @@ class TestIgnore < TestWithBasicSetup
     end
   end
 
+  def test_config_add_should_append_existing_dir_to_ignore_file
+    dir_name = 'test'
+    exec("#{@@command_add} #{dir_name}/")
+    contents = File.open(IGNORE_FILE, &:read)
+    expected_line = File.join('.', dir_name)
+    assert_true  contents.include?(expected_line)
+    assert_false contents.include?(expected_line + '/')
+  end
+
   def test_config_add_should_not_append_non_existing_file_to_ignore_file
     file = 'non_existing_file'
 
