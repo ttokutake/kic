@@ -38,11 +38,10 @@ class TestIgnore < TestWithBasicSetup
   end
 
   def test_config_add_should_not_append_non_existing_file_to_ignore_file
+    dir  = 'non_existing_dir'
     file = 'non_existing_file'
-    dir  = 'empty_dir'
-    FileUtils.mkdir(dir)
 
-    [file, dir].each do |path|
+    [file, dir + file].each do |path|
       path_with_current_dir = File.join('.', path)
       contents = File.open(IGNORE_FILE, &:read)
       assert_false contents.include?(path_with_current_dir)
@@ -51,8 +50,6 @@ class TestIgnore < TestWithBasicSetup
       contents = File.open(IGNORE_FILE, &:read)
       assert_false contents.include?(path_with_current_dir)
     end
-
-    FileUtils.rmdir(dir)
   end
 
   def test_config_remove_should_display_usage
