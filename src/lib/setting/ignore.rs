@@ -75,7 +75,7 @@ impl Ignore {
         let paths_to_be_added = paths
             .iter()
             .map(supply_current_dir_prefix)
-            .filter(|p| Path::new(p).is_file())
+            .filter(|p| Path::new(p).exists())
             .collect::<BTreeSet<String>>();
 
         self.files = self
