@@ -83,8 +83,9 @@ impl Ignore {
     pub fn add(mut self, paths: &Vec<String>) -> Self {
         let paths_to_be_added = paths
             .iter()
-            .map(supply_current_dir_prefix)
             .filter(|p| Path::new(p).exists())
+            .map(supply_current_dir_prefix)
+            .map(supply_dir_suffix)
             .collect::<BTreeSet<String>>();
 
         self.entries = self
@@ -100,6 +101,7 @@ impl Ignore {
         let paths_to_be_removed = paths
             .iter()
             .map(supply_current_dir_prefix)
+            .map(supply_dir_suffix)
             .collect::<BTreeSet<String>>();
 
         self.entries = self

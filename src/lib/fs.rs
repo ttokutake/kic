@@ -70,6 +70,16 @@ pub fn supply_current_dir_prefix<S: AsRef<str>>(path_name: S) -> String {
     }
 }
 
+pub fn supply_dir_suffix<S: AsRef<str>>(path_name: S) -> String {
+    let path_name = path_name.as_ref();
+
+    if Path::new(path_name).is_dir() && !path_name.ends_with(MAIN_SEPARATOR) {
+        format!("{}{}", path_name, MAIN_SEPARATOR)
+    } else {
+        path_name.to_string()
+    }
+}
+
 pub fn la<P: AsRef<Path>>(path: P) -> Result<Vec<String>, IoError> {
     let dirs = try!(fs::read_dir(path));
     let dirs = dirs
