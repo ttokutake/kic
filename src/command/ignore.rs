@@ -43,9 +43,7 @@ impl Ignore {
 
         let ignore = try!(setting::Ignore::read()).add(paths);
 
-        try!(ignore.create());
-
-        Ok(())
+        ignore.create().map_err(|e| From::from(e))
     }
 
     fn remove(&self) -> Result<(), CliError> {
@@ -57,9 +55,7 @@ impl Ignore {
 
         let ignore = try!(setting::Ignore::read()).remove(paths);
 
-        try!(ignore.create());
-
-        Ok(())
+        ignore.create().map_err(|e| From::from(e))
     }
 
     fn ignore_current_files() -> Result<(), CliError> {

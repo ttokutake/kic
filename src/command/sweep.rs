@@ -43,7 +43,7 @@ impl Command for Sweep {
         let ignore = try!(Ignore::read());
 
         let target_files = walk_dir(MAIN_DIR)
-            .difference(ignore.files())
+            .difference(ignore.entries())
             .filter(|f| if all { true } else { !is_recently_accessed(f, &moratorium) })
             .cloned()
             .collect::<Vec<String>>();
