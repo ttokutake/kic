@@ -107,12 +107,29 @@ class TestSweep < TestWithBasicSetup
       assert_false result.include?(enclose(not_dust))
     end
 
-    result = exec(@@command_sweep_all_indeed)
+    exec(@@command_sweep_all_indeed)
     assert_true File.exist?(DUST_BOX)
     dusts.each do |dust|
       assert_true  File.exist?(File.join(DUST_BOX, dust))
       assert_false File.exist?(dust)
     end
+    not_dusts.each do |not_dust|
+      assert_false File.exist?(File.join(DUST_BOX, not_dust))
+      assert_true  File.exist?(not_dust)
+    end
+  end
+
+  def test_sweep_all_should_ignore_files_which_are_in_ignored_directory
+    not_dusts = [@f2, @f3]
+
+    exec("ignore add #{@d1}")
+
+    result = exec(@@command_sweep_all)
+    not_dusts.each do |not_dust|
+      assert_false result.include?(enclose(not_dust))
+    end
+
+    exec(@@command_sweep_all_indeed)
     not_dusts.each do |not_dust|
       assert_false File.exist?(File.join(DUST_BOX, not_dust))
       assert_true  File.exist?(not_dust)
