@@ -14,6 +14,7 @@
 - "kic" is incomplete for Windows platform.
   - Autonomous deletion
   - Judgement of a hidden file
+  - Instantly move of "dust" file
   - Directory which is forbid to run
 
 ## Installation
@@ -22,12 +23,17 @@ TBD
 
 ## Basic Usage
 
+### Preliminary
+
+- We use `tree` command for easily explanation.
+
 ### Initialize
 
 1. Change directory which you want to register.
 2. `$ kic init`
 3. Confirm `.kic` directory and essential files have created in current directory.
 4. Confirm initially existing files have written in "ignore" file.
+
 ```bash
 $ pwd
 /Users/tokutake/tmp
@@ -70,6 +76,7 @@ $ cat .kic/ignore
 3. Check "dust" files are not moved to "dust box".
 4. `$ kic sweep all indeed`
 5. Check "dust" files have been moved to "dust box".
+
 ```bash
 $ touch file3 dir1/file4
 .
@@ -143,3 +150,52 @@ $ tree -a
 6 directories, 7 files
 ```
 
+### Why we used `all` option above example?
+
+1. `$ kic sweep` (dry-run)
+2. Confirm "dust" files do not appear in the list.
+3. Confirm there is the moratorium Until "dust" files are moved to "dust box" (Default: 10minutes).
+
+```bash
+$ kic sweep
+INFO: Create "2016-05-16" directory in ".kic/warehouse"
+INFO: Create "sweep.log" file in ".kic/warehouse/2016-05-16"
+INFO: Read "config.toml" file
+INFO: Get the parameter for "sweep.moratorium"
+INFO: Read "ignore" file
+INFO: Move dusts to ".kic/warehouse/2016-05-16/dusts" (dry-run mode)
+INFO: Move empty dirs to ".kic/warehouse/2016-05-16/dusts" (dry-run mode)
+
+$ cat .kic/config.toml
+
+[burn]
+moratorium = "2 weeks"
+
+[sweep]
+moratorium = "10 minutes"
+period = "daily"
+time = "00:00"
+
+... (10 minutes later)
+$ kic sweep
+INFO: Create "2016-05-16" directory in ".kic/warehouse"
+INFO: Create "sweep.log" file in ".kic/warehouse/2016-05-16"
+INFO: Read "config.toml" file
+INFO: Get the parameter for "sweep.moratorium"
+INFO: Read "ignore" file
+INFO: Move dusts to ".kic/warehouse/2016-05-16/dusts" (dry-run mode)
+INFO:   => "./dir1/file4"
+INFO:   => "./file3"
+INFO: Move empty dirs to ".kic/warehouse/2016-05-16/dusts" (dry-run mode)
+
+$ kic sweep indeed
+INFO: Create "2016-05-16" directory in ".kic/warehouse"
+INFO: Create "sweep.log" file in ".kic/warehouse/2016-05-16"
+INFO: Read "config.toml" file
+INFO: Get the parameter for "sweep.moratorium"
+INFO: Read "ignore" file
+INFO: Move dusts to ".kic/warehouse/2016-05-16/dusts"
+INFO:   => "./dir1/file4"
+INFO:   => "./file3"
+INFO: Move empty dirs to ".kic/warehouse/2016-05-16/dusts"
+```
