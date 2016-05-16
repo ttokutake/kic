@@ -2,22 +2,25 @@
 
 [![Build Status](https://travis-ci.org/ttokutake/kic.svg?branch=master)](https://travis-ci.org/ttokutake/kic)
 
-## Feature
+## Abstract
 
 - "kic" prevents someone from making a mess of directories.
-- For registered directories, "kic" moves "dust" files into "dust box" by using `cron`.
-- "dust" is file which is not specified as "requirement" in "kic".
+- For registered directories, "kic" autonomously moves "dust" files into "dust box".
+- "dust" is file which is not specified as a requirement in "kic".
+ 
+## Notice
 
-## Commands
+- "kic" uses your `cron` in UNIX platform.
+- "kic" is incomplete for Windows platform.
+  - Autonomous deletion
+  - Judgement of a hidden file
+  - Directory which is forbid to run
 
-- `help`
-- `version`
-- `init`
-- `config`
-- `ignore`
-- `sweep`
-- `burn`
-- `start`
-- `end`
-- `destroy`
-- `patrol`
+## Installation
+
+TBD
+
+## Usage
+
+TBD
+
