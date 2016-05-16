@@ -247,6 +247,7 @@ INFO: Read "config.toml" file
 INFO: Set the parameter for "burn.moratorium"
 INFO: Create "config.toml" file
 
+### Rename the directory which has been named as today to yesterday
 $ mv .kic/warehouse/2016-05-16/ .kic/warehouse/2016-05-15/
 
 $ kic burn
@@ -301,7 +302,7 @@ $ tree -a
 
 5 directories, 5 files
 
-### Action like below also is OK!
+### Action like below is also OK!
 $ rm -rf .kic/warehouse/2016-05-16/
 ```
 
