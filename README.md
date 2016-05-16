@@ -309,7 +309,14 @@ $ rm -rf .kic/warehouse/2016-05-16/
 
 ### Register/Unregister with/from `cron`
 
-TBD
+1. `$ kic start`
+2. Check several "kic" commands have added to your cron.
+3. `$ kic end`
+4. Check "kic" commands related to current directory have deleted from your cron.
+
+```bash
+### TBD
+```
 
 ### Add/Delete files or directories to/from "ignore"
 
