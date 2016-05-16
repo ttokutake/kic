@@ -31,7 +31,7 @@ TBD
 
 1. Change directory which you want to register.
 2. `$ kic init`
-3. Confirm `.kic` directory and essential files have created in current directory.
+3. Confirm `.kic` directory and essential files have been created in current directory.
 4. Confirm initially existing files have written in "ignore" file.
 
 ```bash
