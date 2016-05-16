@@ -152,9 +152,10 @@ $ tree -a
 
 ### Why we used `all` option above example?
 
-1. `$ kic sweep` (dry-run)
-2. Confirm "dust" files do not appear in the list.
-3. Confirm there is the moratorium Until "dust" files are moved to "dust box" (Default: 10 minutes).
+1. Make "dust" files.
+2. `$ kic sweep` (dry-run)
+3. Confirm "dust" files do not appear in the list.
+4. Confirm there is the moratorium Until "dust" files are moved to "dust box" (Default: 10 minutes).
 
 ```bash
 $ touch file3 dir1/file4
