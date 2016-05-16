@@ -307,10 +307,20 @@ $ rm -rf .kic/warehouse/2016-05-16/
 
 ### Register/Unregister with/from `cron`
 
+TBD
+
 ### Add/Delete files or directories to/from "ignore"
+
+TBD
 
 ### Useful sub-command of "ignore"
 
+TBD
+
 ### Help me!
 
+TBD
+
 ### Bye Bye, "kic"!
+
+TBD
