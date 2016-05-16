@@ -287,6 +287,7 @@ impl UsageKind {
             UsageKind::Ignore => vec![
                 format!("{} add <File> ..."   , self.common_usage()),
                 format!("{} remove <File> ...", self.common_usage()),
+                format!("{} refresh"          , self.common_usage()),
                 format!("{} current"          , self.common_usage()),
                 format!("{} clear"            , self.common_usage()),
             ],
@@ -333,8 +334,9 @@ impl UsageKind {
                 "init # Initialize \"config.toml\" file"                          .to_string(),
             ],
             UsageKind::Ignore => vec![
-                "add     # Add files which will be ignored to \"ignore\" file"                        .to_string(),
-                "remove  # Remove files which have been ignored from \"ignore\" file"                 .to_string(),
+                "add     # Add directories and files which will be ignored to \"ignore\" file"        .to_string(),
+                "remove  # Remove directories and files which have been ignored from \"ignore\" file" .to_string(),
+                "refresh # Remove non-existing directories and files from \"ignore\" file"            .to_string(),
                 "current # Replace \"ignore\" file with one which register current all files"         .to_string(),
                 "clear   # Clear \"ignore\" file, i.e. all files will be aimed from \"sweep\" command".to_string(),
             ],

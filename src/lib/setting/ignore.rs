@@ -67,6 +67,7 @@ impl Ignore {
         let entries = contents
             .lines()
             .map(|l| l.trim().to_string())
+            .filter(|s| Path::new(s).exists())
             .collect::<BTreeSet<String>>();
 
         Ok(Self::_new(entries))
@@ -76,7 +77,6 @@ impl Ignore {
     pub fn dirs_and_files(self) -> (BTreeSet<String>, BTreeSet<String>) {
         self.entries
             .into_iter()
-            .filter(|s| Path::new(s).exists())
             .partition(|s| Path::new(s).is_dir())
     }
 

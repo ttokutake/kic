@@ -20,6 +20,7 @@ impl Command for Ignore {
             Some(ref c) => match c.as_ref() {
                 "add"     => self.add(),
                 "remove"  => self.remove(),
+                "refresh" => Self::refresh(),
                 "current" => Self::ignore_current_files(),
                 "clear"   => Self::clear_ignore_file(),
                 _         => Err(From::from(self.usage())),
@@ -56,6 +57,12 @@ impl Ignore {
         let ignore = try!(setting::Ignore::read()).remove(paths);
 
         ignore.create().map_err(|e| From::from(e))
+    }
+
+    fn refresh() -> Result<(), CliError> {
+        setting::Ignore::read()
+            .and_then(|ignore| ignore.create())
+            .map_err(|e| From::from(e))
     }
 
     fn ignore_current_files() -> Result<(), CliError> {
