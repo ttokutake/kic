@@ -3,6 +3,7 @@ require_relative 'helper'
 class TestIgnore < TestWithBasicSetup
   @@command_add     = 'ignore add'
   @@command_remove  = 'ignore remove'
+  @@command_refresh = 'ignore refresh'
   @@command_current = 'ignore current'
   @@command_clear   = 'ignore clear'
 
@@ -79,6 +80,18 @@ class TestIgnore < TestWithBasicSetup
       contents = File.open(IGNORE_FILE, &:read)
       assert_false contents.include?(path)
     end
+  end
+
+  def test_config_refresh_should_remove_non_existing_entries
+    file_name = 'file1'
+    expected_line = File.join('.', file_name)
+    FileUtils.touch(file_name)
+    exec("#{@@command_add} #{file_name}")
+    assert_true File.open(IGNORE_FILE, &:read).include?(expected_line)
+
+    FileUtils.rm_f(file_name)
+    exec(@@command_refresh)
+    assert_false File.open(IGNORE_FILE, &:read).include?(expected_line)
   end
 
   def test_config_current_should_replace_ignore_file_with_new_one_mirroring_current_directory_tree

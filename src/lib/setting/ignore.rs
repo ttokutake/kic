@@ -66,8 +66,9 @@ impl Ignore {
 
         let entries = contents
             .lines()
-            .map(|l| l.trim().to_string())
+            .map(|l| l.trim())
             .filter(|s| Path::new(s).exists())
+            .map(|p| p.to_string())
             .collect::<BTreeSet<String>>();
 
         Ok(Self::_new(entries))
