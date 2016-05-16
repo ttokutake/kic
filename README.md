@@ -27,7 +27,7 @@ TBD
 
 - We use `tree` command for easily explanation.
 
-### Initialize
+### Hello, "kic"!
 
 1. Change directory which you want to register.
 2. `$ kic init`
@@ -304,3 +304,13 @@ $ tree -a
 ### Action like below also is OK!
 $ rm -rf .kic/warehouse/2016-05-16/
 ```
+
+### Register/Unregister with/from `cron`
+
+### Add/Delete files or directories to/from "ignore"
+
+### Useful sub-command of "ignore"
+
+### Help me!
+
+### Bye Bye, "kic"!
