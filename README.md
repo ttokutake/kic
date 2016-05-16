@@ -27,6 +27,7 @@ TBD
 1. Change directory which you want to register.
 2. `$ kic init`
 3. Confirm `.kic` directory and essential files have created in current directory.
+4. Confirm initially existing files have written in "ignore" file.
 ```bash
 $ pwd
 /Users/tokutake/tmp
@@ -56,5 +57,89 @@ $ tree -a
 └── file1
 
 3 directories, 4 files
+
+$ cat .kic/ignore
+./dir1/file2
+./file1
+```
+
+### Try to move "dust" files manually
+
+1. Make "dust" files.
+2. `$ kic sweep all` (dry-run)
+3. Check "dust" files are not moved to "dust box".
+4. `$ kic sweep all indeed`
+5. Check "dust" files have been moved to "dust box".
+```bash
+$ touch file3 dir1/file4
+.
+├── .kic
+│   ├── config.toml
+│   ├── ignore
+│   └── warehouse
+├── dir1
+│   ├── file2
+│   └── file4
+├── file1
+└── file3
+
+3 directories, 6 files
+
+$ kic sweep all
+INFO: Create "2016-05-16" directory in ".kic/warehouse"
+INFO: Create "sweep.log" file in ".kic/warehouse/2016-05-16"
+INFO: Read "config.toml" file
+INFO: Get the parameter for "sweep.moratorium"
+INFO: Read "ignore" file
+INFO: Move dusts to ".kic/warehouse/2016-05-16/dusts" (dry-run mode)
+INFO:   => "./dir1/file4"
+INFO:   => "./file3"
+INFO: Move empty dirs to ".kic/warehouse/2016-05-16/dusts" (dry-run mode)
+
+$ tree -a
+.
+├── .kic
+│   ├── config.toml
+│   ├── ignore
+│   └── warehouse
+│       └── 2016-05-16
+│           ├── dusts
+│           └── sweep.log
+├── dir1
+│   ├── file2
+│   └── file4
+├── file1
+└── file3
+
+5 directories, 7 files
+
+$ kic sweep all indeed
+INFO: Create "2016-05-16" directory in ".kic/warehouse"
+INFO: Create "sweep.log" file in ".kic/warehouse/2016-05-16"
+INFO: Read "config.toml" file
+INFO: Get the parameter for "sweep.moratorium"
+INFO: Read "ignore" file
+INFO: Move dusts to ".kic/warehouse/2016-05-16/dusts"
+INFO:   => "./dir1/file4"
+INFO:   => "./file3"
+INFO: Move empty dirs to ".kic/warehouse/2016-05-16/dusts"
+
+$ tree -a
+.
+├── .kic
+│   ├── config.toml
+│   ├── ignore
+│   └── warehouse
+│       └── 2016-05-16
+│           ├── dusts
+│           │   ├── dir1
+│           │   │   └── file4
+│           │   └── file3
+│           └── sweep.log
+├── dir1
+│   └── file2
+└── file1
+
+6 directories, 7 files
 ```
 
