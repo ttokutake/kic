@@ -20,7 +20,41 @@
 
 TBD
 
-## Usage
+## Basic Usage
 
-TBD
+### Initialize
+
+1. Change directory which you want to register.
+2. `$ kic init`
+3. Confirm `.kic` directory and essential files have created in current directory.
+```bash
+$ pwd
+/Users/tokutake/tmp
+
+$ tree -a
+.
+├── dir1
+│   └── file2
+└── file1
+
+1 directory, 2 files
+
+$ kic init
+INFO: Create ".kic" directory
+INFO: Create "warehouse" directory
+INFO: Create "config.toml" file
+INFO: Create "ignore" file
+
+$ tree -a
+.
+├── .kic
+│   ├── config.toml
+│   ├── ignore
+│   └── warehouse
+├── dir1
+│   └── file2
+└── file1
+
+3 directories, 4 files
+```
 
