@@ -221,7 +221,7 @@ INFO:   => "./file3"
 INFO: Move empty dirs to ".kic/warehouse/2016-05-16/dusts" (dry-run mode)
 ```
 
-### Try to delete "dust" files in "dust box" manually
+### Try to delete "dust box" manually
 
 1. Confirm there is the moratorium Until "dust box" are deleted. (Default: 2 weeks)
 2. Change the moratorium for confirmation.
@@ -300,4 +300,7 @@ $ tree -a
 └── file1
 
 5 directories, 5 files
+
+### Action like below also is OK!
+$ rm -rf .kic/warehouse/2016-05-16/
 ```
