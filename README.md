@@ -311,11 +311,67 @@ $ rm -rf .kic/warehouse/2016-05-16/
 
 1. `$ kic start`
 2. Check several "kic" commands have added to your cron.
-3. `$ kic end`
-4. Check "kic" commands related to current directory have deleted from your cron.
+3. Check running time of command in cron change by "config.toml".
+4. `$ kic end`
+5. Check "kic" commands related to current directory have deleted from your cron.
 
 ```bash
-### TBD
+$ kic start
+INFO: Read cron
+INFO: Read "config.toml" file
+INFO: Get the parameter for "sweep.period"
+INFO: Get the parameter for "sweep.time"
+INFO: Set new cron
+
+$ crontab -l
+###################################
+# "kic" uses the lines from this.
+# Please don't touch them and me!
+###################################
+0 12 * * *	/Users/tokutake/codes/kic/target/debug/kic patrol
+0 0 * * *	cd /Users/tokutake/tmp && /Users/tokutake/codes/kic/target/debug/kic burn indeed
+0 0 * * *	cd /Users/tokutake/tmp && /Users/tokutake/codes/kic/target/debug/kic sweep indeed
+###################################
+# "kic" uses the lines up to here.
+# Please don't touch them and me!
+###################################
+
+$ kic config set sweep.period weekly
+INFO: Read "config.toml" file
+INFO: Set the parameter for "sweep.period"
+INFO: Create "config.toml" file
+
+$ kic config set sweep.time 14:00
+INFO: Read "config.toml" file
+INFO: Set the parameter for "sweep.time"
+INFO: Create "config.toml" file
+
+$ kic start
+INFO: Read cron
+INFO: Read "config.toml" file
+INFO: Get the parameter for "sweep.period"
+INFO: Get the parameter for "sweep.time"
+INFO: Set new cron
+
+$ crontab -l
+###################################
+# "kic" uses the lines from this.
+# Please don't touch them and me!
+###################################
+0 12 * * *	/Users/tokutake/codes/kic/target/debug/kic patrol
+0 0 * * *	cd /Users/tokutake/tmp && /Users/tokutake/codes/kic/target/debug/kic burn indeed
+0 14 * * 0	cd /Users/tokutake/tmp && /Users/tokutake/codes/kic/target/debug/kic sweep indeed
+###################################
+# "kic" uses the lines up to here.
+# Please don't touch them and me!
+###################################
+
+$ kic end
+INFO: Read cron
+INFO: Set new cron
+
+$ crontab -l
+### There is no contents
 ```
 
 ### Add/Delete files or directories to/from "ignore"
