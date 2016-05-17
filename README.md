@@ -376,7 +376,71 @@ $ crontab -l
 
 ### Add/Delete files or directories to/from "ignore"
 
-TBD
+1. Make non-"dust" files.
+2. Add the file to "ignore".
+3. Check the file is not listed.
+4. Make a directory and non-"dust" files in it.
+5. Add the directory to "ignore".
+6. Check the files are not listed.
+7. Delete files in the directory.
+8. Check the empty directory is listed regardless of "ignore".
+9. Add an empty hidden file if you want to leave empty directories.
+
+```bash
+$ touch file3 file4
+
+$ kic ignore add file3 file4
+INFO: Read "ignore" file
+INFO: Create "ignore" file
+
+$ kic sweep all
+INFO: Create "2016-05-17" directory in ".kic/warehouse"
+INFO: Create "sweep.log" file in ".kic/warehouse/2016-05-17"
+INFO: Read "config.toml" file
+INFO: Get the parameter for "sweep.moratorium"
+INFO: Read "ignore" file
+INFO: Move dusts to ".kic/warehouse/2016-05-17/dusts" (dry-run mode)
+INFO: Move empty dirs to ".kic/warehouse/2016-05-17/dusts" (dry-run mode)
+
+$ mkdir dir2 && touch dir2/file{5,6}
+
+### If you are leaving "dir1", specifying "dir1" is also OK!
+$ kic ignore add dir2
+INFO: Read "ignore" file
+INFO: Create "ignore" file
+
+$ kic sweep all
+INFO: Create "2016-05-17" directory in ".kic/warehouse"
+INFO: Create "sweep.log" file in ".kic/warehouse/2016-05-17"
+INFO: Read "config.toml" file
+INFO: Get the parameter for "sweep.moratorium"
+INFO: Read "ignore" file
+INFO: Move dusts to ".kic/warehouse/2016-05-17/dusts" (dry-run mode)
+INFO: Move empty dirs to ".kic/warehouse/2016-05-17/dusts" (dry-run mode)
+
+$ rm dir2/*
+
+$ kic sweep all
+INFO: Create "2016-05-17" directory in ".kic/warehouse"
+INFO: Create "sweep.log" file in ".kic/warehouse/2016-05-17"
+INFO: Read "config.toml" file
+INFO: Get the parameter for "sweep.moratorium"
+INFO: Read "ignore" file
+INFO: Move dusts to ".kic/warehouse/2016-05-17/dusts" (dry-run mode)
+INFO: Move empty dirs to ".kic/warehouse/2016-05-17/dusts" (dry-run mode)
+INFO:   => "./dir2"
+
+$ touch dir2/.kickeep
+
+$ kic sweep all
+INFO: Create "2016-05-17" directory in ".kic/warehouse"
+INFO: Create "sweep.log" file in ".kic/warehouse/2016-05-17"
+INFO: Read "config.toml" file
+INFO: Get the parameter for "sweep.moratorium"
+INFO: Read "ignore" file
+INFO: Move dusts to ".kic/warehouse/2016-05-17/dusts" (dry-run mode)
+INFO: Move empty dirs to ".kic/warehouse/2016-05-17/dusts" (dry-run mode)
+```
 
 ### Useful sub-command of "ignore"
 
