@@ -543,4 +543,23 @@ Keys:
 
 ### Bye Bye, "kic"!
 
-TBD
+1. `$ kic destroy`
+2. Check contents of cron is deleted if you have left it.
+
+```bash
+$ kic start
+INFO: Read cron
+INFO: Read "config.toml" file
+INFO: Get the parameter for "sweep.period"
+INFO: Get the parameter for "sweep.time"
+INFO: Set new cron
+
+$ kic destroy
+CAUTION: Do you want to clear all files related to "kic"? [yes/no]: y
+INFO: Delete ".kic" directory
+INFO: Read cron
+INFO: Set new cron
+
+$ crontab -l
+### There is no contents
+```
