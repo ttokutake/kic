@@ -444,7 +444,57 @@ INFO: Move empty dirs to ".kic/warehouse/2016-05-17/dusts" (dry-run mode)
 
 ### Useful sub-command of "ignore"
 
-TBD
+1. Make non-"dust" directories and files.
+2. `$ kic ignore current`
+3. Check the files are not listed.
+4. Remove non-"dust" files.
+5. `$ kic ignore refresh`
+6. Check the non-existing files (and directories) have already not existed in "ignore".
+
+```bash
+$ touch file{5,6,7}
+
+$ mkdir dir3 && dir3/file{8,9,10}
+
+### NOTICE: If you have registered some directories in "ignore", They will be deleted from "ignore" and Files in them will be added to it.
+$ kic ignore current
+CAUTION: Do you want to preserve current state? [yes/no]: y
+INFO: Create "ignore" file
+
+$ kic sweep all
+INFO: Create "2016-05-18" directory in ".kic/warehouse"
+INFO: Create "sweep.log" file in ".kic/warehouse/2016-05-18"
+INFO: Read "config.toml" file
+INFO: Get the parameter for "sweep.moratorium"
+INFO: Read "ignore" file
+INFO: Move dusts to ".kic/warehouse/2016-05-18/dusts" (dry-run mode)
+INFO: Move empty dirs to ".kic/warehouse/2016-05-18/dusts" (dry-run mode)
+
+$ cat .kic/ignore 
+./dir1/file2
+./dir3/file10
+./dir3/file8
+./dir3/file9
+./file1
+./file3
+./file4
+./file5
+./file6
+./file7
+
+$ rm file{5,6,7}
+
+$ kic ignore refresh
+
+$ cat .kic/ignore
+./dir1/file2
+./dir3/file10
+./dir3/file8
+./dir3/file9
+./file1
+./file3
+./file4
+```
 
 ### Help me!
 
