@@ -498,7 +498,48 @@ $ cat .kic/ignore
 
 ### Help me!
 
-TBD
+1. Check general help message.
+2. Check help message for each command.
+
+```bash
+$ kic
+Usage:
+    kic <Command>
+
+Description:
+    Keep your directories clean
+
+Command:
+    help    # Display usage for each command
+    version # Display the version of this software
+    init    # Register current directory, i.e. create ".kic" directory
+    config  # Change "config.toml" file's contents
+    ignore  # Change "ignore" file's contents
+    sweep   # Move dust files and empty directories into "warehouse" directory
+    burn    # Delete expired directories in "warehouse" directory
+    start   # Start autonomous "sweep" and "burn" (UNIX-like: cron, Windows: ?)
+    end     # End autonomous "sweep" and "burn" (UNIX-like: cron, Windows: ?)
+    destroy # Unregister current directory, i.e. delete ".kic" directory
+    patrol  # Keep your "cron" file clean (UNIX-like only)
+
+$ kic help config
+Usage:
+    kic config set <Key> <Value>
+    kic config init
+
+Description:
+    Change "config.toml" file's contents
+
+Command:
+    set  # Set parameters related to "sweep" and "burn" commands
+    init # Initialize "config.toml" file
+
+Keys:
+    burn.moratorium  # Moratorium to delete directories in "warehouse"
+    sweep.moratorium # Moratorium to Move "dust"s into "warehouse"
+    sweep.period     # Period to Move "dust"s by autonomous "sweep"
+    sweep.time       # Time to Move "dust"s by autonomous "sweep"
+```
 
 ### Bye Bye, "kic"!
 
