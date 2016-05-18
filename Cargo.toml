@@ -3,6 +3,11 @@ name = "kic"
 version = "0.1.0"
 authors = ["ttokutake <tadatoshi.tokutake@gmail.com>"]
 
+description = "Delete files autonomously."
+repository = "https://github.com/ttokutake/kic"
+readme = "README.md"
+license = "MIT"
+
 [dependencies]
 chrono = "0.2"
 regex = "0.1"
