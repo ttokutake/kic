@@ -2,6 +2,10 @@
 
 [![Build Status](https://travis-ci.org/ttokutake/kic.svg?branch=master)](https://travis-ci.org/ttokutake/kic)
 
+## Links
+
+- https://crates.io/crates/kic
+
 ## Abstract
 
 - "kic" prevents someone from making a mess of directories.
@@ -19,7 +23,19 @@
 
 ## Installation
 
-TBD
+1. Please install **stable** version of [rust](https://www.rust-lang.org/index.html). See [here](https://www.rust-lang.org/downloads.html).
+2. `$ cargo install kic`
+3. Add "~/.cargo/bin" directory to `$PATH`.
+
+### Example for MacOS
+
+```bash
+$ curl -sSf https://static.rust-lang.org/rustup.sh | sh
+
+$ cargo install kic
+
+$ echo 'PATH=$PATH:$HOME/.cargo/bin' >> $HOME/.bash_profile && source $HOME/.bash_profile
+```
 
 ## Basic Usage
 
