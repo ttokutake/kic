@@ -9,7 +9,7 @@
 ## Abstract
 
 - "kic" prevents someone from making a mess of directories.
-- For registered directories, "kic" autonomously moves "dust" files into "dust box".
+- For registered directories, "kic" automatically moves "dust" files into "dust box".
 - "dust" is file which is not specified as a requirement in "kic".
  
 ## Notice
@@ -533,8 +533,8 @@ Command:
     ignore  # Change "ignore" file's contents
     sweep   # Move dust files and empty directories into "warehouse" directory
     burn    # Delete expired directories in "warehouse" directory
-    start   # Start autonomous "sweep" and "burn" (UNIX-like: cron, Windows: ?)
-    end     # End autonomous "sweep" and "burn" (UNIX-like: cron, Windows: ?)
+    start   # Start automatic "sweep" and "burn" (UNIX-like: cron, Windows: ?)
+    end     # End automatic "sweep" and "burn" (UNIX-like: cron, Windows: ?)
     destroy # Unregister current directory, i.e. delete ".kic" directory
     patrol  # Keep your "cron" file clean (UNIX-like only)
 
@@ -553,8 +553,8 @@ Command:
 Keys:
     burn.moratorium  # Moratorium to delete directories in "warehouse"
     sweep.moratorium # Moratorium to Move "dust"s into "warehouse"
-    sweep.period     # Period to Move "dust"s by autonomous "sweep"
-    sweep.time       # Time to Move "dust"s by autonomous "sweep"
+    sweep.period     # Period to Move "dust"s by automatic "sweep"
+    sweep.time       # Time to Move "dust"s by automatic "sweep"
 ```
 
 ### Bye Bye, "kic"!

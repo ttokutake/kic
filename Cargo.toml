@@ -1,9 +1,9 @@
 [package]
 name = "kic"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["ttokutake <tadatoshi.tokutake@gmail.com>"]
 
-description = "Delete files autonomously."
+description = "Delete uselss files automatically"
 repository = "https://github.com/ttokutake/kic"
 readme = "README.md"
 license = "MIT"

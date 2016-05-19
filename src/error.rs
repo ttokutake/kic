@@ -307,8 +307,8 @@ impl UsageKind {
             UsageKind::Ignore  => "Change \"ignore\" file's contents",
             UsageKind::Sweep   => "Move dust files and empty directories into \"warehouse\" directory",
             UsageKind::Burn    => "Delete expired directories in \"warehouse\" directory",
-            UsageKind::Start   => "Start autonomous \"sweep\" and \"burn\" (UNIX-like: cron, Windows: ?)",
-            UsageKind::End     => "End autonomous \"sweep\" and \"burn\" (UNIX-like: cron, Windows: ?)",
+            UsageKind::Start   => "Start automatic \"sweep\" and \"burn\" (UNIX-like: cron, Windows: ?)",
+            UsageKind::End     => "End automatic \"sweep\" and \"burn\" (UNIX-like: cron, Windows: ?)",
             UsageKind::Destroy => "Unregister current directory, i.e. delete \".kic\" directory",
             UsageKind::Patrol  => "Keep your \"cron\" file clean (UNIX-like only)",
         }
@@ -359,8 +359,8 @@ impl UsageKind {
             UsageKind::Config => ("Keys", vec![
                 r#"burn.moratorium  # Moratorium to delete directories in "warehouse""#,
                 r#"sweep.moratorium # Moratorium to Move "dust"s into "warehouse""#,
-                r#"sweep.period     # Period to Move "dust"s by autonomous "sweep""#,
-                r#"sweep.time       # Time to Move "dust"s by autonomous "sweep""#,
+                r#"sweep.period     # Period to Move "dust"s by automatic "sweep""#,
+                r#"sweep.time       # Time to Move "dust"s by automatic "sweep""#,
             ]),
             _ => ("", Vec::new()),
         }

@@ -1,6 +1,6 @@
 [root]
 name = "kic"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "chrono 0.2.22 (registry+https://github.com/rust-lang/crates.io-index)",
  "regex 0.1.69 (registry+https://github.com/rust-lang/crates.io-index)",
