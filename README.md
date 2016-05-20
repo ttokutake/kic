@@ -26,7 +26,7 @@
 1. Please install **stable** version of [rust](https://www.rust-lang.org/index.html). See [here](https://www.rust-lang.org/downloads.html).
 2. `$ cargo install kic`
 3. Add "~/.cargo/bin" directory to `$PATH`.
-
+ 
 ### Example for MacOS
 
 ```bash
@@ -36,6 +36,11 @@ $ cargo install kic
 
 $ echo 'PATH=$PATH:$HOME/.cargo/bin' >> $HOME/.bash_profile && source $HOME/.bash_profile
 ```
+
+## Update the package
+
+1. `$ cargo uninstall kic`
+2. `$ cargo install kic`
 
 ## Basic Usage
 
